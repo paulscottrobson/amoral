@@ -93,7 +93,6 @@ _CHIsUnary:
 		ora 	#$10 						; mapped onto $10-$1F
 		;
 _CHCall:									; at this point $00-$0F for non unary, $10-$1F for unary
-		debug
 		asl 	a 							; now offset in the jump table and into X
 		tax
 		lda 	JumpTable,x 				; copy the jump table vectors into temp0

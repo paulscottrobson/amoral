@@ -18,7 +18,7 @@
 ; *******************************************************************************************
 
 RunTimeAddress = $1000 						; Runtime loads at this address (e.g. Boot)
-VariableMemory = $C00 						; Variable memory here (128 per 1/4k)
+VariableMemory = $C00 						; Variable memory here (128 per 1/4k) PAGE BOUNDARY.
 ZeroPageBase = $08 							; Zero page goes here.
 
 ; *******************************************************************************************
@@ -39,9 +39,15 @@ temp0 = ZeroPageBase+4 						; temporary registers
 
 		* =	RunTimeAddress
 		lda 	#$60
-		sta 	$3082
+		ldx 	#$4A
 		jsr 	RunPCode
-		.byte 	$A0
+		.byte 	$90,$3C,$57
+		.byte 	$BA,$02,$01
+		.byte 	$80,$FE
+		.byte 	$CA,$80,$08
+		.byte 	$B0,$02,$01
+		.byte 	$C0,$80,$08
+		.byte 	$89
 
 		* = 	RunTimeAddress+26			; the setup area
 		.word 	RunTimeAddress 				; the address of boot
@@ -50,6 +56,7 @@ temp0 = ZeroPageBase+4 						; temporary registers
 
 		.include "interpreter.asm" 			; main interpreter
 		.include "commands.asm"				; command handlers.
+		.include "support.asm"				; support for command handlers
 
 EndRunPCode:
 

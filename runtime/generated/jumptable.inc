@@ -11,7 +11,7 @@
 	.word OpcodeError              ; $87 ?
 	.word OpcodeError              ; $88 ?
 	.word OpcodeError              ; $89 ?
-	.word OpcodeError              ; $8a ?
+	.word StoreHandler             ; $8a STR
 	.word OpcodeError              ; $8b ?
 	.word OpcodeError              ; $8c ?
 	.word OpcodeError              ; $8d ?

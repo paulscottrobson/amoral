@@ -16,4 +16,26 @@
 ; *******************************************************************************************
 
 LoadHandler:	;; LDR $80
-		debug
+		jsr 	EvaluateValue 				; temp0 = target value.
+		lda 	temp0						; copy value into register
+		sta 	Reg16
+		lda 	temp0+1
+		sta 	Reg16+1
+		jmp 	ExecLoop
+
+; *******************************************************************************************
+;
+;									Handles store
+;
+; *******************************************************************************************
+
+StoreHandler: 	;; STR $8A
+		jsr 	EvaluateAddress 			; temp0 = target address.
+		ldy 	#0							; write register out
+		lda 	Reg16 
+		sta 	(temp0),y
+		lda 	Reg16+1
+		iny
+		sta 	(temp0),y
+		jmp 	ExecLoop
+
