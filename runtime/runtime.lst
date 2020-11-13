@@ -1,0 +1,154 @@
+
+; 64tass Turbo Assembler Macro V1.55.2200 listing file
+; 64tass --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Fri Nov 13 18:53:17 2020
+
+;Offset	;Hex		;Monitor	;Source
+
+;******  Processing input file: runtime.asm
+
+
+;******  Processing file: macros.asm
+
+
+;******  Return to file: runtime.asm
+
+=$1000					RunTimeAddress = $1000 						; Runtime loads at this address (e.g. Boot)
+=$c00					VariableMemory = $C00 						; Variable memory here (128 per 1/4k)
+=$08					ZeroPageBase = $08 							; Zero page goes here.
+=$08					Reg16 = ZeroPageBase 						; the current value register.
+=10					Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
+=12					temp0 = ZeroPageBase+4 						; temporary registers
+.1000	a9 60		lda #$60			lda 	#$60
+.1002	8d 82 30	sta $3082			sta 	$3082
+.1005	20 2c 10	jsr $102c			jsr 	RunPCode
+>1008	a0						.byte 	$A0
+>101a	00 10						.word 	RunTimeAddress 				; the address of boot
+>101c	d3 10						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
+
+;******  Processing file: interpreter.asm
+
+>1020	b3 00					.word 	EndRunPCode-* 							; offset to next entry
+>1022	72 75 6e 70 63 6f 64 65			.text 	"runpcode",0 							; the text (must be lower case)
+>102a	00
+>102b						.align 	2								; force to even boundary.
+.102c					RunPCode:
+.102c	86 09		stx $09				stx 	Reg16+1 					; save the current XA values.
+.102e	85 08		sta $08				sta 	Reg16
+.1030	68		pla				pla 								; pull the address into the PC
+.1031	85 0a		sta $0a				sta 	Pctr
+.1033	68		pla				pla
+.1034	85 0b		sta $0b				sta 	Pctr+1
+.1036	e6 0a		inc $0a			inc 	Pctr
+.1038	d0 02		bne $103c		bne 	nocarry
+.103a	e6 0b		inc $0b			inc 	1+(Pctr)
+.103c					nocarry:
+.103c					ExecLoop:
+.103c	a0 00		ldy #$00			ldy 	#0							; get the next instruction
+.103e	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1040	e6 0a		inc $0a			inc 	Pctr
+.1042	d0 02		bne $1046		bne 	nocarry
+.1044	e6 0b		inc $0b			inc 	1+(Pctr)
+.1046					nocarry:
+.1046	0a		asl a				asl 	a 							; shift bit 7 into carry.
+.1047	b0 29		bcs $1072			bcs 	CommandHandler 				; 80-FF it's a command
+.1049	85 0c		sta $0c				sta 	temp0 						; construct the call address in temp0
+.104b	b1 0a		lda ($0a),y			lda 	(PCtr),y 					; get the MSB
+.104d	85 0d		sta $0d				sta 	temp0+1
+.104f	e6 0a		inc $0a			inc 	Pctr
+.1051	d0 02		bne $1055		bne 	nocarry
+.1053	e6 0b		inc $0b			inc 	1+(Pctr)
+.1055					nocarry:
+.1055	a5 0a		lda $0a				lda 	Pctr 						; save PCTR on 6502 stack
+.1057	48		pha				pha
+.1058	a5 0b		lda $0b				lda 	Pctr+1
+.105a	48		pha				pha
+.105b	a5 08		lda $08				lda 	Reg16 						; restore Reg16 into XA
+.105d	a6 09		ldx $09				ldx 	Reg16+1
+.105f	20 6f 10	jsr $106f			jsr 	CallTemp0 					; call the routine as 6502 code.
+.1062	86 09		stx $09				stx 	Reg16+1 					; save Reg16 back
+.1064	85 08		sta $08				sta 	Reg16
+.1066	68		pla				pla 								; restore the program counter
+.1067	85 0b		sta $0b				sta 	Pctr+1
+.1069	68		pla				pla
+.106a	85 0a		sta $0a				sta 	Pctr
+.106c	4c 3c 10	jmp $103c			jmp 	ExecLoop 					; and go round again.
+.106f					CallTemp0:
+.106f	6c 0c 00	jmp ($000c)			jmp 	(temp0)
+.1072					CommandHandler:
+.1072	6a		ror a				ror 	a 							; patch it back so it has the full opcode.
+.1073	a8		tay				tay  								; save it in Y for use by the commands.
+.1074	c9 f0		cmp #$f0			cmp 	#$F0 						; is it a unary operation.
+.1076	b0 05		bcs $107d			bcs 	_CHIsUnary
+.1078	29 0f		and #$0f			and 	#$0F 						; get the command number out.
+.107a	4c 81 10	jmp $1081			jmp 	_CHCall 					; go do the call
+.107d					_CHIsUnary:
+.107d	29 0f		and #$0f			and 	#$0F 						; this is the unary command number
+.107f	09 10		ora #$10			ora 	#$10 						; mapped onto $10-$1F
+.1081					_CHCall:
+>1081	db					.byte 	$DB
+.1082	0a		asl a				asl 	a 							; now offset in the jump table and into X
+.1083	aa		tax				tax
+.1084	bd 92 10	lda $1092,x			lda 	JumpTable,x 				; copy the jump table vectors into temp0
+.1087	85 0c		sta $0c				sta 	temp0
+.1089	bd 93 10	lda $1093,x			lda 	JumpTable+1,x
+.108c	85 0d		sta $0d				sta 	temp0+1
+.108e	6c 0c 00	jmp ($000c)			jmp 	(temp0)						; and go there to execute with the opcode in Y.
+.1091					OpcodeError:
+>1091	db					.byte 	$DB
+.1092					JumpTable:
+
+;******  Processing file: generated/jumptable.inc
+
+>1092	d2 10					.word LoadHandler              ; $80 LDR
+>1094	91 10					.word OpcodeError              ; $81 ?
+>1096	91 10					.word OpcodeError              ; $82 ?
+>1098	91 10					.word OpcodeError              ; $83 ?
+>109a	91 10					.word OpcodeError              ; $84 ?
+>109c	91 10					.word OpcodeError              ; $85 ?
+>109e	91 10					.word OpcodeError              ; $86 ?
+>10a0	91 10					.word OpcodeError              ; $87 ?
+>10a2	91 10					.word OpcodeError              ; $88 ?
+>10a4	91 10					.word OpcodeError              ; $89 ?
+>10a6	91 10					.word OpcodeError              ; $8a ?
+>10a8	91 10					.word OpcodeError              ; $8b ?
+>10aa	91 10					.word OpcodeError              ; $8c ?
+>10ac	91 10					.word OpcodeError              ; $8d ?
+>10ae	91 10					.word OpcodeError              ; $8e ?
+>10b0	91 10					.word OpcodeError              ; $8f ?
+>10b2	91 10					.word OpcodeError              ; $f0 ?
+>10b4	91 10					.word OpcodeError              ; $f1 ?
+>10b6	91 10					.word OpcodeError              ; $f2 ?
+>10b8	91 10					.word OpcodeError              ; $f3 ?
+>10ba	91 10					.word OpcodeError              ; $f4 ?
+>10bc	91 10					.word OpcodeError              ; $f5 ?
+>10be	91 10					.word OpcodeError              ; $f6 ?
+>10c0	91 10					.word OpcodeError              ; $f7 ?
+>10c2	91 10					.word OpcodeError              ; $f8 ?
+>10c4	91 10					.word OpcodeError              ; $f9 ?
+>10c6	91 10					.word OpcodeError              ; $fa ?
+>10c8	91 10					.word OpcodeError              ; $fb ?
+>10ca	91 10					.word OpcodeError              ; $fc ?
+>10cc	91 10					.word OpcodeError              ; $fd ?
+>10ce	91 10					.word OpcodeError              ; $fe ?
+>10d0	91 10					.word OpcodeError              ; $ff ?
+
+;******  Return to file: interpreter.asm
+
+
+;******  Return to file: runtime.asm
+
+
+;******  Processing file: commands.asm
+
+.10d2					LoadHandler:
+>10d2	db					.byte 	$DB
+
+;******  Return to file: runtime.asm
+
+.10d3					EndRunPCode:
+.10d3					RuntimeEnd:
+>10d3	00 00						.word 	0 							; end marker for dictionary.
+
+;******  End of listing

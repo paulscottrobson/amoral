@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+python ../scripts/scanner.py
+64tass --m6502 runtime.asm -o runtime.prg -L runtime.lst

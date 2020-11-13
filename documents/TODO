@@ -1,0 +1,37 @@
+TODO List:
+
+Runtime:
+	Write STR code
+	Write address get for direct short, direct long, absolute
+	Write LDR code and value getter, check it works.
+	Extend with immediates and check that.
+	Check Direct short, Direct long, absolute on LDR.
+	Write AND ORR XOR
+	Write ADD SUB
+	Write Multiply then MLT
+	Write Divide then DIV MOD
+	Write Branches.
+	Write Unary Functions.
+	Write Return.
+	Write support Divide Multiply.
+	Build first proper runtime.
+	Write baby assembler for it and do some testing.
+	Write Debug.Hex() support routine
+	Write Debug.String() support routine
+
+Compiler:
+	Extend scanner to output the opcodes for Command/Unary into a class like Asm6502.py
+	Start on compiler :)
+	Implement Abs, Sgn, Len, Random
+
+
+PostCompiler:
+	Write handler for structure generation.
+	Write Balls/Amoral.
+	Write Mario/Amoral nick graphic from Lean.
+
+Compiler#2:
+	Write 6502 code generation. (in project file)	
+	Do some tests regarding speed up of various optimisations.
+	
+
