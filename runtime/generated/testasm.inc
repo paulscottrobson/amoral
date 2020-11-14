@@ -1,5 +1,5 @@
 ;
 ;	Automatically generated
 ;
-	.byte $f1                                      ; dec 
+	.byte $90,$fe,$7f                              ; ldr #32766
 	.byte $f5                                      ; ret 

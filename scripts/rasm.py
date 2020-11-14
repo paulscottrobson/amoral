@@ -92,7 +92,7 @@ src = """
 ;
 ;		comment
 ;
-	dec
+	ldr 	#32766
 	ret
 	
 """.split("\n")

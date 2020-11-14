@@ -51,7 +51,7 @@ MultiplyAbsolute:
 EndMultiplyAbsolute:
 
 
-		define 	"divideimmediate",EndDivideImmediate
+		define 	"divide.immediate",EndDivideImmediate
 DivideImmediate:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Divide
@@ -60,7 +60,7 @@ DivideImmediate:
 		rts
 EndDivideImmediate:
 
-		define 	"divideabsolute",EndDivideAbsolute
+		define 	"divide.absolute",EndDivideAbsolute
 DivideAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0
@@ -70,7 +70,7 @@ DivideAbsolute:
 		rts
 EndDivideAbsolute:
 
-		define 	"modulusimmediate",EndModulusImmediate
+		define 	"modulus.immediate",EndModulusImmediate
 ModulusImmediate:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Divide
@@ -79,7 +79,7 @@ ModulusImmediate:
 		rts
 EndModulusImmediate:
 
-		define 	"modulusabsolute",EndMulDivContent
+		define 	"modulus.absolute",EndMulDivContent
 ModulusAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0
@@ -142,14 +142,12 @@ LoadIndirectTemp0:
 
 		.if test==2
 TestExternal:
-		debug
-		ldx 	#10000 >> 8
-		lda 	#10000 & $FF
-		jsr 	DivideAbsolute
-		.word 	a200
+		ldx 	#txt >> 8
+		lda 	#txt & $FF
+		jsr 	PrintString
 		ldy 	#$DD
 		debug
-a200:	.word 	1000	
+txt:	.text 	"HELLO, WORLD!",0
 		.endif
 
 EndMulDivContent:

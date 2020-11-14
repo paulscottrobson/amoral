@@ -81,7 +81,7 @@ _EACalcVarAddress:
 		rol 	temp0+1
 		clc 								; add the page address of variable data on.
 		lda 	temp0+1
-		adc 	#VariableMemory/256 
+		adc 	#VarAddr/256 
 		sta 	temp0+1
 		rts
 ;

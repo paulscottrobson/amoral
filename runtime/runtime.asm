@@ -17,9 +17,17 @@
 ;
 ; *******************************************************************************************
 
-RunTimeAddress = $1000 						; Runtime loads at this address (e.g. Boot)
-VariableMemory = $C00 						; Variable memory here (128 per 1/4k) PAGE BOUNDARY.
-ZeroPageBase = $08 							; Zero page goes here.
+.weak
+
+BootAddr = $1000 							; Runtime loads at this address (e.g. Boot)
+
+VarAddr = $800 								; Variable memory here (128 per 1/4k) PAGE BOUNDARY.
+
+ZeroAddr = $08 								; Zero page goes here.
+
+test = 0									; test to run (default is build final)
+
+.endweak
 
 ; *******************************************************************************************
 ;
@@ -27,10 +35,10 @@ ZeroPageBase = $08 							; Zero page goes here.
 ;
 ; *******************************************************************************************
 
-Reg16 = ZeroPageBase 						; the current value register.
-Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
-temp0 = ZeroPageBase+4 						; temporary registers
-temp1 = ZeroPageBase+6
+Reg16 = ZeroAddr 							; the current value register.
+Pctr = ZeroAddr+2 							; the program counter (e.g. the next instruction)
+temp0 = ZeroAddr+4 							; temporary registers
+temp1 = ZeroAddr+6
 
 ; *******************************************************************************************
 ;
@@ -38,7 +46,7 @@ temp1 = ZeroPageBase+6
 ;
 ; *******************************************************************************************
 
-		* =	RunTimeAddress
+		* =	BootAddr
 		.if test==1
 		jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
 		.endif
@@ -46,10 +54,10 @@ temp1 = ZeroPageBase+6
 		jmp 	TestExternal
 		.endif
 		
-		jmp 	RunTimeAddress 				; test=0 what we normally get, no start address.
+		jmp 	BootAddr 					; test=0 what we normally get, no start address.
 
-		* = 	RunTimeAddress+26			; the setup area
-		.word 	RunTimeAddress 				; the address of boot
+		* = 	BootAddr+26					; the setup area
+		.word 	BootAddr 					; the address of boot
 		.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 		.word 	$0000 						; address of allocatable memory (set up by compiler)
 
@@ -89,6 +97,8 @@ EndRunPCode:
 
 RuntimeEnd:		
 		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
-
-		.word 	0 							; end marker for dictionary.
+		.include 	"utility.asm"			; utility functions.
+;
+;		As is, there is no end marker, so that code can be added on.
+;
 
