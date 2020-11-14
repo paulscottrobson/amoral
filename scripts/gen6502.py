@@ -175,7 +175,7 @@ for c in opcodes:
         assert m is not None,c+" fails match"
         aMode = m.group(2).replace("!","").replace("_","").replace("rel","")
         aMode = "_"+aMode if aMode != "" else aMode
-        h.write("Asm6502.{0}{1:7} = 0x{2:02X}\n".format(m.group(3),aMode,int(m.group(1),16)))
+        h.write("Asm6502.{0}{1:7} = 0x{2:02X}\n".format(m.group(3).upper(),aMode.upper(),int(m.group(1),16)))
 h.close()		
 
         

@@ -37,3 +37,15 @@ for i in range(0,32):
 	else:
 		h.write("\t.word {0:24} ; ${1:02x} {2}\n".format(entries[i]["label"],n,entries[i]["mnemonic"]))		
 h.close()		
+#
+#		Create Runtime Opcode list.
+#
+h = open(".."+os.sep+"compiler"+os.sep+"runtime.py","w")
+h.write("#\n#\tAutomatically generated\n#\n")
+h.write("class RTOpcodes(object):\n\tpass\n\n")
+h.write("RTOpcodes.JSR = 0x00\n\n")
+keys = [x for x in entries.keys()]
+keys.sort()
+for e in keys:
+	h.write("RTOpcodes.{0} = 0x{1:02x}\n".format(entries[e]["mnemonic"].upper(),entries[e]["opcode"]))
+h.close()	
