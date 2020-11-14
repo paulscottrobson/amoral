@@ -42,14 +42,27 @@ temp1 = ZeroPageBase+6
 		.if test==1
 		jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
 		.endif
-		jmp 	RunTimeAddress 				; what we normally get.
+		.if test==2 						; test=2 tests the externally callable functions
+		jmp 	TestExternal
+		.endif
+		
+		jmp 	RunTimeAddress 				; test=0 what we normally get, no start address.
 
 		* = 	RunTimeAddress+26			; the setup area
 		.word 	RunTimeAddress 				; the address of boot
 		.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 		.word 	$0000 						; address of allocatable memory (set up by compiler)
 
+; *******************************************************************************************
+;
+;		The first word "runpcode" encompasses the interpreter and all its support functions.
+;
+; *******************************************************************************************
+
+		define	"runpcode",EndRunPCode
+
 		.include "interpreter.asm" 			; main interpreter
+
 		.include "commands.asm"				; command handlers.
 		.include "support.asm"				; support for command handlers
 		.include "branches.asm"				; branch handlers
@@ -68,6 +81,14 @@ TestRuntimeCode:
 
 EndRunPCode:
 
+; *******************************************************************************************
+;
+;		Other words. Their words should be self contained and maintain the linked list.
+;
+; *******************************************************************************************
+
 RuntimeEnd:		
+		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
+
 		.word 	0 							; end marker for dictionary.
 

@@ -15,7 +15,6 @@
 ;
 ; *******************************************************************************************
 
-		define	"runpcode",EndRunPCode
 RunPCode:
 		stx 	Reg16+1 					; save the current XA values.
 		sta 	Reg16

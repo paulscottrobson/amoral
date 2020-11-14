@@ -1,13 +1,13 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass -D test=1 --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Sat Nov 14 07:39:56 2020
+; 64tass -D test=2 --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Sat Nov 14 11:22:03 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
 ;******  Command line definitions
 
-=1					test=1
+=2					test=2
 
 ;******  Processing input file: runtime.asm
 
@@ -24,18 +24,18 @@
 =10					Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroPageBase+4 						; temporary registers
 =14					temp1 = ZeroPageBase+6
-.1000	4c b9 12	jmp $12b9			jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
-.1003	4c 00 10	jmp $1000			jmp 	RunTimeAddress 				; what we normally get.
+.1000	4c aa 13	jmp $13aa			jmp 	TestExternal
+.1003	4c 00 10	jmp $1000			jmp 	RunTimeAddress 				; test=0 what we normally get, no start address.
 >101a	00 10						.word 	RunTimeAddress 				; the address of boot
->101c	c3 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	b9 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
-
-;******  Processing file: interpreter.asm
-
->1020	a3 02					.word 	EndRunPCode-* 							; offset to next entry
+>1020	99 02					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 70 63 6f 64 65			.text 	"runpcode",0 							; the text (must be lower case)
 >102a	00
 >102b						.align 	2								; force to even boundary.
+
+;******  Processing file: interpreter.asm
+
 .102c					RunPCode:
 .102c	86 09		stx $09				stx 	Reg16+1 					; save the current XA values.
 .102e	85 08		sta $08				sta 	Reg16
@@ -462,21 +462,122 @@
 
 ;******  Return to file: runtime.asm
 
-.12b9					TestRuntimeCode:
-.12b9	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
-.12bb	a9 cd		lda #$cd			lda 	#$CD
-.12bd	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
+.12b9					EndRunPCode:
+.12b9					RuntimeEnd:
 
-;******  Processing file: generated/testasm.inc
+;******  Processing file: muldiv.asm
 
->12c0	f1					.byte $f1                                      ; dec
->12c1	f5					.byte $f5                                      ; ret
+>12b9	20 00					.word 	EndMultiplyImmediate-* 							; offset to next entry
+>12bb	6d 75 6c 74 69 70 6c 79			.text 	"multiplyimmediate",0 							; the text (must be lower case)
+>12c3	69 6d 6d 65 64 69 61 74 65 00
+>12cd						.align 	2								; force to even boundary.
+.12ce					MultiplyImmediate:
+.12ce	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.12d1	20 45 12	jsr $1245			jsr 	Multiply
+.12d4	a5 08		lda $08				lda 	Reg16
+.12d6	a6 09		ldx $09				ldx 	Reg16+1
+.12d8	60		rts				rts
+.12d9					EndMultiplyImmediate:
+>12d9	21 00					.word 	EndMultiplyAbsolute-* 							; offset to next entry
+>12db	6d 75 6c 74 69 70 6c 79			.text 	"multiplyabsolute",0 							; the text (must be lower case)
+>12e3	61 62 73 6f 6c 75 74 65 00
+>12ec						.align 	2								; force to even boundary.
+.12ec					MultiplyAbsolute:
+.12ec	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.12ef	20 9d 13	jsr $139d			jsr 	LoadIndirectTemp0
+.12f2	20 45 12	jsr $1245			jsr 	Multiply
+.12f5	a5 08		lda $08				lda 	Reg16
+.12f7	a6 09		ldx $09				ldx 	Reg16+1
+.12f9	60		rts				rts
+.12fa					EndMultiplyAbsolute:
+>12fa	1d 00					.word 	EndDivideImmediate-* 							; offset to next entry
+>12fc	64 69 76 69 64 65 69 6d			.text 	"divideimmediate",0 							; the text (must be lower case)
+>1304	6d 65 64 69 61 74 65 00
+>130c						.align 	2								; force to even boundary.
+.130c					DivideImmediate:
+.130c	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.130f	20 93 12	jsr $1293			jsr 	Divide
+.1312	a5 0e		lda $0e				lda 	temp1
+.1314	a6 0f		ldx $0f				ldx 	temp1+1
+.1316	60		rts				rts
+.1317					EndDivideImmediate:
+>1317	1f 00					.word 	EndDivideAbsolute-* 							; offset to next entry
+>1319	64 69 76 69 64 65 61 62			.text 	"divideabsolute",0 							; the text (must be lower case)
+>1321	73 6f 6c 75 74 65 00
+>1328						.align 	2								; force to even boundary.
+.1328					DivideAbsolute:
+.1328	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.132b	20 9d 13	jsr $139d			jsr 	LoadIndirectTemp0
+.132e	20 93 12	jsr $1293			jsr 	Divide
+.1331	a5 0e		lda $0e				lda 	temp1
+.1333	a6 0f		ldx $0f				ldx 	temp1+1
+.1335	60		rts				rts
+.1336					EndDivideAbsolute:
+>1336	1f 00					.word 	EndModulusImmediate-* 							; offset to next entry
+>1338	6d 6f 64 75 6c 75 73 69			.text 	"modulusimmediate",0 							; the text (must be lower case)
+>1340	6d 6d 65 64 69 61 74 65 00
+>1349						.align 	2								; force to even boundary.
+.134a					ModulusImmediate:
+.134a	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.134d	20 93 12	jsr $1293			jsr 	Divide
+.1350	a5 08		lda $08				lda 	Reg16
+.1352	a6 09		ldx $09				ldx 	Reg16+1
+.1354	60		rts				rts
+.1355					EndModulusImmediate:
+>1355	64 00					.word 	EndMulDivContent-* 							; offset to next entry
+>1357	6d 6f 64 75 6c 75 73 61			.text 	"modulusabsolute",0 							; the text (must be lower case)
+>135f	62 73 6f 6c 75 74 65 00
+>1367						.align 	2								; force to even boundary.
+.1368					ModulusAbsolute:
+.1368	20 76 13	jsr $1376			jsr 	SaveXTemp1GetTemp0
+.136b	20 9d 13	jsr $139d			jsr 	LoadIndirectTemp0
+.136e	20 93 12	jsr $1293			jsr 	Divide
+.1371	a5 08		lda $08				lda 	Reg16
+.1373	a6 09		ldx $09				ldx 	Reg16+1
+.1375	60		rts				rts
+.1376					SaveXTemp1GetTemp0:
+.1376	85 0e		sta $0e				sta 	temp1 						; write XA out.
+.1378	86 0f		stx $0f				stx 	temp1+1
+.137a	ba		tsx				tsx 								; get stack pointer so we can access return two up.
+.137b	18		clc				clc 								; copy the address to temp0, adding 2 and updating.
+.137c	bd 03 01	lda $0103,x			lda 	$0103,x
+.137f	85 0c		sta $0c				sta 	temp0
+.1381	69 02		adc #$02			adc 	#2
+.1383	9d 03 01	sta $0103,x			sta 	$0103,x
+.1386	bd 04 01	lda $0104,x			lda 	$0104,x
+.1389	85 0d		sta $0d				sta 	temp0+1
+.138b	69 00		adc #$00			adc 	#0
+.138d	9d 04 01	sta $0104,x			sta 	$0104,x
+.1390	a0 01		ldy #$01			ldy 	#1 							; temp0 points to high byte of call, rts works that way
+.1392	b1 0c		lda ($0c),y			lda 	(temp0),y 					; so get the word there.
+.1394	aa		tax				tax
+.1395	c8		iny				iny
+.1396	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1398	85 0d		sta $0d				sta 	temp0+1
+.139a	86 0c		stx $0c				stx 	temp0
+.139c	60		rts				rts
+.139d					LoadIndirectTemp0:
+.139d	a0 00		ldy #$00			ldy 	#0							; low byte into X
+.139f	b1 0c		lda ($0c),y			lda 	(temp0),y
+.13a1	aa		tax				tax
+.13a2	c8		iny				iny
+.13a3	b1 0c		lda ($0c),y			lda 	(temp0),y 					; high byte into A
+.13a5	85 0d		sta $0d				sta 	temp0+1 					; copy out.
+.13a7	86 0c		stx $0c				stx 	temp0
+.13a9	60		rts				rts
+.13aa					TestExternal:
+>13aa	db					.byte 	$DB
+.13ab	a2 27		ldx #$27			ldx 	#10000 >> 8
+.13ad	a9 10		lda #$10			lda 	#10000 & $FF
+.13af	20 28 13	jsr $1328			jsr 	DivideAbsolute
+>13b2	b7 13						.word 	a200
+.13b4	a0 dd		ldy #$dd			ldy 	#$DD
+>13b6	db					.byte 	$DB
+>13b7	e8 03				a200:	.word 	1000
+.13b9					EndMulDivContent:
 
 ;******  Return to file: runtime.asm
 
->12c2	db					.byte 	$DB
-.12c3					EndRunPCode:
-.12c3					RuntimeEnd:
->12c3	00 00						.word 	0 							; end marker for dictionary.
+>13b9	00 00						.word 	0 							; end marker for dictionary.
 
 ;******  End of listing
