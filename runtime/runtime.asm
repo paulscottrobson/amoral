@@ -52,6 +52,8 @@ temp1 = ZeroPageBase+6
 		.include "interpreter.asm" 			; main interpreter
 		.include "commands.asm"				; command handlers.
 		.include "support.asm"				; support for command handlers
+		.include "branches.asm"				; branch handlers
+		.include "unary.asm"				; unary handlers	
 		.include "multiply.asm"				; multiply code.
 		.include "divide.asm"				; divide/modulus code.
 		

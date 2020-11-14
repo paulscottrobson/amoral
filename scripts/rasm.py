@@ -85,18 +85,15 @@ class Assembler(object):
 			return code
 		#
 		label = "TEST_"+operand
-		return "${0:02x},{1} & 0xFF,{1} >> 8".format(baseOpcode+0x40,label)
+		return "${0:02x},{1} & $FF,{1} >> 8".format(baseOpcode+0x40,label)
 
 asm = Assembler()
 src = """
 ;
 ;		comment
 ;
-.count
-	ldr 	#10007
-	mod 	#10
-	str 	[2]
-	halt
-
+	dec
+	ret
+	
 """.split("\n")
 asm.assemble(src,open(".."+os.sep+"runtime"+os.sep+"generated"+os.sep+"testasm.inc","w"))

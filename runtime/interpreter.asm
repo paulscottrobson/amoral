@@ -34,7 +34,7 @@ RunPCode:
 ; *******************************************************************************************
 
 ExecLoop:
-		debug
+		;debug
 		ldy 	#0							; get the next instruction
 		lda 	(Pctr),y
 		inc16 	Pctr 						; advance the program pointer
@@ -74,6 +74,17 @@ ExecLoop:
 
 CallTemp0:
 		jmp 	(temp0)
+
+; *******************************************************************************************
+;
+;			Unary function 'Return' which takes you back out of executing P-Code
+;
+; *******************************************************************************************
+
+Command_Return:	;; RET $F5
+		lda 	Reg16 						; get XA back
+		ldx 	Reg16+1
+		jmp 	(Pctr)						; and go back to the caller.
 
 ; *******************************************************************************************
 ;

@@ -12,17 +12,17 @@
 	.word ModulusHandler           ; $88 MOD
 	.word OpcodeError              ; $89 ?
 	.word StoreHandler             ; $8a STR
-	.word OpcodeError              ; $8b ?
-	.word OpcodeError              ; $8c ?
-	.word OpcodeError              ; $8d ?
-	.word OpcodeError              ; $8e ?
-	.word OpcodeError              ; $8f ?
-	.word OpcodeError              ; $f0 ?
-	.word OpcodeError              ; $f1 ?
-	.word OpcodeError              ; $f2 ?
-	.word OpcodeError              ; $f3 ?
-	.word OpcodeError              ; $f4 ?
-	.word OpcodeError              ; $f5 ?
+	.word Branch_Always            ; $8b BRA
+	.word Branch_Zero              ; $8c BEQ
+	.word Branch_NonZero           ; $8d BNE
+	.word Branch_Minus             ; $8e BMI
+	.word Branch_Positive          ; $8f BPL
+	.word Inc_Unary                ; $f0 INC
+	.word Dec_Unary                ; $f1 DEC
+	.word Shl_Unary                ; $f2 SHL
+	.word Shr_Unary                ; $f3 SHR
+	.word Clr_Unary                ; $f4 CLR
+	.word Command_Return           ; $f5 RET
 	.word OpcodeError              ; $f6 ?
 	.word OpcodeError              ; $f7 ?
 	.word OpcodeError              ; $f8 ?

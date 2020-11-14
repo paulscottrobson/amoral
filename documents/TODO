@@ -1,9 +1,6 @@
 TODO List:
 
 Runtime:
-	Write Branches.
-	Write Unary Functions.
-	Write Return.
 	Write support Divide Multiply.
 	Build first proper runtime.
 	Write Debug.Hex() support routine

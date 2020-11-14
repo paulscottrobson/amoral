@@ -1,9 +1,9 @@
 ; *******************************************************************************************
 ; *******************************************************************************************
 ;
-;       File:           macros.asm
-;       Date:           13th November 2020
-;       Purpose:        AMORAL Macros
+;       File:           branches.asm
+;       Date:           14th November 2020
+;       Purpose:        Branch handlers
 ;       Author:         Paul Robson (paul@robson.org.uk)
 ;
 ; *******************************************************************************************
@@ -11,46 +11,52 @@
 
 ; *******************************************************************************************
 ;
-;									Break into debugger
+;									Unconditional Branch
 ;
 ; *******************************************************************************************
 
-debug .macro
-	.byte 	$DB
-	.endm
-
-
-; *******************************************************************************************
-;
-;							  Define a new word in the runtime
-;
-; *******************************************************************************************
-
-define .macro
-	.word 	\2-* 							; offset to next entry
-	.text 	\1,0 							; the text (must be lower case)
-	.align 	2								; force to even boundary.
-	.endm
+Branch_Always: 	;; BRA 	$8B
+		ldy 	#0
+		lda 	(Pctr),y
+		tax
+		iny
+		lda 	(Pctr),y
+		sta 	Pctr+1
+		stx 	Pctr
+		jmp 	ExecLoop
 
 ; *******************************************************************************************
 ;
-;									16 bit utilities
+;										Branch Conditional
 ;
 ; *******************************************************************************************
 
-inc16 .macro
-	inc 	\1
-	bne 	nocarry
-	inc 	1+(\1)
-nocarry:
-	.endm
+Branch_Zero: 	;; BEQ $8C
+		lda 	Reg16
+		ora 	Reg16+1
+		beq 	Branch_Always
+		bne 	Branch_Fail
 
-dec16 .macro
-	lda 	\1
-	bne 	noborrow
-	dec 	1+(\1)
-noborrow:
-	dec 	\1
-	.endm
-	
-	
+Branch_NonZero: 	;; BNE $8D
+		lda 	Reg16
+		ora 	Reg16+1
+		bne 	Branch_Always
+Branch_Fail:
+		clc
+		lda 	Pctr
+		adc 	#2
+		sta 	Pctr
+		bne 	_BFNoCarry
+		inc 	Pctr+1
+_BFNoCarry:
+		jmp 	ExecLoop		
+
+Branch_Minus:	;; BMI $8E
+		lda 	Reg16+1
+		bmi 	Branch_Always
+		bpl 	Branch_Fail
+
+Branch_Positive:	;; BPL $8F
+		lda 	Reg16+1
+		bpl 	Branch_Always
+		bmi 	Branch_Fail

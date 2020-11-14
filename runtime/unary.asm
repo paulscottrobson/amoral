@@ -1,9 +1,9 @@
 ; *******************************************************************************************
 ; *******************************************************************************************
 ;
-;       File:           macros.asm
-;       Date:           13th November 2020
-;       Purpose:        AMORAL Macros
+;       File:           unary.asm
+;       Date:           14th November 2020
+;       Purpose:        Unary functions
 ;       Author:         Paul Robson (paul@robson.org.uk)
 ;
 ; *******************************************************************************************
@@ -11,46 +11,43 @@
 
 ; *******************************************************************************************
 ;
-;									Break into debugger
+;								Increment/Decrement
 ;
 ; *******************************************************************************************
 
-debug .macro
-	.byte 	$DB
-	.endm
+Inc_Unary: 	;; INC 	$F0
+		inc16 	Reg16
+		jmp 	ExecLoop
 
-
-; *******************************************************************************************
-;
-;							  Define a new word in the runtime
-;
-; *******************************************************************************************
-
-define .macro
-	.word 	\2-* 							; offset to next entry
-	.text 	\1,0 							; the text (must be lower case)
-	.align 	2								; force to even boundary.
-	.endm
+Dec_Unary: 	;; DEC 	$F1
+		dec16 	Reg16
+		jmp 	ExecLoop
 
 ; *******************************************************************************************
 ;
-;									16 bit utilities
+;						Shifts - these are logical unsigned not arithmetic
 ;
 ; *******************************************************************************************
 
-inc16 .macro
-	inc 	\1
-	bne 	nocarry
-	inc 	1+(\1)
-nocarry:
-	.endm
+Shl_Unary:	;; SHL $F2
+		asl 	Reg16
+		rol 	Reg16+1
+		jmp 	ExecLoop
 
-dec16 .macro
-	lda 	\1
-	bne 	noborrow
-	dec 	1+(\1)
-noborrow:
-	dec 	\1
-	.endm
-	
-	
+Shr_Unary:	;; SHR $F3
+		lsr 	Reg16+1
+		ror 	Reg16
+		jmp 	ExecLoop
+
+; *******************************************************************************************
+;
+;						Clear, assuming we using constant 0 a fair bit :)
+;
+; *******************************************************************************************
+
+Clr_Unary:	;; CLR $F4
+		lda 	#0
+		sta		Reg16
+		sta 	Reg16+1
+		jmp 	ExecLoop
+		
