@@ -93,9 +93,8 @@ src = """
 ;		comment
 ;
 .count
-	ldr 	#65
-	str 	[0]
-	ldr 	#32767
+	ldr 	#2107
+	mlt 	#13
 	str 	[2]
 	halt
 

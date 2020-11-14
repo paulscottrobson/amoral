@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -D test=1 --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Sat Nov 14 06:07:37 2020
+; Sat Nov 14 06:27:22 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -23,14 +23,16 @@
 =$08					Reg16 = ZeroPageBase 						; the current value register.
 =10					Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroPageBase+4 						; temporary registers
-.1000	4c 70 11	jmp $1170			jmp 	TestRuntimeCode
+=14					temp1 = ZeroPageBase+6
+.1000	4c 01 12	jmp $1201			jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
+.1003	4c 00 10	jmp $1000			jmp 	RunTimeAddress 				; what we normally get.
 >101a	00 10						.word 	RunTimeAddress 				; the address of boot
->101c	82 11						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	11 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 
 ;******  Processing file: interpreter.asm
 
->1020	62 01					.word 	EndRunPCode-* 							; offset to next entry
+>1020	f1 01					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 70 63 6f 64 65			.text 	"runpcode",0 							; the text (must be lower case)
 >102a	00
 >102b						.align 	2								; force to even boundary.
@@ -104,12 +106,12 @@
 ;******  Processing file: generated/jumptable.inc
 
 >1094	d4 10					.word LoadHandler              ; $80 LDR
->1096	91 10					.word OpcodeError              ; $81 ?
->1098	91 10					.word OpcodeError              ; $82 ?
->109a	91 10					.word OpcodeError              ; $83 ?
->109c	91 10					.word OpcodeError              ; $84 ?
->109e	91 10					.word OpcodeError              ; $85 ?
->10a0	91 10					.word OpcodeError              ; $86 ?
+>1096	19 11					.word Andhandler               ; $81 AND
+>1098	2b 11					.word Orhandler                ; $82 ORR
+>109a	3d 11					.word Xorhandler               ; $83 XOR
+>109c	f3 10					.word Addhandler               ; $84 ADD
+>109e	06 11					.word Subhandler               ; $85 SUB
+>10a0	cc 11					.word MultiplyHandler          ; $86 MLT
 >10a2	91 10					.word OpcodeError              ; $87 ?
 >10a4	91 10					.word OpcodeError              ; $88 ?
 >10a6	91 10					.word OpcodeError              ; $89 ?
@@ -145,14 +147,14 @@
 ;******  Processing file: commands.asm
 
 .10d4					LoadHandler:
-.10d4	20 f3 10	jsr $10f3			jsr 	EvaluateValue 				; temp0 = target value.
+.10d4	20 4f 11	jsr $114f			jsr 	EvaluateValue 				; temp0 = target value.
 .10d7	a5 0c		lda $0c				lda 	temp0						; copy value into register
 .10d9	85 08		sta $08				sta 	Reg16
 .10db	a5 0d		lda $0d				lda 	temp0+1
 .10dd	85 09		sta $09				sta 	Reg16+1
 .10df	4c 3c 10	jmp $103c			jmp 	ExecLoop
 .10e2					StoreHandler:
-.10e2	20 28 11	jsr $1128			jsr 	EvaluateAddress 			; temp0 = target address.
+.10e2	20 84 11	jsr $1184			jsr 	EvaluateAddress 			; temp0 = target address.
 .10e5	a0 00		ldy #$00			ldy 	#0							; write register out
 .10e7	a5 08		lda $08				lda 	Reg16
 .10e9	91 0c		sta ($0c),y			sta 	(temp0),y
@@ -160,116 +162,198 @@
 .10ed	c8		iny				iny
 .10ee	91 0c		sta ($0c),y			sta 	(temp0),y
 .10f0	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.10f3					Addhandler:
+.10f3	20 4f 11	jsr $114f			jsr 	EvaluateValue
+.10f6	18		clc				clc
+.10f7	a5 08		lda $08				lda 	Reg16
+.10f9	65 0c		adc $0c				adc 	temp0
+.10fb	85 08		sta $08				sta 	Reg16
+.10fd	a5 09		lda $09				lda 	Reg16+1
+.10ff	65 0d		adc $0d				adc 	temp0+1
+.1101	85 09		sta $09				sta 	Reg16+1
+.1103	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.1106					Subhandler:
+.1106	20 4f 11	jsr $114f			jsr 	EvaluateValue
+.1109	38		sec				sec
+.110a	a5 08		lda $08				lda 	Reg16
+.110c	e5 0c		sbc $0c				sbc 	temp0
+.110e	85 08		sta $08				sta 	Reg16
+.1110	a5 09		lda $09				lda 	Reg16+1
+.1112	e5 0d		sbc $0d				sbc 	temp0+1
+.1114	85 09		sta $09				sta 	Reg16+1
+.1116	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.1119					Andhandler:
+.1119	20 4f 11	jsr $114f			jsr 	EvaluateValue
+.111c	a5 08		lda $08				lda 	Reg16
+.111e	25 0c		and $0c				and 	temp0
+.1120	85 08		sta $08				sta 	Reg16
+.1122	a5 09		lda $09				lda 	Reg16+1
+.1124	25 0d		and $0d				and 	temp0+1
+.1126	85 09		sta $09				sta 	Reg16+1
+.1128	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.112b					Orhandler:
+.112b	20 4f 11	jsr $114f			jsr 	EvaluateValue
+.112e	a5 08		lda $08				lda 	Reg16
+.1130	05 0c		ora $0c				ora 	temp0
+.1132	85 08		sta $08				sta 	Reg16
+.1134	a5 09		lda $09				lda 	Reg16+1
+.1136	05 0d		ora $0d				ora 	temp0+1
+.1138	85 09		sta $09				sta 	Reg16+1
+.113a	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.113d					Xorhandler:
+.113d	20 4f 11	jsr $114f			jsr 	EvaluateValue
+.1140	a5 08		lda $08				lda 	Reg16
+.1142	45 0c		eor $0c				eor 	temp0
+.1144	85 08		sta $08				sta 	Reg16
+.1146	a5 09		lda $09				lda 	Reg16+1
+.1148	45 0d		eor $0d				eor 	temp0+1
+.114a	85 09		sta $09				sta 	Reg16+1
+.114c	4c 3c 10	jmp $103c			jmp 	ExecLoop
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: support.asm
 
-.10f3					EvaluateValue:
-.10f3	98		tya				tya 								; get EAC part and save in X
-.10f4	29 70		and #$70			and 	#$70
-.10f6	aa		tax				tax
-.10f7	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
-.10f9	b0 1d		bcs $1118			bcs 	_EDMemory
-.10fb	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.10fd	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.10ff	85 0c		sta $0c				sta 	temp0
-.1101	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.1103	e6 0a		inc $0a			inc 	Pctr
-.1105	d0 02		bne $1109		bne 	nocarry
-.1107	e6 0b		inc $0b			inc 	1+(Pctr)
-.1109					nocarry:
-.1109	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
-.110b	f0 0a		beq $1117			beq 	_EACalcValue
-.110d	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.110f	85 0d		sta $0d				sta 	temp0+1
-.1111	e6 0a		inc $0a			inc 	Pctr
-.1113	d0 02		bne $1117		bne 	nocarry
-.1115	e6 0b		inc $0b			inc 	1+(Pctr)
-.1117					nocarry:
-.1117					_EACalcValue:
-.1117	60		rts				rts
-.1118					_EDMemory:
-.1118	20 28 11	jsr $1128			jsr	 	EvaluateAddress 			; evaluate the address.
-.111b	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
-.111d	b1 0c		lda ($0c),y			lda 	(temp0),y
-.111f	aa		tax				tax
-.1120	c8		iny				iny
-.1121	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1123	86 0c		stx $0c				stx 	temp0
-.1125	85 0d		sta $0d				sta 	temp0+1
-.1127	60		rts				rts
-.1128					EvaluateAddress:
-.1128	98		tya				tya 								; get EAC part of opcode.
-.1129	29 70		and #$70			and 	#$70
-.112b	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
-.112d	f0 29		beq $1158			beq 	_EAAbsolute
-.112f	aa		tax				tax 								; save in X
-.1130	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.1132	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1134	85 0c		sta $0c				sta 	temp0
-.1136	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.1138	e6 0a		inc $0a			inc 	Pctr
-.113a	d0 02		bne $113e		bne 	nocarry
-.113c	e6 0b		inc $0b			inc 	1+(Pctr)
-.113e					nocarry:
-.113e	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
-.1140	f0 0a		beq $114c			beq 	_EACalcVarAddress
-.1142	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.1144	85 0d		sta $0d				sta 	temp0+1
-.1146	e6 0a		inc $0a			inc 	Pctr
-.1148	d0 02		bne $114c		bne 	nocarry
-.114a	e6 0b		inc $0b			inc 	1+(Pctr)
-.114c					nocarry:
-.114c					_EACalcVarAddress:
-.114c	06 0c		asl $0c				asl 	temp0 						; double the variable number
-.114e	26 0d		rol $0d				rol 	temp0+1
-.1150	18		clc				clc 								; add the page address of variable data on.
-.1151	a5 0d		lda $0d				lda 	temp0+1
-.1153	69 0c		adc #$0c			adc 	#VariableMemory/256
-.1155	85 0d		sta $0d				sta 	temp0+1
-.1157	60		rts				rts
-.1158					_EAAbsolute:
-.1158	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
-.115a	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.115c	85 0c		sta $0c				sta 	temp0
-.115e	c8		iny				iny
-.115f	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1161	85 0d		sta $0d				sta 	temp0+1
-.1163					ReturnBump2
-.1163	e6 0a		inc $0a			inc 	Pctr
-.1165	d0 02		bne $1169		bne 	nocarry
-.1167	e6 0b		inc $0b			inc 	1+(Pctr)
-.1169					nocarry:
-.1169					ReturnBump1:
-.1169	e6 0a		inc $0a			inc 	Pctr
-.116b	d0 02		bne $116f		bne 	nocarry
-.116d	e6 0b		inc $0b			inc 	1+(Pctr)
-.116f					nocarry:
-.116f	60		rts				rts
+.114f					EvaluateValue:
+.114f	98		tya				tya 								; get EAC part and save in X
+.1150	29 70		and #$70			and 	#$70
+.1152	aa		tax				tax
+.1153	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
+.1155	b0 1d		bcs $1174			bcs 	_EDMemory
+.1157	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.1159	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.115b	85 0c		sta $0c				sta 	temp0
+.115d	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.115f	e6 0a		inc $0a			inc 	Pctr
+.1161	d0 02		bne $1165		bne 	nocarry
+.1163	e6 0b		inc $0b			inc 	1+(Pctr)
+.1165					nocarry:
+.1165	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
+.1167	f0 0a		beq $1173			beq 	_EACalcValue
+.1169	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
+.116b	85 0d		sta $0d				sta 	temp0+1
+.116d	e6 0a		inc $0a			inc 	Pctr
+.116f	d0 02		bne $1173		bne 	nocarry
+.1171	e6 0b		inc $0b			inc 	1+(Pctr)
+.1173					nocarry:
+.1173					_EACalcValue:
+.1173	60		rts				rts
+.1174					_EDMemory:
+.1174	20 84 11	jsr $1184			jsr	 	EvaluateAddress 			; evaluate the address.
+.1177	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
+.1179	b1 0c		lda ($0c),y			lda 	(temp0),y
+.117b	aa		tax				tax
+.117c	c8		iny				iny
+.117d	b1 0c		lda ($0c),y			lda 	(temp0),y
+.117f	86 0c		stx $0c				stx 	temp0
+.1181	85 0d		sta $0d				sta 	temp0+1
+.1183	60		rts				rts
+.1184					EvaluateAddress:
+.1184	98		tya				tya 								; get EAC part of opcode.
+.1185	29 70		and #$70			and 	#$70
+.1187	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
+.1189	f0 29		beq $11b4			beq 	_EAAbsolute
+.118b	aa		tax				tax 								; save in X
+.118c	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.118e	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1190	85 0c		sta $0c				sta 	temp0
+.1192	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.1194	e6 0a		inc $0a			inc 	Pctr
+.1196	d0 02		bne $119a		bne 	nocarry
+.1198	e6 0b		inc $0b			inc 	1+(Pctr)
+.119a					nocarry:
+.119a	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
+.119c	f0 0a		beq $11a8			beq 	_EACalcVarAddress
+.119e	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
+.11a0	85 0d		sta $0d				sta 	temp0+1
+.11a2	e6 0a		inc $0a			inc 	Pctr
+.11a4	d0 02		bne $11a8		bne 	nocarry
+.11a6	e6 0b		inc $0b			inc 	1+(Pctr)
+.11a8					nocarry:
+.11a8					_EACalcVarAddress:
+.11a8	06 0c		asl $0c				asl 	temp0 						; double the variable number
+.11aa	26 0d		rol $0d				rol 	temp0+1
+.11ac	18		clc				clc 								; add the page address of variable data on.
+.11ad	a5 0d		lda $0d				lda 	temp0+1
+.11af	69 0c		adc #$0c			adc 	#VariableMemory/256
+.11b1	85 0d		sta $0d				sta 	temp0+1
+.11b3	60		rts				rts
+.11b4					_EAAbsolute:
+.11b4	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
+.11b6	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11b8	85 0c		sta $0c				sta 	temp0
+.11ba	c8		iny				iny
+.11bb	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11bd	85 0d		sta $0d				sta 	temp0+1
+.11bf					ReturnBump2
+.11bf	e6 0a		inc $0a			inc 	Pctr
+.11c1	d0 02		bne $11c5		bne 	nocarry
+.11c3	e6 0b		inc $0b			inc 	1+(Pctr)
+.11c5					nocarry:
+.11c5					ReturnBump1:
+.11c5	e6 0a		inc $0a			inc 	Pctr
+.11c7	d0 02		bne $11cb		bne 	nocarry
+.11c9	e6 0b		inc $0b			inc 	1+(Pctr)
+.11cb					nocarry:
+.11cb	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
-.1170					TestRuntimeCode:
-.1170	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
-.1172	a9 cd		lda #$cd			lda 	#$CD
-.1174	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
+
+;******  Processing file: multiply.asm
+
+.11cc					MultiplyHandler:
+.11cc	20 4f 11	jsr $114f			jsr 	EvaluateValue 				; temp0 = target value.
+.11cf	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.11d1	85 0e		sta $0e				sta 	temp1
+.11d3	a5 09		lda $09				lda	 	Reg16+1
+.11d5	85 0f		sta $0f				sta 	temp1+1
+.11d7	20 dd 11	jsr $11dd			jsr 	Multiply 					; Reg16 := temp0 * temp1
+.11da	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.11dd					Multiply:
+.11dd	a9 00		lda #$00			lda 	#0 							; zero total.
+.11df	85 08		sta $08				sta 	Reg16
+.11e1	85 09		sta $09				sta 	Reg16+1
+.11e3					_MultLoop:
+.11e3	46 0d		lsr $0d				lsr 	temp0+1
+.11e5	66 0c		ror $0c				ror 	temp0
+.11e7	90 0d		bcc $11f6			bcc 	_MultNoAdd
+.11e9	18		clc				clc
+.11ea	a5 0e		lda $0e				lda 	temp1
+.11ec	65 08		adc $08				adc 	Reg16
+.11ee	85 08		sta $08				sta 	Reg16
+.11f0	a5 0f		lda $0f				lda 	temp1+1
+.11f2	65 09		adc $09				adc 	Reg16+1
+.11f4	85 09		sta $09				sta 	Reg16+1
+.11f6					_MultNoAdd:
+.11f6	06 0e		asl $0e				asl 	temp1
+.11f8	26 0f		rol $0f				rol 	temp1+1
+.11fa	a5 0c		lda $0c				lda 	temp0
+.11fc	05 0d		ora $0d				ora 	temp0+1
+.11fe	d0 e3		bne $11e3			bne 	_MultLoop
+.1200	60		rts				rts
+
+;******  Return to file: runtime.asm
+
+.1201					TestRuntimeCode:
+.1201	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
+.1203	a9 cd		lda #$cd			lda 	#$CD
+.1205	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
 
 ;******  Processing file: generated/testasm.inc
 
-.1177					TEST_count:
->1177	80 41					.byte $80,$41                                  ; ldr #65
->1179	aa 00					.byte $aa,$00                                  ; str [0]
->117b	90 ff 7f				.byte $90,$ff,$7f                              ; ldr #32767
->117e	aa 02					.byte $aa,$02                                  ; str [2]
->1180	ff					.byte $ff                                      ; halt
+.1208					TEST_count:
+>1208	90 3b 08				.byte $90,$3b,$08                              ; ldr #2107
+>120b	86 0d					.byte $86,$0d                                  ; mlt #13
+>120d	aa 02					.byte $aa,$02                                  ; str [2]
+>120f	ff					.byte $ff                                      ; halt
 
 ;******  Return to file: runtime.asm
 
->1181	db					.byte 	$DB
-.1182					EndRunPCode:
-.1182					RuntimeEnd:
->1182	00 00						.word 	0 							; end marker for dictionary.
+>1210	db					.byte 	$DB
+.1211					EndRunPCode:
+.1211					RuntimeEnd:
+>1211	00 00						.word 	0 							; end marker for dictionary.
 
 ;******  End of listing

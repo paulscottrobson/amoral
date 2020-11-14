@@ -2,4 +2,4 @@
 set -e
 python ../scripts/scanner.py
 python ../scripts/rasm.py
-64tass -D test=1 --m6502 runtime.asm -o runtime.prg -L runtime.lst
+64tass $* --m6502 runtime.asm -o runtime.prg -L runtime.lst

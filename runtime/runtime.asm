@@ -30,6 +30,7 @@ ZeroPageBase = $08 							; Zero page goes here.
 Reg16 = ZeroPageBase 						; the current value register.
 Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
 temp0 = ZeroPageBase+4 						; temporary registers
+temp1 = ZeroPageBase+6
 
 ; *******************************************************************************************
 ;
@@ -39,10 +40,9 @@ temp0 = ZeroPageBase+4 						; temporary registers
 
 		* =	RunTimeAddress
 		.if test==1
-		jmp 	TestRuntimeCode
-		.else
-		jmp 	RunTimeAddress
+		jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
 		.endif
+		jmp 	RunTimeAddress 				; what we normally get.
 
 		* = 	RunTimeAddress+26			; the setup area
 		.word 	RunTimeAddress 				; the address of boot
@@ -52,8 +52,8 @@ temp0 = ZeroPageBase+4 						; temporary registers
 		.include "interpreter.asm" 			; main interpreter
 		.include "commands.asm"				; command handlers.
 		.include "support.asm"				; support for command handlers
-
-
+		.include "multiply.asm"				; multiply code.
+		
 		.if test==1 						; include test code if needed.			
 TestRuntimeCode:
 		ldx 	#$AB 						; something to work with

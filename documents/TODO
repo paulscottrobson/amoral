@@ -1,9 +1,6 @@
 TODO List:
 
 Runtime:
-	Write AND ORR XOR
-	Write ADD SUB
-	Write Multiply then MLT
 	Write Divide then DIV MOD
 	Write Branches.
 	Write Unary Functions.

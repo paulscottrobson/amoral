@@ -2,12 +2,12 @@
 ;	Automatically generated
 ;
 	.word LoadHandler              ; $80 LDR
-	.word OpcodeError              ; $81 ?
-	.word OpcodeError              ; $82 ?
-	.word OpcodeError              ; $83 ?
-	.word OpcodeError              ; $84 ?
-	.word OpcodeError              ; $85 ?
-	.word OpcodeError              ; $86 ?
+	.word Andhandler               ; $81 AND
+	.word Orhandler                ; $82 ORR
+	.word Xorhandler               ; $83 XOR
+	.word Addhandler               ; $84 ADD
+	.word Subhandler               ; $85 SUB
+	.word MultiplyHandler          ; $86 MLT
 	.word OpcodeError              ; $87 ?
 	.word OpcodeError              ; $88 ?
 	.word OpcodeError              ; $89 ?
