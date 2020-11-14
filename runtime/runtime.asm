@@ -56,8 +56,9 @@ temp1 = ZeroAddr+6
 		
 		jmp 	BootAddr 					; test=0 what we normally get, no start address.
 
-		* = 	BootAddr+26					; the setup area
+		* = 	BootAddr+24					; the setup area
 		.word 	BootAddr 					; the address of boot
+		.word 	VarAddr 					; the address of the variables
 		.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 		.word 	$0000 						; address of allocatable memory (set up by compiler)
 

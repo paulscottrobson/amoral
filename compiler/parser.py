@@ -110,12 +110,16 @@ class Parser(object):
 		return s
 		#
 		raise AmoralException("Cannot parse line")
-
+	#
+	#		Put an element back.	
+	#	
+	def put(self,element):
+		self.parseObjectStack.append(element)
 	#
 	#		Check if completed
 	#
 	def isDone(self):
-		return self.stream.isDone() and self.currentLine == ""
+		return self.stream.isDone() and self.currentLine == "" and len(self.parseObjectStack) == 0
 	#
 	#		Preprocess line.
 	#

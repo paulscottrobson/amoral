@@ -43,6 +43,21 @@ class Procedure(Identifier):
 	#
 	def getType(self):
 		return "P"
+	#
+	def addParameter(self,identifier):
+		self.parameters.append(identifier)
+		return self
+	#
+	def toString(self):
+		params = ",".join([p.getName() for p in self.parameters])
+		if len(self.parameters) > 0:
+			params += " @{0}:${0:x}".format(self.parameters[0].getValue())
+		return Identifier.toString(self)+"("+params+")"
+	#
+	def getParams(self):
+		return self.parameters
+	def getParamCount(self):
+		return len(self.parameters)
 
 # *******************************************************************************************
 #
@@ -91,13 +106,39 @@ class IdentifierManager(object):
 	def toString(self):
 		return self._toString(self.locals,"Locals")+self._toString(self.globals,"Globals")
 	def _toString(self,idents,groupName):
-		return groupName+":\n"+"\n".join(["\t{0}\n".format(idents[x].toString()) for x in idents.keys()])
+		keyList = [x for x in idents.keys()]		
+		keyList.sort()
+		return groupName+":\n"+"".join(["\t{0}\n".format(idents[x].toString()) for x in keyList])
 
+# *******************************************************************************************
+#
+#					Initialised Identifier for testing/development
+#
+# *******************************************************************************************
+
+class FakeIdentifierManager(IdentifierManager):
+	def __init__(self):
+		IdentifierManager.__init__(self)
+		self.addGlobal(Variable("g0",0))
+		self.addGlobal(Variable("g1",1))
+		self.addGlobal(Variable("g2",2))
+		self.addLocal(Variable("l0",16))
+		self.addLocal(Variable("l1",17))
+		self.addGlobal(Procedure("proc.none",0x3579))
+		self.addGlobal(Procedure("proc.one",0x468A).addParameter(Variable("z1",32)))
+		self.addGlobal(Procedure("proc.two",0x759B).addParameter(Variable("y1",40)).addParameter(Variable("y2",41)))
 
 if __name__ == "__main__":
 	im = IdentifierManager()
 	im.addLocal(Variable("count",32))
 	im.addGlobal(Procedure("test.proc",0x1AF7))
+	pr = Procedure("param.procedure",0xFF74).addParameter(Variable("a",64)).addParameter(Variable("b",65))
+	im.addGlobal(pr)
+
 	print(im.toString())
 	print(im.find("COUNT").toString())
 	print(im.find("test.PROC").toString())	
+	print("==============================")
+	
+	im2 = FakeIdentifierManager()
+	print(im2.toString())

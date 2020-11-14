@@ -3,7 +3,7 @@ TODO List:
 Compiler:
 	Start on compiler design :)
 		Write runtime handler/manager and support routines.
-	Implement Abs, Sgn, Len, Random
+		Core compilation that can be used anywhere.
 
 PostCompiler:
 	Write handler for structure generation.
