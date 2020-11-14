@@ -8,8 +8,8 @@
 	.word Addhandler               ; $84 ADD
 	.word Subhandler               ; $85 SUB
 	.word MultiplyHandler          ; $86 MLT
-	.word OpcodeError              ; $87 ?
-	.word OpcodeError              ; $88 ?
+	.word DivideHandler            ; $87 DIV
+	.word ModulusHandler           ; $88 MOD
 	.word OpcodeError              ; $89 ?
 	.word StoreHandler             ; $8a STR
 	.word OpcodeError              ; $8b ?

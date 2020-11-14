@@ -53,6 +53,7 @@ temp1 = ZeroPageBase+6
 		.include "commands.asm"				; command handlers.
 		.include "support.asm"				; support for command handlers
 		.include "multiply.asm"				; multiply code.
+		.include "divide.asm"				; divide/modulus code.
 		
 		.if test==1 						; include test code if needed.			
 TestRuntimeCode:

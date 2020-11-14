@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -D test=1 --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Sat Nov 14 06:27:22 2020
+; Sat Nov 14 06:52:26 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -24,15 +24,15 @@
 =10					Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroPageBase+4 						; temporary registers
 =14					temp1 = ZeroPageBase+6
-.1000	4c 01 12	jmp $1201			jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
+.1000	4c 52 12	jmp $1252			jmp 	TestRuntimeCode 			; test=1 runs code build with rasm.py
 .1003	4c 00 10	jmp $1000			jmp 	RunTimeAddress 				; what we normally get.
 >101a	00 10						.word 	RunTimeAddress 				; the address of boot
->101c	11 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	62 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 
 ;******  Processing file: interpreter.asm
 
->1020	f1 01					.word 	EndRunPCode-* 							; offset to next entry
+>1020	42 02					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 70 63 6f 64 65			.text 	"runpcode",0 							; the text (must be lower case)
 >102a	00
 >102b						.align 	2								; force to even boundary.
@@ -112,8 +112,8 @@
 >109c	f3 10					.word Addhandler               ; $84 ADD
 >109e	06 11					.word Subhandler               ; $85 SUB
 >10a0	cc 11					.word MultiplyHandler          ; $86 MLT
->10a2	91 10					.word OpcodeError              ; $87 ?
->10a4	91 10					.word OpcodeError              ; $88 ?
+>10a2	01 12					.word DivideHandler            ; $87 DIV
+>10a4	1a 12					.word ModulusHandler           ; $88 MOD
 >10a6	91 10					.word OpcodeError              ; $89 ?
 >10a8	e2 10					.word StoreHandler             ; $8a STR
 >10aa	91 10					.word OpcodeError              ; $8b ?
@@ -336,24 +336,75 @@
 
 ;******  Return to file: runtime.asm
 
-.1201					TestRuntimeCode:
-.1201	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
-.1203	a9 cd		lda #$cd			lda 	#$CD
-.1205	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
 
-;******  Processing file: generated/testasm.inc
+;******  Processing file: divide.asm
 
-.1208					TEST_count:
->1208	90 3b 08				.byte $90,$3b,$08                              ; ldr #2107
->120b	86 0d					.byte $86,$0d                                  ; mlt #13
->120d	aa 02					.byte $aa,$02                                  ; str [2]
->120f	ff					.byte $ff                                      ; halt
+.1201					DivideHandler:
+.1201	20 4f 11	jsr $114f			jsr 	EvaluateValue 				; temp0 = target value.
+.1204	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.1206	85 0e		sta $0e				sta 	temp1
+.1208	a5 09		lda $09				lda	 	Reg16+1
+.120a	85 0f		sta $0f				sta 	temp1+1
+.120c	20 2b 12	jsr $122b			jsr 	Divide 						; temp1 := temp1 / temp0
+.120f	a5 0e		lda $0e				lda 	temp1 						; copy result into register
+.1211	85 08		sta $08				sta 	Reg16
+.1213	a5 0f		lda $0f				lda 	temp1+1
+.1215	85 09		sta $09				sta 	Reg16+1
+.1217	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.121a					ModulusHandler:
+.121a	20 4f 11	jsr $114f			jsr 	EvaluateValue 				; temp0 = target value.
+.121d	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.121f	85 0e		sta $0e				sta 	temp1
+.1221	a5 09		lda $09				lda	 	Reg16+1
+.1223	85 0f		sta $0f				sta 	temp1+1
+.1225	20 2b 12	jsr $122b			jsr 	Divide 						; temp1 := temp1 / temp0, mod => Reg16
+.1228	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.122b					Divide:
+.122b	a9 00		lda #$00			lda 	#0 							; set A = 0
+.122d	85 08		sta $08				sta 	Reg16
+.122f	85 09		sta $09				sta 	Reg16+1
+.1231	a0 10		ldy #$10			ldy 	#16 						; loop round 16 times.
+.1233					_DivLoop:
+.1233	06 0e		asl $0e				asl 	temp1 						; shift QA left. Q first
+.1235	26 0f		rol $0f				rol 	temp1+1
+.1237	26 08		rol $08				rol 	Reg16 						; shift A left carrying in.
+.1239	26 09		rol $09				rol 	Reg16+1
+.123b	38		sec				sec 								; calculate A-M, result in XA/C
+.123c	a5 08		lda $08				lda 	Reg16
+.123e	e5 0c		sbc $0c				sbc 	temp0
+.1240	aa		tax				tax
+.1241	a5 09		lda $09				lda 	Reg16+1
+.1243	e5 0d		sbc $0d				sbc 	temp0+1
+.1245	90 06		bcc $124d			bcc 	_DivNoUpdate 				; if A >= M then store result and set Q bit 0.
+.1247	85 09		sta $09				sta 	Reg16+1
+.1249	86 08		stx $08				stx 	Reg16
+.124b	e6 0e		inc $0e				inc 	temp1 						; we know it is even.
+.124d					_DivNoUpdate:
+.124d	88		dey				dey
+.124e	d0 e3		bne $1233			bne 	_DivLoop
+>1250	db					.byte 	$DB
+.1251	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
->1210	db					.byte 	$DB
-.1211					EndRunPCode:
-.1211					RuntimeEnd:
->1211	00 00						.word 	0 							; end marker for dictionary.
+.1252					TestRuntimeCode:
+.1252	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
+.1254	a9 cd		lda #$cd			lda 	#$CD
+.1256	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
+
+;******  Processing file: generated/testasm.inc
+
+.1259					TEST_count:
+>1259	90 17 27				.byte $90,$17,$27                              ; ldr #10007
+>125c	88 0a					.byte $88,$0a                                  ; mod #10
+>125e	aa 02					.byte $aa,$02                                  ; str [2]
+>1260	ff					.byte $ff                                      ; halt
+
+;******  Return to file: runtime.asm
+
+>1261	db					.byte 	$DB
+.1262					EndRunPCode:
+.1262					RuntimeEnd:
+>1262	00 00						.word 	0 							; end marker for dictionary.
 
 ;******  End of listing

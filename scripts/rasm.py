@@ -93,8 +93,8 @@ src = """
 ;		comment
 ;
 .count
-	ldr 	#2107
-	mlt 	#13
+	ldr 	#10007
+	mod 	#10
 	str 	[2]
 	halt
 
