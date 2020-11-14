@@ -38,16 +38,11 @@ temp0 = ZeroPageBase+4 						; temporary registers
 ; *******************************************************************************************
 
 		* =	RunTimeAddress
-		lda 	#$60
-		ldx 	#$4A
-		jsr 	RunPCode
-		.byte 	$90,$3C,$57
-		.byte 	$BA,$02,$01
-		.byte 	$80,$FE
-		.byte 	$CA,$80,$08
-		.byte 	$B0,$02,$01
-		.byte 	$C0,$80,$08
-		.byte 	$89
+		.if test==1
+		jmp 	TestRuntimeCode
+		.else
+		jmp 	RunTimeAddress
+		.endif
 
 		* = 	RunTimeAddress+26			; the setup area
 		.word 	RunTimeAddress 				; the address of boot
@@ -57,6 +52,16 @@ temp0 = ZeroPageBase+4 						; temporary registers
 		.include "interpreter.asm" 			; main interpreter
 		.include "commands.asm"				; command handlers.
 		.include "support.asm"				; support for command handlers
+
+
+		.if test==1 						; include test code if needed.			
+TestRuntimeCode:
+		ldx 	#$AB 						; something to work with
+		lda 	#$CD
+		jsr 	RunPCode 					; go do the following code.	
+		.include "generated/testasm.inc"
+		debug
+		.endif
 
 EndRunPCode:
 

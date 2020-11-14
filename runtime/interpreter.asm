@@ -34,6 +34,7 @@ RunPCode:
 ; *******************************************************************************************
 
 ExecLoop:
+		debug
 		ldy 	#0							; get the next instruction
 		lda 	(Pctr),y
 		inc16 	Pctr 						; advance the program pointer
@@ -102,6 +103,7 @@ _CHCall:									; at this point $00-$0F for non unary, $10-$1F for unary
 		jmp 	(temp0)						; and go there to execute with the opcode in Y.
 
 OpcodeError: 								; come here if not found.
+		ldx 	#$EE 						; EE = Error :)
 		debug 
 
 ;

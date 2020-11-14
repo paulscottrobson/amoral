@@ -1,9 +1,13 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Fri Nov 13 21:45:05 2020
+; 64tass -D test=1 --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Sat Nov 14 06:07:37 2020
 
 ;Offset	;Hex		;Monitor	;Source
+
+;******  Command line definitions
+
+=1					test=1
 
 ;******  Processing input file: runtime.asm
 
@@ -19,23 +23,14 @@
 =$08					Reg16 = ZeroPageBase 						; the current value register.
 =10					Pctr = ZeroPageBase+2 						; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroPageBase+4 						; temporary registers
-.1000	a9 60		lda #$60			lda 	#$60
-.1002	a2 4a		ldx #$4a			ldx 	#$4A
-.1004	20 2c 10	jsr $102c			jsr 	RunPCode
->1007	90 3c 57					.byte 	$90,$3C,$57
->100a	ba 02 01					.byte 	$BA,$02,$01
->100d	80 fe						.byte 	$80,$FE
->100f	ca 80 08					.byte 	$CA,$80,$08
->1012	b0 02 01					.byte 	$B0,$02,$01
->1015	c0 80 08					.byte 	$C0,$80,$08
->1018	89						.byte 	$89
+.1000	4c 70 11	jmp $1170			jmp 	TestRuntimeCode
 >101a	00 10						.word 	RunTimeAddress 				; the address of boot
->101c	6e 11						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	82 11						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 
 ;******  Processing file: interpreter.asm
 
->1020	4e 01					.word 	EndRunPCode-* 							; offset to next entry
+>1020	62 01					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 70 63 6f 64 65			.text 	"runpcode",0 							; the text (must be lower case)
 >102a	00
 >102b						.align 	2								; force to even boundary.
@@ -51,93 +46,95 @@
 .103a	e6 0b		inc $0b			inc 	1+(Pctr)
 .103c					nocarry:
 .103c					ExecLoop:
-.103c	a0 00		ldy #$00			ldy 	#0							; get the next instruction
-.103e	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1040	e6 0a		inc $0a			inc 	Pctr
-.1042	d0 02		bne $1046		bne 	nocarry
-.1044	e6 0b		inc $0b			inc 	1+(Pctr)
-.1046					nocarry:
-.1046	0a		asl a				asl 	a 							; shift bit 7 into carry.
-.1047	b0 29		bcs $1072			bcs 	CommandHandler 				; 80-FF it's a command
-.1049	85 0c		sta $0c				sta 	temp0 						; construct the call address in temp0
-.104b	b1 0a		lda ($0a),y			lda 	(PCtr),y 					; get the MSB
-.104d	85 0d		sta $0d				sta 	temp0+1
-.104f	e6 0a		inc $0a			inc 	Pctr
-.1051	d0 02		bne $1055		bne 	nocarry
-.1053	e6 0b		inc $0b			inc 	1+(Pctr)
-.1055					nocarry:
-.1055	a5 0a		lda $0a				lda 	Pctr 						; save PCTR on 6502 stack
-.1057	48		pha				pha
-.1058	a5 0b		lda $0b				lda 	Pctr+1
-.105a	48		pha				pha
-.105b	a5 08		lda $08				lda 	Reg16 						; restore Reg16 into XA
-.105d	a6 09		ldx $09				ldx 	Reg16+1
-.105f	20 6f 10	jsr $106f			jsr 	CallTemp0 					; call the routine as 6502 code.
-.1062	86 09		stx $09				stx 	Reg16+1 					; save Reg16 back
-.1064	85 08		sta $08				sta 	Reg16
-.1066	68		pla				pla 								; restore the program counter
-.1067	85 0b		sta $0b				sta 	Pctr+1
-.1069	68		pla				pla
-.106a	85 0a		sta $0a				sta 	Pctr
-.106c	4c 3c 10	jmp $103c			jmp 	ExecLoop 					; and go round again.
-.106f					CallTemp0:
-.106f	6c 0c 00	jmp ($000c)			jmp 	(temp0)
-.1072					CommandHandler:
-.1072	6a		ror a				ror 	a 							; patch it back so it has the full opcode.
-.1073	a8		tay				tay  								; save it in Y for use by the commands.
-.1074	c9 f0		cmp #$f0			cmp 	#$F0 						; is it a unary operation.
-.1076	b0 05		bcs $107d			bcs 	_CHIsUnary
-.1078	29 0f		and #$0f			and 	#$0F 						; get the command number out.
-.107a	4c 81 10	jmp $1081			jmp 	_CHCall 					; go do the call
-.107d					_CHIsUnary:
-.107d	29 0f		and #$0f			and 	#$0F 						; this is the unary command number
-.107f	09 10		ora #$10			ora 	#$10 						; mapped onto $10-$1F
-.1081					_CHCall:
-.1081	0a		asl a				asl 	a 							; now offset in the jump table and into X
-.1082	aa		tax				tax
-.1083	bd 91 10	lda $1091,x			lda 	JumpTable,x 				; copy the jump table vectors into temp0
-.1086	85 0c		sta $0c				sta 	temp0
-.1088	bd 92 10	lda $1092,x			lda 	JumpTable+1,x
-.108b	85 0d		sta $0d				sta 	temp0+1
-.108d	6c 0c 00	jmp ($000c)			jmp 	(temp0)						; and go there to execute with the opcode in Y.
-.1090					OpcodeError:
->1090	db					.byte 	$DB
-.1091					JumpTable:
+>103c	db					.byte 	$DB
+.103d	a0 00		ldy #$00			ldy 	#0							; get the next instruction
+.103f	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1041	e6 0a		inc $0a			inc 	Pctr
+.1043	d0 02		bne $1047		bne 	nocarry
+.1045	e6 0b		inc $0b			inc 	1+(Pctr)
+.1047					nocarry:
+.1047	0a		asl a				asl 	a 							; shift bit 7 into carry.
+.1048	b0 29		bcs $1073			bcs 	CommandHandler 				; 80-FF it's a command
+.104a	85 0c		sta $0c				sta 	temp0 						; construct the call address in temp0
+.104c	b1 0a		lda ($0a),y			lda 	(PCtr),y 					; get the MSB
+.104e	85 0d		sta $0d				sta 	temp0+1
+.1050	e6 0a		inc $0a			inc 	Pctr
+.1052	d0 02		bne $1056		bne 	nocarry
+.1054	e6 0b		inc $0b			inc 	1+(Pctr)
+.1056					nocarry:
+.1056	a5 0a		lda $0a				lda 	Pctr 						; save PCTR on 6502 stack
+.1058	48		pha				pha
+.1059	a5 0b		lda $0b				lda 	Pctr+1
+.105b	48		pha				pha
+.105c	a5 08		lda $08				lda 	Reg16 						; restore Reg16 into XA
+.105e	a6 09		ldx $09				ldx 	Reg16+1
+.1060	20 70 10	jsr $1070			jsr 	CallTemp0 					; call the routine as 6502 code.
+.1063	86 09		stx $09				stx 	Reg16+1 					; save Reg16 back
+.1065	85 08		sta $08				sta 	Reg16
+.1067	68		pla				pla 								; restore the program counter
+.1068	85 0b		sta $0b				sta 	Pctr+1
+.106a	68		pla				pla
+.106b	85 0a		sta $0a				sta 	Pctr
+.106d	4c 3c 10	jmp $103c			jmp 	ExecLoop 					; and go round again.
+.1070					CallTemp0:
+.1070	6c 0c 00	jmp ($000c)			jmp 	(temp0)
+.1073					CommandHandler:
+.1073	6a		ror a				ror 	a 							; patch it back so it has the full opcode.
+.1074	a8		tay				tay  								; save it in Y for use by the commands.
+.1075	c9 f0		cmp #$f0			cmp 	#$F0 						; is it a unary operation.
+.1077	b0 05		bcs $107e			bcs 	_CHIsUnary
+.1079	29 0f		and #$0f			and 	#$0F 						; get the command number out.
+.107b	4c 82 10	jmp $1082			jmp 	_CHCall 					; go do the call
+.107e					_CHIsUnary:
+.107e	29 0f		and #$0f			and 	#$0F 						; this is the unary command number
+.1080	09 10		ora #$10			ora 	#$10 						; mapped onto $10-$1F
+.1082					_CHCall:
+.1082	0a		asl a				asl 	a 							; now offset in the jump table and into X
+.1083	aa		tax				tax
+.1084	bd 94 10	lda $1094,x			lda 	JumpTable,x 				; copy the jump table vectors into temp0
+.1087	85 0c		sta $0c				sta 	temp0
+.1089	bd 95 10	lda $1095,x			lda 	JumpTable+1,x
+.108c	85 0d		sta $0d				sta 	temp0+1
+.108e	6c 0c 00	jmp ($000c)			jmp 	(temp0)						; and go there to execute with the opcode in Y.
+.1091					OpcodeError:
+.1091	a2 ee		ldx #$ee			ldx 	#$EE 						; EE = Error :)
+>1093	db					.byte 	$DB
+.1094					JumpTable:
 
 ;******  Processing file: generated/jumptable.inc
 
->1091	d1 10					.word LoadHandler              ; $80 LDR
->1093	90 10					.word OpcodeError              ; $81 ?
->1095	90 10					.word OpcodeError              ; $82 ?
->1097	90 10					.word OpcodeError              ; $83 ?
->1099	90 10					.word OpcodeError              ; $84 ?
->109b	90 10					.word OpcodeError              ; $85 ?
->109d	90 10					.word OpcodeError              ; $86 ?
->109f	90 10					.word OpcodeError              ; $87 ?
->10a1	90 10					.word OpcodeError              ; $88 ?
->10a3	90 10					.word OpcodeError              ; $89 ?
->10a5	df 10					.word StoreHandler             ; $8a STR
->10a7	90 10					.word OpcodeError              ; $8b ?
->10a9	90 10					.word OpcodeError              ; $8c ?
->10ab	90 10					.word OpcodeError              ; $8d ?
->10ad	90 10					.word OpcodeError              ; $8e ?
->10af	90 10					.word OpcodeError              ; $8f ?
->10b1	90 10					.word OpcodeError              ; $f0 ?
->10b3	90 10					.word OpcodeError              ; $f1 ?
->10b5	90 10					.word OpcodeError              ; $f2 ?
->10b7	90 10					.word OpcodeError              ; $f3 ?
->10b9	90 10					.word OpcodeError              ; $f4 ?
->10bb	90 10					.word OpcodeError              ; $f5 ?
->10bd	90 10					.word OpcodeError              ; $f6 ?
->10bf	90 10					.word OpcodeError              ; $f7 ?
->10c1	90 10					.word OpcodeError              ; $f8 ?
->10c3	90 10					.word OpcodeError              ; $f9 ?
->10c5	90 10					.word OpcodeError              ; $fa ?
->10c7	90 10					.word OpcodeError              ; $fb ?
->10c9	90 10					.word OpcodeError              ; $fc ?
->10cb	90 10					.word OpcodeError              ; $fd ?
->10cd	90 10					.word OpcodeError              ; $fe ?
->10cf	90 10					.word OpcodeError              ; $ff ?
+>1094	d4 10					.word LoadHandler              ; $80 LDR
+>1096	91 10					.word OpcodeError              ; $81 ?
+>1098	91 10					.word OpcodeError              ; $82 ?
+>109a	91 10					.word OpcodeError              ; $83 ?
+>109c	91 10					.word OpcodeError              ; $84 ?
+>109e	91 10					.word OpcodeError              ; $85 ?
+>10a0	91 10					.word OpcodeError              ; $86 ?
+>10a2	91 10					.word OpcodeError              ; $87 ?
+>10a4	91 10					.word OpcodeError              ; $88 ?
+>10a6	91 10					.word OpcodeError              ; $89 ?
+>10a8	e2 10					.word StoreHandler             ; $8a STR
+>10aa	91 10					.word OpcodeError              ; $8b ?
+>10ac	91 10					.word OpcodeError              ; $8c ?
+>10ae	91 10					.word OpcodeError              ; $8d ?
+>10b0	91 10					.word OpcodeError              ; $8e ?
+>10b2	91 10					.word OpcodeError              ; $8f ?
+>10b4	91 10					.word OpcodeError              ; $f0 ?
+>10b6	91 10					.word OpcodeError              ; $f1 ?
+>10b8	91 10					.word OpcodeError              ; $f2 ?
+>10ba	91 10					.word OpcodeError              ; $f3 ?
+>10bc	91 10					.word OpcodeError              ; $f4 ?
+>10be	91 10					.word OpcodeError              ; $f5 ?
+>10c0	91 10					.word OpcodeError              ; $f6 ?
+>10c2	91 10					.word OpcodeError              ; $f7 ?
+>10c4	91 10					.word OpcodeError              ; $f8 ?
+>10c6	91 10					.word OpcodeError              ; $f9 ?
+>10c8	91 10					.word OpcodeError              ; $fa ?
+>10ca	91 10					.word OpcodeError              ; $fb ?
+>10cc	91 10					.word OpcodeError              ; $fc ?
+>10ce	91 10					.word OpcodeError              ; $fd ?
+>10d0	91 10					.word OpcodeError              ; $fe ?
+>10d2	91 10					.word OpcodeError              ; $ff ?
 
 ;******  Return to file: interpreter.asm
 
@@ -147,116 +144,132 @@
 
 ;******  Processing file: commands.asm
 
-.10d1					LoadHandler:
-.10d1	20 f0 10	jsr $10f0			jsr 	EvaluateValue 				; temp0 = target value.
-.10d4	a5 0c		lda $0c				lda 	temp0						; copy value into register
-.10d6	85 08		sta $08				sta 	Reg16
-.10d8	a5 0d		lda $0d				lda 	temp0+1
-.10da	85 09		sta $09				sta 	Reg16+1
-.10dc	4c 3c 10	jmp $103c			jmp 	ExecLoop
-.10df					StoreHandler:
-.10df	20 26 11	jsr $1126			jsr 	EvaluateAddress 			; temp0 = target address.
-.10e2	a0 00		ldy #$00			ldy 	#0							; write register out
-.10e4	a5 08		lda $08				lda 	Reg16
-.10e6	91 0c		sta ($0c),y			sta 	(temp0),y
-.10e8	a5 09		lda $09				lda 	Reg16+1
-.10ea	c8		iny				iny
-.10eb	91 0c		sta ($0c),y			sta 	(temp0),y
-.10ed	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.10d4					LoadHandler:
+.10d4	20 f3 10	jsr $10f3			jsr 	EvaluateValue 				; temp0 = target value.
+.10d7	a5 0c		lda $0c				lda 	temp0						; copy value into register
+.10d9	85 08		sta $08				sta 	Reg16
+.10db	a5 0d		lda $0d				lda 	temp0+1
+.10dd	85 09		sta $09				sta 	Reg16+1
+.10df	4c 3c 10	jmp $103c			jmp 	ExecLoop
+.10e2					StoreHandler:
+.10e2	20 28 11	jsr $1128			jsr 	EvaluateAddress 			; temp0 = target address.
+.10e5	a0 00		ldy #$00			ldy 	#0							; write register out
+.10e7	a5 08		lda $08				lda 	Reg16
+.10e9	91 0c		sta ($0c),y			sta 	(temp0),y
+.10eb	a5 09		lda $09				lda 	Reg16+1
+.10ed	c8		iny				iny
+.10ee	91 0c		sta ($0c),y			sta 	(temp0),y
+.10f0	4c 3c 10	jmp $103c			jmp 	ExecLoop
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: support.asm
 
-.10f0					EvaluateValue:
-.10f0	98		tya				tya 								; get EAC part and save in X
-.10f1	29 70		and #$70			and 	#$70
-.10f3	aa		tax				tax
-.10f4	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
-.10f6	b0 1d		bcs $1115			bcs 	_EDMemory
-.10f8	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.10fa	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.10fc	85 0c		sta $0c				sta 	temp0
-.10fe	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.1100	e6 0a		inc $0a			inc 	Pctr
-.1102	d0 02		bne $1106		bne 	nocarry
-.1104	e6 0b		inc $0b			inc 	1+(Pctr)
-.1106					nocarry:
-.1106	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
-.1108	f0 0a		beq $1114			beq 	_EACalcValue
-.110a	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.110c	85 0d		sta $0d				sta 	temp0+1
-.110e	e6 0a		inc $0a			inc 	Pctr
-.1110	d0 02		bne $1114		bne 	nocarry
-.1112	e6 0b		inc $0b			inc 	1+(Pctr)
-.1114					nocarry:
-.1114					_EACalcValue:
-.1114	60		rts				rts
-.1115					_EDMemory:
->1115	db					.byte 	$DB
-.1116	20 26 11	jsr $1126			jsr	 	EvaluateAddress 			; evaluate EAC.
-.1119	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
-.111b	b1 0c		lda ($0c),y			lda 	(temp0),y
-.111d	aa		tax				tax
-.111e	c8		iny				iny
-.111f	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1121	86 0c		stx $0c				stx 	temp0
-.1123	85 0d		sta $0d				sta 	temp0+1
-.1125	60		rts				rts
-.1126					EvaluateAddress:
-.1126	98		tya				tya 								; get EAC part of opcode.
-.1127	29 70		and #$70			and 	#$70
-.1129	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
-.112b	f0 29		beq $1156			beq 	_EAAbsolute
-.112d	aa		tax				tax 								; save in X
-.112e	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.1130	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1132	85 0c		sta $0c				sta 	temp0
-.1134	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.1136	e6 0a		inc $0a			inc 	Pctr
-.1138	d0 02		bne $113c		bne 	nocarry
-.113a	e6 0b		inc $0b			inc 	1+(Pctr)
-.113c					nocarry:
-.113c	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
-.113e	f0 0a		beq $114a			beq 	_EACalcVarAddress
-.1140	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.1142	85 0d		sta $0d				sta 	temp0+1
-.1144	e6 0a		inc $0a			inc 	Pctr
-.1146	d0 02		bne $114a		bne 	nocarry
-.1148	e6 0b		inc $0b			inc 	1+(Pctr)
-.114a					nocarry:
-.114a					_EACalcVarAddress:
-.114a	06 0c		asl $0c				asl 	temp0 						; double the variable number
-.114c	26 0d		rol $0d				rol 	temp0+1
-.114e	18		clc				clc 								; add the page address of variable data on.
-.114f	a5 0d		lda $0d				lda 	temp0+1
-.1151	69 0c		adc #$0c			adc 	#VariableMemory/256
-.1153	85 0d		sta $0d				sta 	temp0+1
-.1155	60		rts				rts
-.1156					_EAAbsolute:
-.1156	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
-.1158	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.115a	85 0c		sta $0c				sta 	temp0
-.115c	c8		iny				iny
-.115d	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.115f	85 0d		sta $0d				sta 	temp0+1
-.1161					ReturnBump2
-.1161	e6 0a		inc $0a			inc 	Pctr
-.1163	d0 02		bne $1167		bne 	nocarry
-.1165	e6 0b		inc $0b			inc 	1+(Pctr)
-.1167					nocarry:
-.1167					ReturnBump1:
-.1167	e6 0a		inc $0a			inc 	Pctr
-.1169	d0 02		bne $116d		bne 	nocarry
-.116b	e6 0b		inc $0b			inc 	1+(Pctr)
-.116d					nocarry:
-.116d	60		rts				rts
+.10f3					EvaluateValue:
+.10f3	98		tya				tya 								; get EAC part and save in X
+.10f4	29 70		and #$70			and 	#$70
+.10f6	aa		tax				tax
+.10f7	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
+.10f9	b0 1d		bcs $1118			bcs 	_EDMemory
+.10fb	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.10fd	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.10ff	85 0c		sta $0c				sta 	temp0
+.1101	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.1103	e6 0a		inc $0a			inc 	Pctr
+.1105	d0 02		bne $1109		bne 	nocarry
+.1107	e6 0b		inc $0b			inc 	1+(Pctr)
+.1109					nocarry:
+.1109	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
+.110b	f0 0a		beq $1117			beq 	_EACalcValue
+.110d	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
+.110f	85 0d		sta $0d				sta 	temp0+1
+.1111	e6 0a		inc $0a			inc 	Pctr
+.1113	d0 02		bne $1117		bne 	nocarry
+.1115	e6 0b		inc $0b			inc 	1+(Pctr)
+.1117					nocarry:
+.1117					_EACalcValue:
+.1117	60		rts				rts
+.1118					_EDMemory:
+.1118	20 28 11	jsr $1128			jsr	 	EvaluateAddress 			; evaluate the address.
+.111b	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
+.111d	b1 0c		lda ($0c),y			lda 	(temp0),y
+.111f	aa		tax				tax
+.1120	c8		iny				iny
+.1121	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1123	86 0c		stx $0c				stx 	temp0
+.1125	85 0d		sta $0d				sta 	temp0+1
+.1127	60		rts				rts
+.1128					EvaluateAddress:
+.1128	98		tya				tya 								; get EAC part of opcode.
+.1129	29 70		and #$70			and 	#$70
+.112b	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
+.112d	f0 29		beq $1158			beq 	_EAAbsolute
+.112f	aa		tax				tax 								; save in X
+.1130	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.1132	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1134	85 0c		sta $0c				sta 	temp0
+.1136	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.1138	e6 0a		inc $0a			inc 	Pctr
+.113a	d0 02		bne $113e		bne 	nocarry
+.113c	e6 0b		inc $0b			inc 	1+(Pctr)
+.113e					nocarry:
+.113e	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
+.1140	f0 0a		beq $114c			beq 	_EACalcVarAddress
+.1142	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
+.1144	85 0d		sta $0d				sta 	temp0+1
+.1146	e6 0a		inc $0a			inc 	Pctr
+.1148	d0 02		bne $114c		bne 	nocarry
+.114a	e6 0b		inc $0b			inc 	1+(Pctr)
+.114c					nocarry:
+.114c					_EACalcVarAddress:
+.114c	06 0c		asl $0c				asl 	temp0 						; double the variable number
+.114e	26 0d		rol $0d				rol 	temp0+1
+.1150	18		clc				clc 								; add the page address of variable data on.
+.1151	a5 0d		lda $0d				lda 	temp0+1
+.1153	69 0c		adc #$0c			adc 	#VariableMemory/256
+.1155	85 0d		sta $0d				sta 	temp0+1
+.1157	60		rts				rts
+.1158					_EAAbsolute:
+.1158	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
+.115a	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.115c	85 0c		sta $0c				sta 	temp0
+.115e	c8		iny				iny
+.115f	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1161	85 0d		sta $0d				sta 	temp0+1
+.1163					ReturnBump2
+.1163	e6 0a		inc $0a			inc 	Pctr
+.1165	d0 02		bne $1169		bne 	nocarry
+.1167	e6 0b		inc $0b			inc 	1+(Pctr)
+.1169					nocarry:
+.1169					ReturnBump1:
+.1169	e6 0a		inc $0a			inc 	Pctr
+.116b	d0 02		bne $116f		bne 	nocarry
+.116d	e6 0b		inc $0b			inc 	1+(Pctr)
+.116f					nocarry:
+.116f	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
-.116e					EndRunPCode:
-.116e					RuntimeEnd:
->116e	00 00						.word 	0 							; end marker for dictionary.
+.1170					TestRuntimeCode:
+.1170	a2 ab		ldx #$ab			ldx 	#$AB 						; something to work with
+.1172	a9 cd		lda #$cd			lda 	#$CD
+.1174	20 2c 10	jsr $102c			jsr 	RunPCode 					; go do the following code.
+
+;******  Processing file: generated/testasm.inc
+
+.1177					TEST_count:
+>1177	80 41					.byte $80,$41                                  ; ldr #65
+>1179	aa 00					.byte $aa,$00                                  ; str [0]
+>117b	90 ff 7f				.byte $90,$ff,$7f                              ; ldr #32767
+>117e	aa 02					.byte $aa,$02                                  ; str [2]
+>1180	ff					.byte $ff                                      ; halt
+
+;******  Return to file: runtime.asm
+
+>1181	db					.byte 	$DB
+.1182					EndRunPCode:
+.1182					RuntimeEnd:
+>1182	00 00						.word 	0 							; end marker for dictionary.
 
 ;******  End of listing

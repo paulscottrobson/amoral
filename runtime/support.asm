@@ -40,8 +40,7 @@ _EACalcValue:
 		;	Either a variable offset (short/long) or an absolute address
 		;
 _EDMemory:
-		debug
-		jsr	 	EvaluateAddress 			; evaluate EAC.
+		jsr	 	EvaluateAddress 			; evaluate the address.
 		;
 		ldy 	#0 							; 16 bit load indirect (temp0) => temp0
 		lda 	(temp0),y 			

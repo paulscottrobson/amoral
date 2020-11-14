@@ -1,8 +1,6 @@
 TODO List:
 
 Runtime:
-	Extend scanner to output the opcodes for Command/Unary into a class like Asm6502.py and one for asm.
-	Write baby assembler for it
 	Write AND ORR XOR
 	Write ADD SUB
 	Write Multiply then MLT
@@ -16,9 +14,9 @@ Runtime:
 	Write Debug.String() support routine
 
 Compiler:
+	Extend scanner to output the opcodes for Command/Unary into a class like Asm6502.py
 	Start on compiler :)
 	Implement Abs, Sgn, Len, Random
-
 
 PostCompiler:
 	Write handler for structure generation.
