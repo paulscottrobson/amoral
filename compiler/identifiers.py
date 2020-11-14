@@ -139,6 +139,6 @@ if __name__ == "__main__":
 	print(im.find("COUNT").toString())
 	print(im.find("test.PROC").toString())	
 	print("==============================")
-	
+		
 	im2 = FakeIdentifierManager()
 	print(im2.toString())
