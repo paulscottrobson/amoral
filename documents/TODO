@@ -2,6 +2,8 @@ TODO List:
 
 Compiler:
 	Start on compiler design :)
+		Write identifier handler/manager
+		Write runtime handler/manager and support routines.
 	Implement Abs, Sgn, Len, Random
 
 PostCompiler:

@@ -6,6 +6,12 @@ class RTOpcodes(object):
 
 RTOpcodes.JSR = 0x00
 
+RTOpcodes.IMMSHORT = 0x00
+RTOpcodes.IMMLONG = 0x10
+RTOpcodes.VARSHORT = 0x20
+RTOpcodes.VARLONG = 0x30
+RTOpcodes.ABS = 0x40
+
 RTOpcodes.LDR = 0x80
 RTOpcodes.AND = 0x81
 RTOpcodes.ORR = 0x82

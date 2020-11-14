@@ -44,6 +44,11 @@ h = open(".."+os.sep+"compiler"+os.sep+"runtime.py","w")
 h.write("#\n#\tAutomatically generated\n#\n")
 h.write("class RTOpcodes(object):\n\tpass\n\n")
 h.write("RTOpcodes.JSR = 0x00\n\n")
+h.write("RTOpcodes.IMMSHORT = 0x00\n")
+h.write("RTOpcodes.IMMLONG = 0x10\n")
+h.write("RTOpcodes.VARSHORT = 0x20\n")
+h.write("RTOpcodes.VARLONG = 0x30\n")
+h.write("RTOpcodes.ABS = 0x40\n\n")
 keys = [x for x in entries.keys()]
 keys.sort()
 for e in keys:
