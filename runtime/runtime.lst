@@ -1,13 +1,9 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass -D Test=2 --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Sat Nov 14 14:27:23 2020
+; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Sat Nov 14 16:52:32 2020
 
 ;Offset	;Hex		;Monitor	;Source
-
-;******  Command line definitions
-
-=2					Test=2
 
 ;******  Processing input file: runtime.asm
 
@@ -25,8 +21,7 @@
 =10					Pctr = ZeroAddr+2 							; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroAddr+4 							; temporary registers
 =14					temp1 = ZeroAddr+6
-.1000	4c ae 13	jmp $13ae			jmp 	TestExternal
-.1003	4c 00 10	jmp $1000			jmp 	BootAddr 					; test=0 what we normally get, no start address.
+.1000	4c 00 10	jmp $1000			jmp 	BootAddr 					; test=0 what we normally get, no start address.
 >101a	00 10						.word 	BootAddr 					; the address of boot
 >101c	b9 12						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
@@ -525,7 +520,7 @@
 .1356	a6 09		ldx $09				ldx 	Reg16+1
 .1358	60		rts				rts
 .1359					EndModulusImmediate:
->1359	6d 00					.word 	EndMulDivContent-* 							; offset to next entry
+>1359	55 00					.word 	EndMulDivContent-* 							; offset to next entry
 >135b	6d 6f 64 75 6c 75 73 2e			.text 	"modulus.absolute",0 							; the text (must be lower case)
 >1363	61 62 73 6f 6c 75 74 65 00
 >136c						.align 	2								; force to even boundary.
@@ -566,70 +561,62 @@
 .13a9	85 0d		sta $0d				sta 	temp0+1 					; copy out.
 .13ab	86 0c		stx $0c				stx 	temp0
 .13ad	60		rts				rts
-.13ae					TestExternal:
-.13ae	a2 13		ldx #$13			ldx 	#txt >> 8
-.13b0	a9 b8		lda #$b8			lda 	#txt & $FF
-.13b2	20 18 14	jsr $1418			jsr 	PrintString
-.13b5	a0 dd		ldy #$dd			ldy 	#$DD
->13b7	db					.byte 	$DB
->13b8	48 45 4c 4c 4f 2c 20 57		txt:	.text 	"HELLO, WORLD!",0
->13c0	4f 52 4c 44 21 00
-.13c6					EndMulDivContent:
+.13ae					EndMulDivContent:
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: utility.asm
 
->13c6	16 00					.word 	EndPrintCharacter-* 							; offset to next entry
->13c8	70 72 69 6e 74 2e 63 68			.text 	"print.character",0 							; the text (must be lower case)
->13d0	61 72 61 63 74 65 72 00
->13d8						.align 	2								; force to even boundary.
-.13d8					PrintCharacter:
-.13d8	20 d2 ff	jsr $ffd2			jsr 	$FFD2
-.13db	60		rts				rts
-.13dc					EndPrintCharacter:
->13dc	2d 00					.word 	EndPrintHex-* 							; offset to next entry
->13de	70 72 69 6e 74 2e 68 65			.text 	"print.hex",0 							; the text (must be lower case)
->13e6	78 00
->13e8						.align 	2								; force to even boundary.
-.13e8					PrintHex:
-.13e8	48		pha				pha
-.13e9	a9 20		lda #$20			lda 	#32
-.13eb	20 d8 13	jsr $13d8			jsr 	PrintCharacter
-.13ee	8a		txa				txa
-.13ef	20 f3 13	jsr $13f3			jsr 	_PHex
-.13f2	68		pla				pla
-.13f3	48		pha		_PHex:	pha
-.13f4	4a		lsr a				lsr 	a
-.13f5	4a		lsr a				lsr 	a
-.13f6	4a		lsr a				lsr 	a
-.13f7	4a		lsr a				lsr 	a
-.13f8	20 fc 13	jsr $13fc			jsr 	_PNibl
-.13fb	68		pla				pla
-.13fc	29 0f		and #$0f	_PNibl:	and 	#15
-.13fe	c9 0a		cmp #$0a			cmp 	#10
-.1400	90 02		bcc $1404			bcc 	_PNoSkip
-.1402	69 06		adc #$06			adc 	#6
-.1404					_PNoSkip:
-.1404	69 30		adc #$30			adc 	#48
-.1406	4c d8 13	jmp $13d8			jmp 	PrintCharacter
-.1409					EndPrintHex:
->1409	20 00					.word 	EndPrintString-* 							; offset to next entry
->140b	70 72 69 6e 74 2e 73 74			.text 	"print.string",0 							; the text (must be lower case)
->1413	72 69 6e 67 00
->1418						.align 	2								; force to even boundary.
-.1418					PrintString:
-.1418	85 0c		sta $0c				sta 	temp0
-.141a	86 0d		stx $0d				stx 	temp0+1
-.141c	a0 00		ldy #$00			ldy 	#0
-.141e	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
-.1420	f0 06		beq $1428			beq 	_PSExit
-.1422	20 d8 13	jsr $13d8			jsr 	PrintCharacter
-.1425	c8		iny				iny
-.1426	d0 f6		bne $141e			bne 	_PSLoop
-.1428	60		rts		_PSExit:rts
-.1429					EndPrintString
+>13ae	16 00					.word 	EndPrintCharacter-* 							; offset to next entry
+>13b0	70 72 69 6e 74 2e 63 68			.text 	"print.character",0 							; the text (must be lower case)
+>13b8	61 72 61 63 74 65 72 00
+>13c0						.align 	2								; force to even boundary.
+.13c0					PrintCharacter:
+.13c0	20 d2 ff	jsr $ffd2			jsr 	$FFD2
+.13c3	60		rts				rts
+.13c4					EndPrintCharacter:
+>13c4	2d 00					.word 	EndPrintHex-* 							; offset to next entry
+>13c6	70 72 69 6e 74 2e 68 65			.text 	"print.hex",0 							; the text (must be lower case)
+>13ce	78 00
+>13d0						.align 	2								; force to even boundary.
+.13d0					PrintHex:
+.13d0	48		pha				pha
+.13d1	a9 20		lda #$20			lda 	#32
+.13d3	20 c0 13	jsr $13c0			jsr 	PrintCharacter
+.13d6	8a		txa				txa
+.13d7	20 db 13	jsr $13db			jsr 	_PHex
+.13da	68		pla				pla
+.13db	48		pha		_PHex:	pha
+.13dc	4a		lsr a				lsr 	a
+.13dd	4a		lsr a				lsr 	a
+.13de	4a		lsr a				lsr 	a
+.13df	4a		lsr a				lsr 	a
+.13e0	20 e4 13	jsr $13e4			jsr 	_PNibl
+.13e3	68		pla				pla
+.13e4	29 0f		and #$0f	_PNibl:	and 	#15
+.13e6	c9 0a		cmp #$0a			cmp 	#10
+.13e8	90 02		bcc $13ec			bcc 	_PNoSkip
+.13ea	69 06		adc #$06			adc 	#6
+.13ec					_PNoSkip:
+.13ec	69 30		adc #$30			adc 	#48
+.13ee	4c c0 13	jmp $13c0			jmp 	PrintCharacter
+.13f1					EndPrintHex:
+>13f1	20 00					.word 	EndPrintString-* 							; offset to next entry
+>13f3	70 72 69 6e 74 2e 73 74			.text 	"print.string",0 							; the text (must be lower case)
+>13fb	72 69 6e 67 00
+>1400						.align 	2								; force to even boundary.
+.1400					PrintString:
+.1400	85 0c		sta $0c				sta 	temp0
+.1402	86 0d		stx $0d				stx 	temp0+1
+.1404	a0 00		ldy #$00			ldy 	#0
+.1406	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
+.1408	f0 06		beq $1410			beq 	_PSExit
+.140a	20 c0 13	jsr $13c0			jsr 	PrintCharacter
+.140d	c8		iny				iny
+.140e	d0 f6		bne $1406			bne 	_PSLoop
+.1410	60		rts		_PSExit:rts
+.1411					EndPrintString
 
 ;******  Return to file: runtime.asm
 

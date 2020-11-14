@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+python ../scripts/scanner.py
+python ../scripts/gen6502.py
+pushd ../runtime >/dev/null
+./build -q
+cp runtime.prg ../compiler
+popd >/dev/null
