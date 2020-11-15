@@ -142,10 +142,10 @@ class FakeIdentifierManager(IdentifierManager):
 		self.addGlobal(Variable("g2",102))
 		self.addLocal(Variable("l0",256))
 		self.addLocal(Variable("l1",257))
-		self.addGlobal(Procedure("proc.none",0x3579))
+		self.addGlobal(Procedure("proc.none",0x3578))
 		self.addGlobal(Procedure("proc.one",0x468A).addParameter(Variable("z1",32)))
-		self.addGlobal(Procedure("proc.two",0x759B).addParameter(Variable("y1",40)).addParameter(Variable("y2",41)))
-		self.addGlobal(Procedure("proc.three",0xFEDB).addParameter(Variable("x1",40)).addParameter(Variable("x2",41)).addParameter(Variable("x3",42)))
+		self.addGlobal(Procedure("proc.two",0x759C).addParameter(Variable("y1",40)).addParameter(Variable("y2",41)))
+		self.addGlobal(Procedure("proc.three",0xFEDE).addParameter(Variable("x1",40)).addParameter(Variable("x2",41)).addParameter(Variable("x3",42)))
 
 if __name__ == "__main__":
 	im = IdentifierManager()

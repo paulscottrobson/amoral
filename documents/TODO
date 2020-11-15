@@ -1,14 +1,11 @@
 TODO List
 =========
 
-Fix import to load parameters in.
-
 Compiler:
 	Work on:
-		- procedure calls
-		- structures (if, while, times)
+		- structures (times,if, while)
 
-	Procedure definitions and variables (re-use vardef code for both)
+	Outer level ; function/Procedure definitions and variables (re-use vardef code for both)
 
 	Inline code blocks []
 

@@ -33,7 +33,7 @@ RunPCode:
 ; *******************************************************************************************
 
 ExecLoop:
-		debug
+		;debug
 		ldy 	#0							; get the next instruction
 		lda 	(Pctr),y
 		inc16 	Pctr 						; advance the program pointer

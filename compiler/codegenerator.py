@@ -60,7 +60,8 @@ class RuntimeCodeGenerator(object):
 	#
 	def call(self,target):
 		assert target % 2 == 0
-		self.cb.append16(RTOpcodes.JSR + (target >> 1))
+		self.cb.append(RTOpcodes.JSR + ((target >> 1) & 0x7F))
+		self.cb.append(target >> 8)
 	#
 	#		Compile a branch to an absolute address. Returns a 'patch' address that
 	#		can be updated.
