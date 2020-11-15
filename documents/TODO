@@ -3,8 +3,9 @@ TODO List
 
 Compiler:
 	Work on:
-		- structures (times,if, while)
-
+		- structures (if, while)
+		- do some basic benchmarks just to see.
+		
 	Outer level ; function/Procedure definitions and variables (re-use vardef code for both)
 
 	Inline code blocks []
@@ -22,3 +23,4 @@ Notes:
 	Consider a PCode for Inline Strings			?
 	Compiler optimise for +/-1 *2/2 			?
 	Consider Length, Abs, Random, Sgn unary functions. ?
+	Comparison to constants ?

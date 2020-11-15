@@ -24,6 +24,7 @@ BootAddr = $1000 							; Runtime loads at this address (e.g. Boot)
 VarAddr = $800 								; Variable memory here (128 per 1/4k) PAGE BOUNDARY.
 
 VarPages = 8 								; Number of pages of variables (256 byte pages)
+											; (variable 0 reserved for parameter)
 
 ZeroAddr = $08 								; Zero page goes here.
 

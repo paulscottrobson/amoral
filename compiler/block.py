@@ -1,9 +1,9 @@
 # *******************************************************************************************
 # *******************************************************************************************
 #
-#       File:           compiler.py
+#       File:           block.py
 #       Date:           15th November 2020
-#       Purpose:        Main Compiler
+#       Purpose:        Compiles a block in curly brackets. 
 #       Author:         Paul Robson (paul@robson.org.uk)
 #
 # *******************************************************************************************
@@ -17,14 +17,18 @@ from parser import *
 
 # *******************************************************************************************
 #
-#											Compiler Class
+#									Block Compiler Class
 #	
 # *******************************************************************************************
 
-class Compiler(object):
-	def __init__(self,identMgr,codeGen,codeBlock):
+class BlockCompiler(object):
+	def __init__(self,identMgr,codeBlock,slowGenerator,fastGenerator):
 		self.im = identMgr
-		self.cg = codeGen
+		self.slowGenerator = slowGenerator
+		self.fastGenerator = fastGenerator
+		self.slowBytes = 0
+		self.fastBytes = 0
+		self.setPCode(True)
 		self.cb = codeBlock
 		#
 		#		Unary functions
@@ -60,6 +64,10 @@ class Compiler(object):
 			elif fs == "var":														# variable declaration
 				self.parser.get()													# throw it.
 				self.declareVariables(True)											# declare the variables.
+			#
+			elif fs == "times":														# times()
+				self.parser.get()													# throw it.
+				self.timesStructure()				
 			#
 			elif fs[0] >= 'a' and fs[0] <= 'z':										# Identifier must be a call.
 				self.parser.get()													# throw it.
@@ -185,8 +193,38 @@ class Compiler(object):
 				self.cg.cmdVar(RTOpcodes.STR,params[i].getValue())					# store parameter.
 		if self.parser.get() != ")":												# check )
 			raise AmoralException("Parameter error on procedure call")		
-		print(proc.toString())
 		self.cg.call(proc.getValue())												# compile call code.
+	#
+	#		Handle times
+	#
+	def timesStructure(self):
+		if self.parser.get() != "(":												# check (
+			raise AmoralException("Missing (")		
+		nx = self.innerCompile()													# get total count.
+		if nx == ",":																# if times(x,y)
+			self.parser.get()														# throw comma
+			ident = self.im.find(self.parser.get())									# grab index variable
+			if ident is None or not isinstance(ident,Variable):
+				raise AmoralException("Missing times index variable")
+			varID = ident.getValue()												# this is the var ID.
+		else:
+			varID = self.cb.allocateVariable()										# allocate unnamed variable
+		if self.parser.get() != ")":												# check )
+			raise AmoralException("Missing )")		
+		self.cg.cmdVar(RTOpcodes.STR,varID)											# write it.
+		timesLoop = self.cb.getAddr()												# loop address			
+		#
+		#	Loop
+		#
+		self.cg.decVar(varID)														# decrement the variable.
+		self.blockCompile()															# loop body.
+		self.cg.loadBranchNonZero(varID,timesLoop)									# loop back if <> 0
+	#
+	#		Set or clear generate PCode flag.
+	#							
+	def setPCode(self,usePCode):
+		self.usePCode = usePCode
+		self.cg = self.slowGenerator if usePCode else self.fastGenerator
 
 
 
@@ -197,15 +235,18 @@ if __name__ == "__main__":
 	cb.show = True
 	rt = RuntimeCodeGenerator(cb)
 	#
-	cm = Compiler(im,rt,cb)
+	cm = BlockCompiler(im,cb,rt,None)
 	cb.open("main")
 	xa = im.find("run.pcode")
 	cb.append(0x20)
 	cb.append16(xa.getValue())
 	src = '42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!"'
-	src = """{ var a,b,c; print.character(42);print.character(43);
+	src = """{ var a,b,c; 43!a;print.character(42);print.character(a+1);
 			print.hex(32766);print.string("HELLO WORLD!")
 			halt.program(); }"""
+
+	src = "{ var a; times(2) { times(5,a) { print.hex(a); }} halt.program(); }"
+	src = '{ var a;print.string("START"); times(100) { times(1000) { a++!a }}	 print.string("END"); halt.program(); }'
 	src = src.split("\n")
 	cm.parser = Parser(TextStream(src))
 	f = cm.blockCompile()
