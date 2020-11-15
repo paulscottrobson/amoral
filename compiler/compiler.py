@@ -107,7 +107,9 @@ if __name__ == "__main__":
 	xa = im.find("run.pcode")
 	cb.append(0x20)
 	cb.append16(xa.getValue())
-	src = '42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!"'.split("\n")
+	src = '42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!"'
+	src = '$17AF !g1 0 g1'
+	src = src.split("\n")
 	cm.parser = Parser(TextStream(src))
 	f = cm.innerCompile()
 	print("Failed on '"+f+"'")
