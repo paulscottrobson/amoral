@@ -23,6 +23,8 @@ BootAddr = $1000 							; Runtime loads at this address (e.g. Boot)
 
 VarAddr = $800 								; Variable memory here (128 per 1/4k) PAGE BOUNDARY.
 
+VarPages = 8 								; Number of pages of variables (256 byte pages)
+
 ZeroAddr = $08 								; Zero page goes here.
 
 test = 0									; test to run (default is build final)
@@ -40,6 +42,8 @@ Pctr = ZeroAddr+2 							; the program counter (e.g. the next instruction)
 temp0 = ZeroAddr+4 							; temporary registers
 temp1 = ZeroAddr+6
 
+ZeroAddrEnd = ZeroAddr+8 					; marks end of allocated space.
+
 ; *******************************************************************************************
 ;
 ;										Boot Area
@@ -56,7 +60,9 @@ temp1 = ZeroAddr+6
 		
 		jmp 	BootAddr 					; test=0 what we normally get, no start address.
 
-		* = 	BootAddr+24					; the setup area
+		* = 	BootAddr+22					; the setup area
+		.byte 	ZeroAddr 					; Low byte of ZeroPage used.
+		.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 		.word 	BootAddr 					; the address of boot
 		.word 	VarAddr 					; the address of the variables
 		.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)

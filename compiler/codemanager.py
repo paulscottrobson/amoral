@@ -127,12 +127,16 @@ class CodeBlock(object):
 	#
 	#		Create final application.
 	#
-	def createApplication(self,fileName = "application.prg"):
+	def createApplication(self,im,fileName = "application.prg"):
 		assert self.executeAddress is not None 										# no procedure !
+		initAddr = im.find("clear.variables").getValue()
 		self.binary[0] = 0xEA 														# Bootup code NOP
-		self.binary[1] = 0x4C 														# JMP <start>
-		self.binary[2] = self.executeAddress & 0xFF
-		self.binary[3] = self.executeAddress >> 8
+		self.binary[1] = 0x20 														# Initialisation code
+		self.binary[2] = initAddr & 0xFF
+		self.binary[3] = initAddr >> 8
+		self.binary[4] = 0x4C 														# JMP <start>
+		self.binary[5] = self.executeAddress & 0xFF
+		self.binary[6] = self.executeAddress >> 8
 		#
 		h = open(fileName,"wb")
 		h.write(bytes([self.loadAddress & 0xFF]))									# 2 byte load addr

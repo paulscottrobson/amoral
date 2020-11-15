@@ -1,8 +1,5 @@
 TODO List:
 
-Runtime:
-	Variable initialisation to zero.
-
 Compiler:
 	Check load & store variables work.
 	

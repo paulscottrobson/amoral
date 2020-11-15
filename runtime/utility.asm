@@ -11,6 +11,33 @@
 
 ; *******************************************************************************************
 ;
+;									Clear variable space
+;
+; *******************************************************************************************
+
+		define 	"clear.variables",EndVariableClear
+VariableClear:
+		debug
+		lda 	#VarAddr & $FF
+		sta 	temp0
+		lda 	#VarAddr >> 8
+		sta		temp0+1
+		ldx 	#VarPages
+		ldy 	#0
+		lda 	#$AA
+_VCLoop:sta 	(temp0),y
+		iny
+		bne 	_VCLoop
+		inc 	temp0+1
+		dex
+		bne 	_VCLoop
+		debug	
+		rts
+
+EndVariableClear:
+
+; *******************************************************************************************
+;
 ;									Print Character
 ;
 ; *******************************************************************************************

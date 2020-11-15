@@ -112,5 +112,5 @@ if __name__ == "__main__":
 	f = cm.innerCompile()
 	print("Failed on '"+f+"'")
 	cb.close()
-	cb.createApplication()
+	cb.createApplication(im)
 	
