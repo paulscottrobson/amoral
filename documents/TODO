@@ -1,21 +1,20 @@
 TODO List:
 
-Double quotes in Runtime/Handler.
-	- add p-code 'set address of string'
-	- add helper function which does jsr getstring .text "xxxxx",0
+Runtime:
+	Variable initialisation to zero.
 
 Compiler:
-
-	Add string to codegenerator.
-	Add string to inner compiler.
-
-	Extend CodeManager to output a CBM binary. Get basic compile code running.
+	Check load & store variables work.
+	
+	Work on:
 		- { } groupings
 		- procedure calls
 		- structures
 		- variable definitions
 
 	Procedure definitions and variables
+
+	Inline code blocks []
 
 PostCompiler:
 	Write handler for structure generation.
@@ -26,3 +25,6 @@ Compiler#2:
 	Write 6502 code generation. (in project file)	
 	Do some tests regarding speed up of various optimisations.
 	
+Notes:	
+	Consider a PCode for Inline Strings			?
+	Compiler optimise for +/-1 *2/2 			?

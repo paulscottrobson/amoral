@@ -76,6 +76,18 @@ class RuntimeCodeGenerator(object):
 		self.cb.write(patchAddr,patchTarget & 0xFF)
 		self.cb.write(patchAddr+1,patchTarget >> 8)
 
+	#
+	#		String constant.
+	#
+	def string(self,s):
+		strAddr = self.cb.getAddr()+6												# string 6 on.
+		self.cb.append(RTOpcodes.LDR+RTOpcodes.IMMLONG)								# LDR #<String>
+		self.cb.append16(strAddr)
+		eosAddr = self.cb.getAddr()+3+len(s)+1										# string 3+1+len
+		self.cb.append(RTOpcodes.BRA+RTOpcodes.ABS)									# BRA #<End>
+		self.cb.append16(eosAddr)
+		for c in s+chr(0):															# output ASCIIZ
+			self.cb.append(ord(c))
 
 if __name__ == "__main__":
 	cb = CodeBlock()

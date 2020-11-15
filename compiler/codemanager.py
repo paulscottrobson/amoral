@@ -124,6 +124,20 @@ class CodeBlock(object):
 				link = link + offset
 			else:
 				link = 0
+	#
+	#		Create final application.
+	#
+	def createApplication(self,fileName = "application.prg"):
+		assert self.executeAddress is not None 										# no procedure !
+		self.binary[0] = 0xEA 														# Bootup code NOP
+		self.binary[1] = 0x4C 														# JMP <start>
+		self.binary[2] = self.executeAddress & 0xFF
+		self.binary[3] = self.executeAddress >> 8
+		#
+		h = open(fileName,"wb")
+		h.write(bytes([self.loadAddress & 0xFF]))									# 2 byte load addr
+		h.write(bytes([self.loadAddress >> 8]))
+		h.write(bytes(self.binary))
 
 if __name__ == "__main__":
 	cb = CodeBlock()		

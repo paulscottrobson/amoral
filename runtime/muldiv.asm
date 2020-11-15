@@ -21,13 +21,51 @@
 ;
 ; *******************************************************************************************
 ;
-;	Currently provided for Multiply, Divide and Modulus. 
+;	Currently provided for Multiply, Divide and Modulus, and String Constant.
 ;
 ; *******************************************************************************************
 
+
 ; *******************************************************************************************
 ;
-;										The defined words
+;										String Accessor
+;
+; *******************************************************************************************
+
+		define 	"string.constant",EndStringConstant
+StringConstant:
+		pla 										; pull address and save in temp0
+		sta 	temp0
+		pla 
+		sta 	temp0+1
+		inc16 	temp0 								; temp0 now points to the string.
+		ldy 	#0 									; figure out the end of the string.
+_SCEnd:	lda 	(temp0),y
+		iny
+		cmp 	#0
+		bne 	_SCEnd
+		;
+		clc 										; add Y to temp0, to continue, while putting
+		sty 	temp1 								; original value into XY
+
+		clc
+		lda 	temp0 								
+		tay
+		adc 	temp1
+		sta 	temp0
+		lda 	temp0+1
+		tax
+		adc 	#0
+		sta 	temp0+1
+		;
+		tya 										; value now in XA
+		jmp 	(temp0)								; and continue.
+
+EndStringConstant:
+
+; *******************************************************************************************
+;
+;									  Arithmetic support
 ;
 ; *******************************************************************************************
 
@@ -142,12 +180,10 @@ LoadIndirectTemp0:
 
 		.if test==2
 TestExternal:
-		ldx 	#txt >> 8
-		lda 	#txt & $FF
-		jsr 	PrintString
+		jsr 	StringConstant
+		.text 	"HELLO,WORLD!",0
 		ldy 	#$DD
 		debug
-txt:	.text 	"HELLO, WORLD!",0
 		.endif
 
 EndMulDivContent:

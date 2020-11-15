@@ -49,6 +49,9 @@ class Compiler(object):
 			elif s == ";":															# ignore ;
 				pass
 			#
+			elif s.startswith('"'):													# quoted string
+				self.cg.string(s[1:])
+			#
 			elif s == "0":															# zero const use clear.
 				self.cg.unary(RTOpcodes.CLR)
 			#
@@ -100,7 +103,14 @@ if __name__ == "__main__":
 	rt = RuntimeCodeGenerator(cb)
 	#
 	cm = Compiler(im,rt)
-	src = "42 612 g0 l1 ++ >> 0 +9 *l1".split("\n")
+	cb.open("main")
+	xa = im.find("run.pcode")
+	cb.append(0x20)
+	cb.append16(xa.getValue())
+	src = '42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!"'.split("\n")
 	cm.parser = Parser(TextStream(src))
 	f = cm.innerCompile()
 	print("Failed on '"+f+"'")
+	cb.close()
+	cb.createApplication()
+	
