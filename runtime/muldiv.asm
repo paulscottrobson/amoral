@@ -32,7 +32,7 @@
 ;
 ; *******************************************************************************************
 
-		define 	"string.constant",EndStringConstant
+		define 	"string.constant:0",EndStringConstant
 StringConstant:
 		pla 										; pull address and save in temp0
 		sta 	temp0
@@ -69,7 +69,7 @@ EndStringConstant:
 ;
 ; *******************************************************************************************
 
-		define 	"multiply.immediate",EndMultiplyImmediate
+		define 	"multiply.immediate:0",EndMultiplyImmediate
 MultiplyImmediate:	
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Multiply
@@ -78,7 +78,7 @@ MultiplyImmediate:
 		rts
 EndMultiplyImmediate:
 
-		define 	"multiply.absolute",EndMultiplyAbsolute
+		define 	"multiply.absolute:0",EndMultiplyAbsolute
 MultiplyAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0
@@ -89,7 +89,7 @@ MultiplyAbsolute:
 EndMultiplyAbsolute:
 
 
-		define 	"divide.immediate",EndDivideImmediate
+		define 	"divide.immediate:0",EndDivideImmediate
 DivideImmediate:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Divide
@@ -98,7 +98,7 @@ DivideImmediate:
 		rts
 EndDivideImmediate:
 
-		define 	"divide.absolute",EndDivideAbsolute
+		define 	"divide.absolute:0",EndDivideAbsolute
 DivideAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0
@@ -108,7 +108,7 @@ DivideAbsolute:
 		rts
 EndDivideAbsolute:
 
-		define 	"modulus.immediate",EndModulusImmediate
+		define 	"modulus.immediate:0",EndModulusImmediate
 ModulusImmediate:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Divide
@@ -117,7 +117,7 @@ ModulusImmediate:
 		rts
 EndModulusImmediate:
 
-		define 	"modulus.absolute",EndMulDivContent
+		define 	"modulus.absolute:0",EndMulDivContent
 ModulusAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0

@@ -74,7 +74,7 @@ ZeroAddrEnd = ZeroAddr+8 					; marks end of allocated space.
 ;
 ; *******************************************************************************************
 
-		define	"run.pcode",EndRunPCode
+		define	"run.pcode:0",EndRunPCode
 
 		.include "interpreter.asm" 			; main interpreter
 

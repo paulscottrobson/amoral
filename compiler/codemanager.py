@@ -38,9 +38,13 @@ class CodeBlock(object):
 		assert self.nextFree-self.loadAddress == len(self.binary) 					# check it all matches up.
 		self.firstWriteable = self.nextFree 										# can't write below this.
 		#
-		self.show = True 															# debug output
+		self.show = False 															# debug output
 		self.currentHeader = None 													# not in a definition.
 		self.executeAddress = None													# what we run.
+		self.nextVariable = 4														# next allocatable variable
+		#
+		#	Variable zero is the first param of two for system calls with 2 parameters.
+		#
 	#
 	#		Read a byte, the address is the mapped address on the Code Block
 	#
@@ -119,7 +123,7 @@ class CodeBlock(object):
 				p = p if (p % 2) == 0 else p+1 										# must be even address.
 				#
 				if not name.startswith("."):										# if not hidden.
-					im.addGlobal(Procedure(name,p))									# add to identmgr
+					im.addGlobal(SystemProcedure(name,p))							# add to identmgr
 				#
 				link = link + offset
 			else:
@@ -142,6 +146,12 @@ class CodeBlock(object):
 		h.write(bytes([self.loadAddress & 0xFF]))									# 2 byte load addr
 		h.write(bytes([self.loadAddress >> 8]))
 		h.write(bytes(self.binary))
+	#
+	#		Allocate variable id.
+	#
+	def allocateVariable(self):
+		self.nextVariable += 1
+		return self.nextVariable-1
 
 if __name__ == "__main__":
 	cb = CodeBlock()		

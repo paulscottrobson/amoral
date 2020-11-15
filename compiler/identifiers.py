@@ -59,6 +59,24 @@ class Procedure(Identifier):
 	def getParamCount(self):
 		return len(self.parameters)
 
+class SystemProcedure(Procedure):
+	def __init__(self,name,value):
+		if name.find(":") >= 0:														# specifies param count
+			parts = name.split(":")													# split up
+			name = parts[0]
+			Procedure.__init__(self,name,value)
+			count = int(parts[1])													# #of params.
+			if count == 2:
+				self.addParameter(Identifier("p1",0))
+			if count >= 1:															# don't need a target for
+				self.addParameter(Identifier("p"+str(count),-1))					# last parameter.
+
+		else:
+			Procedure.__init__(self,name,value)
+
+	def getType(self):
+		return "S"
+
 # *******************************************************************************************
 #
 #								Identifier manager class
@@ -119,14 +137,15 @@ class IdentifierManager(object):
 class FakeIdentifierManager(IdentifierManager):
 	def __init__(self):
 		IdentifierManager.__init__(self)
-		self.addGlobal(Variable("g0",0))
-		self.addGlobal(Variable("g1",1))
-		self.addGlobal(Variable("g2",2))
+		self.addGlobal(Variable("g0",100))
+		self.addGlobal(Variable("g1",101))
+		self.addGlobal(Variable("g2",102))
 		self.addLocal(Variable("l0",256))
 		self.addLocal(Variable("l1",257))
 		self.addGlobal(Procedure("proc.none",0x3579))
 		self.addGlobal(Procedure("proc.one",0x468A).addParameter(Variable("z1",32)))
 		self.addGlobal(Procedure("proc.two",0x759B).addParameter(Variable("y1",40)).addParameter(Variable("y2",41)))
+		self.addGlobal(Procedure("proc.three",0xFEDB).addParameter(Variable("x1",40)).addParameter(Variable("x2",41)).addParameter(Variable("x3",42)))
 
 if __name__ == "__main__":
 	im = IdentifierManager()

@@ -1,13 +1,14 @@
-TODO List:
+TODO List
+=========
+
+Fix import to load parameters in.
 
 Compiler:
 	Work on:
-		- { } groupings
 		- procedure calls
-		- structures
-		- variable definitions
+		- structures (if, while, times)
 
-	Procedure definitions and variables
+	Procedure definitions and variables (re-use vardef code for both)
 
 	Inline code blocks []
 
@@ -23,3 +24,4 @@ Compiler#2:
 Notes:	
 	Consider a PCode for Inline Strings			?
 	Compiler optimise for +/-1 *2/2 			?
+	Consider Length, Abs, Random, Sgn unary functions. ?

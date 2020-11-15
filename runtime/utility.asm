@@ -15,7 +15,7 @@
 ;
 ; *******************************************************************************************
 
-		define 	"clear.variables",EndVariableClear
+		define 	"clear.variables:0",EndVariableClear
 VariableClear:
 		lda 	#VarAddr & $FF
 		sta 	temp0
@@ -40,7 +40,7 @@ EndVariableClear:
 ;
 ; *******************************************************************************************
 
-		define 	"print.character",EndPrintCharacter
+		define 	"print.character:1",EndPrintCharacter
 PrintCharacter:
 		jsr 	$FFD2
 		rts
@@ -53,7 +53,7 @@ EndPrintCharacter:
 ;
 ; *******************************************************************************************
 
-		define 	"print.hex",EndPrintHex
+		define 	"print.hex:1",EndPrintHex
 PrintHex:
 		pha
 		lda 	#32
@@ -84,7 +84,7 @@ EndPrintHex:
 ;
 ; *******************************************************************************************
 
-		define 	"print.string",EndPrintString
+		define 	"print.string:1",EndPrintString
 PrintString:
 		sta 	temp0
 		stx 	temp0+1
