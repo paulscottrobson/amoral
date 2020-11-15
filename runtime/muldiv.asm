@@ -31,7 +31,7 @@
 ;
 ; *******************************************************************************************
 
-		define 	"multiplyimmediate",EndMultiplyImmediate
+		define 	"multiply.immediate",EndMultiplyImmediate
 MultiplyImmediate:	
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	Multiply
@@ -40,7 +40,7 @@ MultiplyImmediate:
 		rts
 EndMultiplyImmediate:
 
-		define 	"multiplyabsolute",EndMultiplyAbsolute
+		define 	"multiply.absolute",EndMultiplyAbsolute
 MultiplyAbsolute:
 		jsr 	SaveXTemp1GetTemp0
 		jsr 	LoadIndirectTemp0

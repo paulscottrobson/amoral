@@ -57,7 +57,7 @@ class CodeBlock(object):
 		if self.show:
 			print("{0:04x} : {1:02x} (Update)".format(addr,data))
 	#
-	#		Append a byte
+	#		Append a byte/word
 	#
 	def append(self,data):
 		self.binary.append(data)													# write it out
@@ -66,10 +66,40 @@ class CodeBlock(object):
 		if self.show:
 			print("{0:04x} : {1:02x}".format(self.nextFree-1,data))
 	#
+	def append16(self,data):
+		self.binary.append(data & 0xFF)												# write it out
+		self.binary.append(data >> 8)
+		self.nextFree += 2															# bump next free
+		assert self.nextFree - self.loadAddress == len(self.binary)					# check it's valid.
+		if self.show:
+			print("{0:04x} : {1:04x}".format(self.nextFree-2,data))
+	#
 	#		Get current write address
 	#
 	def getAddr(self):
-		return self.nextFree		
+		return self.nextFree	
+	#
+	#		Open a new definition.
+	#	
+	def open(self,definitionName):
+		assert self.currentHeader is None 											# not already open.
+		definitionName = definitionName.strip().lower()+chr(0)						# preprocess
+		self.currentHeader = self.getAddr()											# remember header
+		self.append16(0)															# dummy offset patched later
+		for c in definitionName:													# name of routine
+			self.append(ord(c))
+		if self.getAddr() % 2 != 0:													# make even address.
+			self.append(0)
+		return self.getAddr()														# return address.
+	#
+	#		Close open definition.
+	#
+	def close(self):
+		assert self.currentHeader is not None 										# check open.
+		offset = self.getAddr()-self.currentHeader 									# calc offset
+		self.write(self.currentHeader,offset & 0xFF)								# patch offset when opened
+		self.write(self.currentHeader+1,offset >> 8)	
+		self.currentHeader = None 													# close definition.
 	#
 	#		Import the routines into the identifier manager.
 	#
@@ -99,5 +129,6 @@ if __name__ == "__main__":
 	cb.importRuntime(im)
 	print(im.toString())
 	#
-	cb.append(42)
-	cb.append(255)
+	cb.open("test1")
+	cb.append(0xFF)
+	cb.close()

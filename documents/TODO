@@ -1,9 +1,10 @@
 TODO List:
 
 Compiler:
-	Start on compiler design :)
-		Write runtime handler/manager and support routines.
-		Core compilation that can be used anywhere.
+	Core compilation that can be used anywhere - ld/st/binary/unary, loops and returns what it
+		couldn't compile.
+	Extend CodeManager to output a CBM binary. Get basic compile code running.
+	Extend out to curly bracket group compilation.
 
 PostCompiler:
 	Write handler for structure generation.

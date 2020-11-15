@@ -68,7 +68,7 @@ temp1 = ZeroAddr+6
 ;
 ; *******************************************************************************************
 
-		define	"runpcode",EndRunPCode
+		define	"run.pcode",EndRunPCode
 
 		.include "interpreter.asm" 			; main interpreter
 
@@ -96,9 +96,10 @@ EndRunPCode:
 ;
 ; *******************************************************************************************
 
-RuntimeEnd:		
 		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
 		.include 	"utility.asm"			; utility functions.
+
+RuntimeEnd:		
 ;
 ;		As is, there is no end marker, so that code can be added on.
 ;
