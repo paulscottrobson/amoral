@@ -53,7 +53,7 @@ class RuntimeCodeGenerator(object):
 	#
 	#		Compile a unary function INC/DEC/RTN etc.
 	#
-	def cmdUnary(self,cmd):
+	def unary(self,cmd):
 		self.cb.append(cmd)
 	#
 	#		Compile a call to the given addres
@@ -91,7 +91,7 @@ if __name__ == "__main__":
 	rt.cmdImm(RTOpcodes.ADD,518)
 	print("=============================")
 	#
-	rt.cmdUnary(RTOpcodes.INC)
+	rt.unary(RTOpcodes.INC)
 	print("=============================")
 	#
 	rt.branch(RTOpcodes.BEQ,0x127A)	

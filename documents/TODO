@@ -1,10 +1,21 @@
 TODO List:
 
+Double quotes in Runtime/Handler.
+	- add p-code 'set address of string'
+	- add helper function which does jsr getstring .text "xxxxx",0
+
 Compiler:
-	Core compilation that can be used anywhere - ld/st/binary/unary, loops and returns what it
-		couldn't compile.
+
+	Add string to codegenerator.
+	Add string to inner compiler.
+
 	Extend CodeManager to output a CBM binary. Get basic compile code running.
-	Extend out to curly bracket group compilation.
+		- { } groupings
+		- procedure calls
+		- structures
+		- variable definitions
+
+	Procedure definitions and variables
 
 PostCompiler:
 	Write handler for structure generation.
@@ -15,4 +26,3 @@ Compiler#2:
 	Write 6502 code generation. (in project file)	
 	Do some tests regarding speed up of various optimisations.
 	
-

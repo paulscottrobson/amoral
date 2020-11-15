@@ -114,7 +114,8 @@ class Parser(object):
 	#		Put an element back.	
 	#	
 	def put(self,element):
-		self.parseObjectStack.append(element)
+		if element != "":
+			self.parseObjectStack.append(element)
 	#
 	#		Check if completed
 	#

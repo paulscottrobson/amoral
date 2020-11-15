@@ -40,6 +40,7 @@ class CodeBlock(object):
 		#
 		self.show = True 															# debug output
 		self.currentHeader = None 													# not in a definition.
+		self.executeAddress = None													# what we run.
 	#
 	#		Read a byte, the address is the mapped address on the Code Block
 	#
@@ -90,7 +91,8 @@ class CodeBlock(object):
 			self.append(ord(c))
 		if self.getAddr() % 2 != 0:													# make even address.
 			self.append(0)
-		return self.getAddr()														# return address.
+		self.executeAddress = self.getAddr()										# run last defined.
+		return self.getAddr()
 	#
 	#		Close open definition.
 	#
