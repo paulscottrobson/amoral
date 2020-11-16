@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Mon Nov 16 17:39:56 2020
+; Mon Nov 16 18:49:17 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -18,6 +18,8 @@
 =8					VarPages = 8 								; Number of pages of variables (256 byte pages)
 =$08					ZeroAddr = $08 								; Zero page goes here.
 =0					test = 0									; test to run (default is build final)
+=$800					Param1 = VarAddr 							; parameter #1 of 2 for 2 param utility methods
+=2050					RandomSeed = VarAddr+2 						; 2nd var is random# seed.
 =$08					Reg16 = ZeroAddr 							; the current value register.
 =10					Pctr = ZeroAddr+2 							; the program counter (e.g. the next instruction)
 =12					temp0 = ZeroAddr+4 							; temporary registers
@@ -28,7 +30,8 @@
 >1017	10						.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 >1018	00 10						.word 	BootAddr 					; the address of boot
 >101a	00 08						.word 	VarAddr 					; the address of the variables
->101c	5c 15						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	2a 16						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+.101e					AllocMem:
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 >1020	9b 02					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 2e 70 63 6f 64			.text 	"run.pcode:0",0 							; the text (must be lower case)
@@ -602,7 +605,7 @@
 ;******  Return to file: runtime.asm
 
 
-;******  Processing file: utility.asm
+;******  Processing file: utility1.asm
 
 >13fe	2c 00					.word 	EndVariableClear-* 							; offset to next entry
 >1400	63 6c 65 61 72 2e 76 61			.text 	"clear.variables:0",0 							; the text (must be lower case)
@@ -646,7 +649,7 @@
 .1464					PrintHex:
 .1464	48		pha				pha
 .1465	a9 20		lda #$20			lda 	#32
-.1467	20 30 15	jsr $1530			jsr 	PrintCharacter
+.1467	20 fe 15	jsr $15fe			jsr 	PrintCharacter
 .146a	8a		txa				txa
 .146b	20 6f 14	jsr $146f			jsr 	_PHex
 .146e	68		pla				pla
@@ -663,7 +666,7 @@
 .147e	69 06		adc #$06			adc 	#6
 .1480					_PNoSkip:
 .1480	69 30		adc #$30			adc 	#48
-.1482	4c 30 15	jmp $1530			jmp 	PrintCharacter
+.1482	4c fe 15	jmp $15fe			jmp 	PrintCharacter
 .1485					EndPrintHex:
 >1485	22 00					.word 	EndPrintString-* 							; offset to next entry
 >1487	70 72 69 6e 74 2e 73 74			.text 	"print.string:1",0 							; the text (must be lower case)
@@ -675,7 +678,7 @@
 .149a	a0 00		ldy #$00			ldy 	#0
 .149c	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
 .149e	f0 06		beq $14a6			beq 	_PSExit
-.14a0	20 30 15	jsr $1530			jsr 	PrintCharacter
+.14a0	20 fe 15	jsr $15fe			jsr 	PrintCharacter
 .14a3	c8		iny				iny
 .14a4	d0 f6		bne $149c			bne 	_PSLoop
 .14a6	60		rts		_PSExit:rts
@@ -687,7 +690,7 @@
 .14b6					PrintDecimal:
 .14b6	48		pha				pha
 .14b7	a9 20		lda #$20			lda 	#32							; leading spaces.
-.14b9	20 30 15	jsr $1530			jsr 	PrintCharacter
+.14b9	20 fe 15	jsr $15fe			jsr 	PrintCharacter
 .14bc	68		pla				pla
 .14bd					PDEntry:
 .14bd	85 0e		sta $0e				sta 	temp1						; save in temp1
@@ -707,7 +710,7 @@
 .14d8					_PDNoRecurse:
 .14d8	68		pla				pla 								; restore and print
 .14d9	09 30		ora #$30			ora 	#48
-.14db	4c 30 15	jmp $1530			jmp 	PrintCharacter
+.14db	4c fe 15	jmp $15fe			jmp 	PrintCharacter
 .14de					EndPrintDecimal:
 >14de	26 00					.word 	EndPrintSignedInt-* 							; offset to next entry
 >14e0	70 72 69 6e 74 2e 73 69			.text 	"print.sint:1",0 							; the text (must be lower case)
@@ -717,60 +720,174 @@
 .14f0	f0 c4		beq $14b6			beq 	PrintDecimal
 .14f2	48		pha				pha
 .14f3	a9 20		lda #$20			lda 	#32
-.14f5	20 30 15	jsr $1530			jsr 	PrintCharacter
+.14f5	20 fe 15	jsr $15fe			jsr 	PrintCharacter
 .14f8	a9 2d		lda #$2d			lda 	#'-'
-.14fa	20 30 15	jsr $1530			jsr 	PrintCharacter
+.14fa	20 fe 15	jsr $15fe			jsr 	PrintCharacter
 .14fd	68		pla				pla
-.14fe	20 0c 15	jsr $150c			jsr 	Negate
+.14fe	20 4a 15	jsr $154a			jsr 	Negate
 .1501	4c bd 14	jmp $14bd			jmp 	PDEntry
 .1504					EndPrintSignedInt:
->1504	17 00					.word 	EndNegate-* 							; offset to next entry
->1506	6e 65 67 3a 30 00			.text 	"neg:0",0 							; the text (must be lower case)
+
+;******  Return to file: runtime.asm
+
+
+;******  Processing file: utility2.asm
+
+>1504	1b 00					.word 	EndMax-* 							; offset to next entry
+>1506	6d 61 78 3a 32 00			.text 	"max:2",0 							; the text (must be lower case)
 >150c						.align 	2								; force to even boundary.
-.150c	48		pha		Negate:	pha
-.150d	8a		txa				txa
-.150e	49 ff		eor #$ff			eor 	#$FF
-.1510	aa		tax				tax
-.1511	68		pla				pla
-.1512	49 ff		eor #$ff			eor 	#$FF
-.1514	18		clc				clc
-.1515	69 01		adc #$01			adc 	#1
-.1517	90 01		bcc $151a			bcc 	_NGExit
-.1519	e8		inx				inx
-.151a	60		rts		_NGExit:rts
-.151b					EndNegate:
+.150c	a8		tay				tay 								; save in Y
+.150d	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
+.1510	8a		txa				txa
+.1511	ed 01 08	sbc $0801			sbc 	Param1+1
+.1514	98		tya				tya 								; ready to return original value.
+.1515	90 01		bcc $1518			bcc 	MMReturnP1
+.1517	60		rts				rts
+.1518					MMReturnP1:
+.1518	ad 00 08	lda $0800			lda 	Param1
+.151b	ae 01 08	ldx $0801			ldx 	Param1+1
+.151e	60		rts				rts
+.151f					EndMax:
+>151f	15 00					.word 	EndMin-* 							; offset to next entry
+>1521	6d 69 6e 3a 32 00			.text 	"min:2",0 							; the text (must be lower case)
+>1527						.align 	2								; force to even boundary.
+.1528	a8		tay				tay 								; save in Y
+.1529	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
+.152c	8a		txa				txa
+.152d	ed 01 08	sbc $0801			sbc 	Param1+1
+.1530	98		tya				tya 								; ready to return original value.
+.1531	b0 e5		bcs $1518			bcs 	MMReturnP1
+.1533	60		rts				rts
+.1534					EndMin:
+>1534	0d 00					.word 	EndAbs-* 							; offset to next entry
+>1536	61 62 73 3a 31 00			.text 	"abs:1",0 							; the text (must be lower case)
+>153c						.align 	2								; force to even boundary.
+.153c	e0 00		cpx #$00			cpx 	#0
+.153e	30 0a		bmi $154a			bmi 	Negate
+.1540	60		rts				rts
+.1541					EndAbs:
+>1541	18 00					.word 	EndNegate-* 							; offset to next entry
+>1543	6e 65 67 3a 30 00			.text 	"neg:0",0 							; the text (must be lower case)
+>1549						.align 	2								; force to even boundary.
+.154a	48		pha		Negate:	pha
+.154b	8a		txa				txa
+.154c	49 ff		eor #$ff			eor 	#$FF
+.154e	aa		tax				tax
+.154f	68		pla				pla
+.1550	49 ff		eor #$ff			eor 	#$FF
+.1552	18		clc				clc
+.1553	69 01		adc #$01			adc 	#1
+.1555	90 01		bcc $1558			bcc 	_NGExit
+.1557	e8		inx				inx
+.1558	60		rts		_NGExit:rts
+.1559					EndNegate:
+>1559	1e 00					.word 	EndSgn-* 							; offset to next entry
+>155b	73 67 6e 3a 31 00			.text 	"sgn:1",0 							; the text (must be lower case)
+>1561						.align 	2								; force to even boundary.
+.1562	a0 ff		ldy #$ff			ldy 	#$FF
+.1564	e0 00		cpx #$00			cpx 	#0
+.1566	30 07		bmi $156f			bmi 	_SGRetYA
+.1568	d0 08		bne $1572			bne 	_SGPositive
+.156a	c8		iny				iny
+.156b	c9 00		cmp #$00			cmp 	#0
+.156d	d0 03		bne $1572			bne 	_SGPositive
+.156f					_SGRetYA:
+.156f	98		tya				tya
+.1570	aa		tax				tax
+.1571	60		rts				rts
+.1572					_SGPositive:
+.1572	a9 01		lda #$01			lda 	#1
+.1574	a2 00		ldx #$00			ldx 	#0
+.1576	60		rts				rts
+.1577					EndSgn:
+>1577	17 00					.word 	EndLen-* 							; offset to next entry
+>1579	6c 65 6e 3a 31 00			.text 	"len:1",0 							; the text (must be lower case)
+>157f						.align 	2								; force to even boundary.
+.1580	85 0c		sta $0c				sta 	temp0
+.1582	86 0d		stx $0d				stx 	temp0+1
+.1584	a0 ff		ldy #$ff			ldy 	#255
+.1586	c8		iny		_GetLen:iny
+.1587	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1589	d0 fb		bne $1586			bne 	_GetLen
+.158b	aa		tax				tax
+.158c	98		tya				tya
+.158d	60		rts				rts
+.158e					EndLen:
+>158e	26 00					.word 	EndAlloc-* 							; offset to next entry
+>1590	61 6c 6c 6f 63 3a 31 00			.text 	"alloc:1",0 							; the text (must be lower case)
+>1598						.align 	2								; force to even boundary.
+.1598	a8		tay				tay 								; XY is size.
+.1599	ad 1e 10	lda $101e			lda 	AllocMem 					; push allocated addr on stack
+.159c	48		pha				pha
+.159d	ad 1f 10	lda $101f			lda 	AllocMem+1
+.15a0	48		pha				pha
+.15a1	18		clc				clc 								; add XY to alloc mem
+.15a2	98		tya				tya
+.15a3	6d 1e 10	adc $101e			adc 	AllocMem
+.15a6	8d 1e 10	sta $101e			sta 	AllocMem
+.15a9	8a		txa				txa
+.15aa	6d 1f 10	adc $101f			adc 	AllocMem+1
+.15ad	8d 1f 10	sta $101f			sta 	AllocMem+1
+.15b0	68		pla				pla 								; restore and exit
+.15b1	aa		tax				tax
+.15b2	68		pla				pla
+.15b3	60		rts				rts
+.15b4					EndAlloc:
+>15b4	35 00					.word 	EndRandom-* 							; offset to next entry
+>15b6	72 61 6e 64 6f 6d 3a 30			.text 	"random:0",0 							; the text (must be lower case)
+>15be	00
+>15bf						.align 	2								; force to even boundary.
+.15c0	ad 02 08	lda $0802			lda 	RandomSeed 					; initialise if nonzero
+.15c3	0d 03 08	ora $0803			ora 	RandomSeed+1
+.15c6	d0 0a		bne $15d2			bne 	_R16_NoInit
+.15c8	a9 a3		lda #$a3			lda 	#$A3
+.15ca	8d 02 08	sta $0802			sta 	RandomSeed
+.15cd	a9 75		lda #$75			lda 	#$75
+.15cf	8d 03 08	sta $0803			sta 	RandomSeed+1
+.15d2					_R16_NoInit:
+.15d2	4e 03 08	lsr $0803			lsr 	RandomSeed+1				; shift seed right
+.15d5	6e 02 08	ror $0802			ror 	RandomSeed
+.15d8	90 08		bcc $15e2			bcc 	_R16_NoXor
+.15da	ad 03 08	lda $0803			lda 	RandomSeed+1				; xor MSB with $B4 if bit set.
+.15dd	49 b4		eor #$b4			eor 	#$B4 						; like the Wikipedia one.
+.15df	8d 03 08	sta $0803			sta 	RandomSeed+1
+.15e2					_R16_NoXor:
+.15e2	ad 02 08	lda $0802			lda 	RandomSeed					; copy result to evaluate stack.
+.15e5	ae 03 08	ldx $0803			ldx 	RandomSeed+1
+.15e8	60		rts				rts
+.15e9					EndRandom
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: sys/x16/porting.asm
 
->151b	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
->151d	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
->1525	61 72 61 63 74 65 72 3a 31 00
->152f						.align 	2								; force to even boundary.
-.1530					PrintCharacter:
-.1530	20 d2 ff	jsr $ffd2			jsr 	$FFD2
-.1533	60		rts				rts
-.1534					EndPrintCharacter:
->1534	15 00					.word 	EndPrintCRLF-* 							; offset to next entry
->1536	70 72 69 6e 74 2e 63 72			.text 	"print.crlf:0",0 							; the text (must be lower case)
->153e	6c 66 3a 30 00
->1543						.align 	2								; force to even boundary.
-.1544	a9 0d		lda #$0d			lda 	#13
-.1546	4c 30 15	jmp $1530			jmp 	PrintCharacter
-.1549					EndPrintCRLF:
->1549	13 00					.word 	EndReadTimer-* 							; offset to next entry
->154b	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
->1553	65 72 3a 30 00
->1558						.align 	2								; force to even boundary.
-.1558					ReadTimer:
-.1558	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
-.155b	60		rts				rts
-.155c					EndReadTimer:
+>15e9	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
+>15eb	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
+>15f3	61 72 61 63 74 65 72 3a 31 00
+>15fd						.align 	2								; force to even boundary.
+.15fe					PrintCharacter:
+.15fe	20 d2 ff	jsr $ffd2			jsr 	$FFD2
+.1601	60		rts				rts
+.1602					EndPrintCharacter:
+>1602	15 00					.word 	EndPrintCRLF-* 							; offset to next entry
+>1604	70 72 69 6e 74 2e 63 72			.text 	"print.crlf:0",0 							; the text (must be lower case)
+>160c	6c 66 3a 30 00
+>1611						.align 	2								; force to even boundary.
+.1612	a9 0d		lda #$0d			lda 	#13
+.1614	4c fe 15	jmp $15fe			jmp 	PrintCharacter
+.1617					EndPrintCRLF:
+>1617	13 00					.word 	EndReadTimer-* 							; offset to next entry
+>1619	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
+>1621	65 72 3a 30 00
+>1626						.align 	2								; force to even boundary.
+.1626					ReadTimer:
+.1626	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
+.1629	60		rts				rts
+.162a					EndReadTimer:
 
 ;******  Return to file: runtime.asm
 
-.155c					RuntimeEnd:
+.162a					RuntimeEnd:
 
 ;******  End of listing

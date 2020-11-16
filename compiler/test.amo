@@ -2,7 +2,7 @@
 #		Amoral test program.
 #
 proc main() {
-	print.int(40960)
-	print.sint(40960)
-	print.sint(65535)
+	times(10) {
+		alloc(64) print.hex(~) print.crlf()
+	}
 }

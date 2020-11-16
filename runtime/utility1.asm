@@ -1,7 +1,7 @@
 ; *******************************************************************************************
 ; *******************************************************************************************
 ;
-;       File:           utility.asm
+;       File:           utility1.asm
 ;       Date:           14th November 2020
 ;       Purpose:        Utility routines for 6502 code.
 ;       Author:         Paul Robson (paul@robson.org.uk)
@@ -153,22 +153,4 @@ EndPrintDecimal:
 		jmp 	PDEntry
 EndPrintSignedInt:
 
-; *******************************************************************************************
-;
-;										Negate XA
-;
-; *******************************************************************************************
 
-		define 	"neg:0",EndNegate
-Negate:	pha
-		txa
-		eor 	#$FF
-		tax
-		pla
-		eor 	#$FF
-		clc
-		adc 	#1
-		bcc 	_NGExit
-		inx
-_NGExit:rts
-EndNegate:		

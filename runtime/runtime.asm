@@ -32,6 +32,9 @@ test = 0									; test to run (default is build final)
 
 .endweak
 
+Param1 = VarAddr 							; parameter #1 of 2 for 2 param utility methods
+RandomSeed = VarAddr+2 						; 2nd var is random# seed.
+
 ; *******************************************************************************************
 ;
 ;									Zero Page Usage
@@ -65,8 +68,9 @@ ZeroAddrEnd = ZeroAddr+8 					; marks end of allocated space.
 		.byte 	ZeroAddr 					; Low byte of ZeroPage used.
 		.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 		.word 	BootAddr 					; the address of boot
-		.word 	VarAddr 					; the address of the variables
+		.word 	VarAddr 					; the address of the variables		
 		.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+AllocMem:		
 		.word 	$0000 						; address of allocatable memory (set up by compiler)
 
 ; *******************************************************************************************
@@ -104,7 +108,8 @@ EndRunPCode:
 ; *******************************************************************************************
 
 		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
-		.include 	"utility.asm"			; utility functions.
+		.include 	"utility1.asm"			; utility functions.
+		.include 	"utility2.asm"			; utility functions.
 
 		.include "sys/x16/porting.asm"		; X16 specific stuff.
 		

@@ -2,10 +2,9 @@ TODO List
 =========
 
 Compiler:	
-	Alloc Length Abs Sgn Max Min Random functions into runtime.
 	Peek and Poke, Deek and Doke equivalents and VPeek/VPoke routines in x16
 	Inline code blocks []
-	Times replacement (if non-zero decrement and branch)
+	Times replacement (if non-zero decrement and branch) (and recheck benchmarks)
 
 PostCompiler:
 	Array system.
