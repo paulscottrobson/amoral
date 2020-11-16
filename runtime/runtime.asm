@@ -33,7 +33,8 @@ test = 0									; test to run (default is build final)
 .endweak
 
 Param1 = VarAddr 							; parameter #1 of 2 for 2 param utility methods
-RandomSeed = VarAddr+2 						; 2nd var is random# seed.
+Param2 = VarAddr+2 							; parameter #2 of 3 for 3 param utility methods.
+RandomSeed = VarAddr+4 						; 3rd var is random# seed.
 
 ; *******************************************************************************************
 ;
@@ -110,6 +111,7 @@ EndRunPCode:
 		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
 		.include 	"utility1.asm"			; utility functions.
 		.include 	"utility2.asm"			; utility functions.
+		.include 	"utility3.asm"			; utility functions.
 
 		.include "sys/x16/porting.asm"		; X16 specific stuff.
 		

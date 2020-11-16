@@ -2,12 +2,12 @@ TODO List
 =========
 
 Compiler:	
-	Peek and Poke, Deek and Doke equivalents and VPeek/VPoke routines in x16
-	Inline code blocks []
-	Times replacement (if non-zero decrement and branch) (and recheck benchmarks)
+	Inline code blocks [] / data access.
+	Non-zero decrement and branch) (and recheck benchmarks)
+		Needs to be 6502ish as well.
+		Decrement Load ? Stop when -ve.
 
 PostCompiler:
-	Array system.
 	Write handler for structure generation.
 	Write Balls/Amoral.
 	Write Mario/Amoral nick graphic from Lean.
@@ -18,3 +18,5 @@ Compiler#2:
 	
 Notes:	
 	Compiler optimise for +/-1 *2/2 			?
+	Array system (?)
+	object:method() => method(object,xxx) ?

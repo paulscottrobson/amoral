@@ -66,8 +66,8 @@ class SystemProcedure(Procedure):
 			name = parts[0]
 			Procedure.__init__(self,name,value)
 			count = int(parts[1])													# #of params.
-			if count == 2:
-				self.addParameter(Identifier("p1",0))
+			for p in range(0,count-1):												# params except last.
+				self.addParameter(Identifier("p"+str(p+1),p))
 			if count >= 1:															# don't need a target for
 				self.addParameter(Identifier("p"+str(count),-1))					# last parameter.
 

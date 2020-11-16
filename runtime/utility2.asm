@@ -57,7 +57,7 @@ EndAbs:
 ;
 ; *******************************************************************************************
 
-		define 	"neg:0",EndNegate
+		define 	"neg:1",EndNegate
 Negate:	pha
 		txa
 		eor 	#$FF

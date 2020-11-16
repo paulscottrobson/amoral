@@ -1,8 +1,11 @@
 #
 #		Amoral test program.
 #
-proc main() {
-	times(10) {
-		alloc(64) print.hex(~) print.crlf()
-	}
+code func test() {
+	
+}
+
+slow proc main() {
+	var i
+	times($3E00,i) { poke.v(0,i,42); }
 }

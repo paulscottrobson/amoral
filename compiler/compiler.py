@@ -116,7 +116,8 @@ class Compiler(BlockCompiler):
 		self.blockCompile()															# compile body.
 		if self.mode == Compiler.SLOWMODE:											# Ret (from PCode)
 			self.cb.append(RTOpcodes.RET)
-		self.cb.append(Asm6502.RTS)													# and end with RTS
+		if self.mode != Compiler.CODEMODE:
+			self.cb.append(Asm6502.RTS)												# and end with RTS
 		self.cb.close()																# close definition.
 		#
 		codeUsed = self.cb.getAddr()-startAddr 										# code used.
