@@ -20,8 +20,18 @@
 PrintCharacter:
 		jsr 	$FFD2
 		rts
-
 EndPrintCharacter:
+
+; *******************************************************************************************
+;
+;									Print CR/LF
+;
+; *******************************************************************************************
+
+		define 	"print.crlf:0",EndPrintCRLF
+		lda 	#13
+		jmp 	PrintCharacter
+EndPrintCRLF:
 
 ; *******************************************************************************************
 ;
@@ -31,7 +41,7 @@ EndPrintCharacter:
 
 		define 	"read.timer:0",EndReadTimer
 ReadTimer:
-		jsr 	$FFDE
+		jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
 		rts
 
 EndReadTimer:

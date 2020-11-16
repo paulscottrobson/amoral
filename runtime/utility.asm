@@ -44,7 +44,18 @@ EndVariableClear:
 HaltProgram:
 		jmp 	HaltProgram
 EndHaltProgram:
+
+; *******************************************************************************************
+;
+;									Boot address
+;
+; *******************************************************************************************
 		
+		define "boot.address:0",EndBootAddress
+		lda 	#BootAddr & $FF
+		ldx 	#BootAddr >> 8
+		rts
+EndBootAddress:
 ; *******************************************************************************************
 ;
 ;								Print Hex w/leading space

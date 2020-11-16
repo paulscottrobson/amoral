@@ -147,6 +147,11 @@ class CodeBlock(object):
 		self.binary[5] = self.executeAddress & 0xFF
 		self.binary[6] = self.executeAddress >> 8
 		#
+		self.append16(0)															# end marker.
+		#
+		self.binary[30] = self.getAddr() & 0xFF 									# free memory pointer
+		self.binary[31] = self.getAddr() >> 8
+		#
 		h = open(fileName,"wb")
 		h.write(bytes([self.loadAddress & 0xFF]))									# 2 byte load addr
 		h.write(bytes([self.loadAddress >> 8]))

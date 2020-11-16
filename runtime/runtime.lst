@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Mon Nov 16 08:36:32 2020
+; Mon Nov 16 10:29:53 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -28,7 +28,7 @@
 >1017	10						.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 >1018	00 10						.word 	BootAddr 					; the address of boot
 >101a	00 08						.word 	VarAddr 					; the address of the variables
->101c	be 14						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	e8 14						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 >1020	9b 02					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 2e 70 63 6f 64			.text 	"run.pcode:0",0 							; the text (must be lower case)
@@ -631,72 +631,87 @@
 .143c					HaltProgram:
 .143c	4c 3c 14	jmp $143c			jmp 	HaltProgram
 .143f					EndHaltProgram:
->143f	30 00					.word 	EndPrintHex-* 							; offset to next entry
->1441	70 72 69 6e 74 2e 68 65			.text 	"print.hex:1",0 							; the text (must be lower case)
->1449	78 3a 31 00
->144d						.align 	2								; force to even boundary.
-.144e					PrintHex:
-.144e	48		pha				pha
-.144f	a9 20		lda #$20			lda 	#32
-.1451	20 a6 14	jsr $14a6			jsr 	PrintCharacter
-.1454	8a		txa				txa
-.1455	20 59 14	jsr $1459			jsr 	_PHex
-.1458	68		pla				pla
-.1459	48		pha		_PHex:	pha
-.145a	4a		lsr a				lsr 	a
-.145b	4a		lsr a				lsr 	a
-.145c	4a		lsr a				lsr 	a
-.145d	4a		lsr a				lsr 	a
-.145e	20 62 14	jsr $1462			jsr 	_PNibl
-.1461	68		pla				pla
-.1462	29 0f		and #$0f	_PNibl:	and 	#15
-.1464	c9 0a		cmp #$0a			cmp 	#10
-.1466	90 02		bcc $146a			bcc 	_PNoSkip
-.1468	69 06		adc #$06			adc 	#6
-.146a					_PNoSkip:
-.146a	69 30		adc #$30			adc 	#48
-.146c	4c a6 14	jmp $14a6			jmp 	PrintCharacter
-.146f					EndPrintHex:
->146f	22 00					.word 	EndPrintString-* 							; offset to next entry
->1471	70 72 69 6e 74 2e 73 74			.text 	"print.string:1",0 							; the text (must be lower case)
->1479	72 69 6e 67 3a 31 00
->1480						.align 	2								; force to even boundary.
-.1480					PrintString:
-.1480	85 0c		sta $0c				sta 	temp0
-.1482	86 0d		stx $0d				stx 	temp0+1
-.1484	a0 00		ldy #$00			ldy 	#0
-.1486	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
-.1488	f0 06		beq $1490			beq 	_PSExit
-.148a	20 a6 14	jsr $14a6			jsr 	PrintCharacter
-.148d	c8		iny				iny
-.148e	d0 f6		bne $1486			bne 	_PSLoop
-.1490	60		rts		_PSExit:rts
-.1491					EndPrintString
+>143f	16 00					.word 	EndBootAddress-* 							; offset to next entry
+>1441	62 6f 6f 74 2e 61 64 64			.text 	"boot.address:0",0 							; the text (must be lower case)
+>1449	72 65 73 73 3a 30 00
+>1450						.align 	2								; force to even boundary.
+.1450	a9 00		lda #$00			lda 	#BootAddr & $FF
+.1452	a2 10		ldx #$10			ldx 	#BootAddr >> 8
+.1454	60		rts				rts
+.1455					EndBootAddress:
+>1455	30 00					.word 	EndPrintHex-* 							; offset to next entry
+>1457	70 72 69 6e 74 2e 68 65			.text 	"print.hex:1",0 							; the text (must be lower case)
+>145f	78 3a 31 00
+>1463						.align 	2								; force to even boundary.
+.1464					PrintHex:
+.1464	48		pha				pha
+.1465	a9 20		lda #$20			lda 	#32
+.1467	20 bc 14	jsr $14bc			jsr 	PrintCharacter
+.146a	8a		txa				txa
+.146b	20 6f 14	jsr $146f			jsr 	_PHex
+.146e	68		pla				pla
+.146f	48		pha		_PHex:	pha
+.1470	4a		lsr a				lsr 	a
+.1471	4a		lsr a				lsr 	a
+.1472	4a		lsr a				lsr 	a
+.1473	4a		lsr a				lsr 	a
+.1474	20 78 14	jsr $1478			jsr 	_PNibl
+.1477	68		pla				pla
+.1478	29 0f		and #$0f	_PNibl:	and 	#15
+.147a	c9 0a		cmp #$0a			cmp 	#10
+.147c	90 02		bcc $1480			bcc 	_PNoSkip
+.147e	69 06		adc #$06			adc 	#6
+.1480					_PNoSkip:
+.1480	69 30		adc #$30			adc 	#48
+.1482	4c bc 14	jmp $14bc			jmp 	PrintCharacter
+.1485					EndPrintHex:
+>1485	22 00					.word 	EndPrintString-* 							; offset to next entry
+>1487	70 72 69 6e 74 2e 73 74			.text 	"print.string:1",0 							; the text (must be lower case)
+>148f	72 69 6e 67 3a 31 00
+>1496						.align 	2								; force to even boundary.
+.1496					PrintString:
+.1496	85 0c		sta $0c				sta 	temp0
+.1498	86 0d		stx $0d				stx 	temp0+1
+.149a	a0 00		ldy #$00			ldy 	#0
+.149c	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
+.149e	f0 06		beq $14a6			beq 	_PSExit
+.14a0	20 bc 14	jsr $14bc			jsr 	PrintCharacter
+.14a3	c8		iny				iny
+.14a4	d0 f6		bne $149c			bne 	_PSLoop
+.14a6	60		rts		_PSExit:rts
+.14a7					EndPrintString
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: sys/x16/porting.asm
 
->1491	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
->1493	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
->149b	61 72 61 63 74 65 72 3a 31 00
->14a5						.align 	2								; force to even boundary.
-.14a6					PrintCharacter:
-.14a6	20 d2 ff	jsr $ffd2			jsr 	$FFD2
-.14a9	60		rts				rts
-.14aa					EndPrintCharacter:
->14aa	14 00					.word 	EndReadTimer-* 							; offset to next entry
->14ac	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
->14b4	65 72 3a 30 00
->14b9						.align 	2								; force to even boundary.
-.14ba					ReadTimer:
-.14ba	20 de ff	jsr $ffde			jsr 	$FFDE
-.14bd	60		rts				rts
-.14be					EndReadTimer:
+>14a7	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
+>14a9	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
+>14b1	61 72 61 63 74 65 72 3a 31 00
+>14bb						.align 	2								; force to even boundary.
+.14bc					PrintCharacter:
+.14bc	20 d2 ff	jsr $ffd2			jsr 	$FFD2
+.14bf	60		rts				rts
+.14c0					EndPrintCharacter:
+>14c0	15 00					.word 	EndPrintCRLF-* 							; offset to next entry
+>14c2	70 72 69 6e 74 2e 63 72			.text 	"print.crlf:0",0 							; the text (must be lower case)
+>14ca	6c 66 3a 30 00
+>14cf						.align 	2								; force to even boundary.
+.14d0	a9 0d		lda #$0d			lda 	#13
+.14d2	4c bc 14	jmp $14bc			jmp 	PrintCharacter
+.14d5					EndPrintCRLF:
+>14d5	13 00					.word 	EndReadTimer-* 							; offset to next entry
+>14d7	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
+>14df	65 72 3a 30 00
+>14e4						.align 	2								; force to even boundary.
+.14e4					ReadTimer:
+.14e4	20 de ff	jsr $ffde			jsr 	$FFDE
+.14e7	60		rts				rts
+.14e8					EndReadTimer:
 
 ;******  Return to file: runtime.asm
 
-.14be					RuntimeEnd:
+.14e8					RuntimeEnd:
 
 ;******  End of listing

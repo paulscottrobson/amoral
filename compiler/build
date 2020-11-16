@@ -6,6 +6,6 @@ pushd ../runtime >/dev/null
 ./build -q
 cp runtime.prg ../compiler
 popd >/dev/null
-python benchmark/..py
+python compiler.py
 
 ../bin/x16emu -debug -prg application.prg -scale 2 -run

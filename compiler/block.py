@@ -26,8 +26,6 @@ class BlockCompiler(object):
 		self.im = identMgr
 		self.slowGenerator = slowGenerator
 		self.fastGenerator = fastGenerator
-		self.slowBytes = 0
-		self.fastBytes = 0
 		self.setPCode(True)
 		self.cb = codeBlock
 		#
@@ -276,6 +274,10 @@ class BlockCompiler(object):
 	def setPCode(self,usePCode):
 		self.usePCode = usePCode
 		self.cg = self.slowGenerator if usePCode else self.fastGenerator
+		assert self.cg is not None
+
+
+
 
 if __name__ == "__main__":
 	cb = CodeBlock()
@@ -311,7 +313,7 @@ if __name__ == "__main__":
 
 	cb.show = False																	# True to o/p code.
 
-	src = src.split("\n")															# make into parser
+	src = src.split("\n")															# make into lines
 	cm.parser = Parser(TextStream(src))												# set the parser (cheat)
 	f = cm.blockCompile()															# compile 
 	cb.close()																		# close definition

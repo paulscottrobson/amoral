@@ -2,8 +2,14 @@ TODO List
 =========
 
 Compiler:
-	Outer level ; function/Procedure definitions and variables (re-use vardef code for both)
+	Outer level ; 
+		fast slow code
+		function/Procedure definitions
+		variables (re-use vardef code for both)
+				
 	Inline code blocks []
+	Length Abs Sgn Max Min Random functions into runtime.
+	True False terms.
 
 Wrapper/Project:
 
@@ -19,6 +25,4 @@ Compiler#2:
 Notes:	
 	Consider a PCode for Inline Strings			?
 	Compiler optimise for +/-1 *2/2 			?
-	Consider Length, Abs, Random, Sgn unary functions. ?
 	Comparison to constants ?
-	FFDE AXY Bug on timer.
