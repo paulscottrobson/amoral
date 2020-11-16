@@ -106,3 +106,69 @@ _PSLoop:lda 	(temp0),y
 _PSExit:rts		
 
 EndPrintString
+
+; *******************************************************************************************
+;
+;									Print Decimal/Signed
+;
+; *******************************************************************************************
+
+		define "print.int:1",EndPrintDecimal
+PrintDecimal:
+		pha
+		lda 	#32							; leading spaces.
+		jsr 	PrintCharacter
+		pla
+PDEntry:		
+		sta 	temp1						; save in temp1
+		stx 	temp1+1
+_PDRecurse:		
+		lda 	#10 						; set base to 10.
+		sta 	temp0
+		lda 	#0
+		sta 	temp0+1
+		jsr 	Divide
+		lda 	Reg16 						; push remainder on stack.
+		pha
+		lda 	temp1						; call recursively if not zero
+		ora 	temp1+1
+		beq 	_PDNoRecurse
+		jsr 	_PDRecurse 					; recursively print
+_PDNoRecurse:
+		pla 								; restore and print 
+		ora 	#48		
+		jmp 	PrintCharacter
+EndPrintDecimal:
+		
+		define "print.sint:1",EndPrintSignedInt
+		cpx 	#0
+		beq 	PrintDecimal
+		pha
+		lda 	#32
+		jsr 	PrintCharacter
+		lda 	#'-'
+		jsr 	PrintCharacter
+		pla
+		jsr 	Negate
+		jmp 	PDEntry
+EndPrintSignedInt:
+
+; *******************************************************************************************
+;
+;										Negate XA
+;
+; *******************************************************************************************
+
+		define 	"neg:0",EndNegate
+Negate:	pha
+		txa
+		eor 	#$FF
+		tax
+		pla
+		eor 	#$FF
+		clc
+		adc 	#1
+		bcc 	_NGExit
+		inx
+_NGExit:rts
+EndNegate:		

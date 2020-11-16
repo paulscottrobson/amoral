@@ -2,9 +2,9 @@ TODO List
 =========
 
 Compiler:	
-	Inline code blocks []
-	Length Abs Sgn Max Min Random functions into runtime.
+	Alloc Length Abs Sgn Max Min Random functions into runtime.
 	Peek and Poke, Deek and Doke equivalents and VPeek/VPoke routines in x16
+	Inline code blocks []
 	Times replacement (if non-zero decrement and branch)
 
 PostCompiler:

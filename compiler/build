@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-rm *.prg
+rm *.prg -f
 python ../scripts/scanner.py
 python ../scripts/gen6502.py
 pushd ../runtime >/dev/null
@@ -8,5 +8,3 @@ pushd ../runtime >/dev/null
 cp runtime.prg ../compiler
 popd >/dev/null
 make -s
-python amoral.zip -s -o test.prg benchmark.amo
-../bin/x16emu -debug -prg test.prg -scale 2 -run
