@@ -1,15 +1,11 @@
 TODO List
 =========
 
-Compiler:
-	Outer level ; 
-		fast slow code
-		function/Procedure definitions
-		variables (re-use vardef code for both)
-				
+Compiler:	
 	Inline code blocks []
 	Length Abs Sgn Max Min Random functions into runtime.
-	True False terms.
+	Peek and Poke, Deek and Doke equivalents and VPeek/VPoke routines in x16
+	Times replacement (if non-zero decrement and branch)
 
 Wrapper/Project:
 

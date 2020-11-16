@@ -124,6 +124,8 @@ class BlockCompiler(object):
 			elif s >= "0" and s <= "9":												# is it a constant ?
 				self.cg.cmdImm(RTOpcodes.LDR,int(s))
 			#
+			elif s == "true" or s == "false":										# true/false
+				self.cg.cmdImm(RTOpcodes.LDR,0xFFFF if s == "true" else 0)
 			#																		# alphanumeric (variable)
 			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None and isinstance(ident,Variable):	
 				self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
@@ -186,7 +188,7 @@ class BlockCompiler(object):
 				self.im.addGlobal(identifier)
 			#
 			if proc is not None:													# if parameter, add them.
-				nx = proc.addParameter(proc)							
+				nx = proc.addParameter(identifier)							
 			#
 			nx = self.parser.get()
 			if nx != ",":															# if not comma

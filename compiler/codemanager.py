@@ -10,6 +10,7 @@
 # *******************************************************************************************
 
 from identifiers import *
+from asm6502 import *
 
 # *******************************************************************************************
 #
@@ -139,13 +140,21 @@ class CodeBlock(object):
 	def createApplication(self,im,fileName = "application.prg"):
 		assert self.executeAddress is not None 										# no procedure !
 		initAddr = im.find("clear.variables").getValue()
-		self.binary[0] = 0xEA 														# Bootup code NOP
-		self.binary[1] = 0x20 														# Initialisation code
+		self.binary[0] = Asm6502.NOP 												# Bootup code NOP
+		#
+		self.binary[1] = Asm6502.JSR_A 												# Initialisation code
 		self.binary[2] = initAddr & 0xFF
 		self.binary[3] = initAddr >> 8
-		self.binary[4] = 0x4C 														# JMP <start>
+		#
+		self.binary[4] = Asm6502.JSR_A 												# JSR <start>
 		self.binary[5] = self.executeAddress & 0xFF
 		self.binary[6] = self.executeAddress >> 8
+		#
+		loopAddr = self.loadAddress+7
+		self.binary[7] = Asm6502.JMP_A												# Loop to end program.
+		self.binary[8] = loopAddr & 0xFF
+		self.binary[9] = loopAddr >> 8
+
 		#
 		self.append16(0)															# end marker.
 		#

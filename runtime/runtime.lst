@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Mon Nov 16 10:29:53 2020
+; Mon Nov 16 13:45:02 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -706,7 +706,7 @@
 >14df	65 72 3a 30 00
 >14e4						.align 	2								; force to even boundary.
 .14e4					ReadTimer:
-.14e4	20 de ff	jsr $ffde			jsr 	$FFDE
+.14e4	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
 .14e7	60		rts				rts
 .14e8					EndReadTimer:
 
