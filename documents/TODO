@@ -19,6 +19,4 @@ Compiler#2:
 	Do some tests regarding speed up of various optimisations.
 	
 Notes:	
-	Consider a PCode for Inline Strings			?
 	Compiler optimise for +/-1 *2/2 			?
-	Comparison to constants ?

@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
+rm *.prg
 python ../scripts/scanner.py
 python ../scripts/gen6502.py
 pushd ../runtime >/dev/null
 ./build -q
 cp runtime.prg ../compiler
 popd >/dev/null
-python compiler.py
-
-../bin/x16emu -debug -prg application.prg -scale 2 -run
+make -s
+python amoral.zip -o test.prg test.amo
+../bin/x16emu -debug -prg test.prg -scale 2 -run

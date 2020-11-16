@@ -1,16 +1,16 @@
 # *******************************************************************************************
 # *******************************************************************************************
 #
-#       File:           exception.py
-#       Date:           14th November 2020
-#       Purpose:        Exception class for compiler
+#       File:           version.py
+#       Date:           16th November 2020
+#       Purpose:        Version notes.
 #       Author:         Paul Robson (paul@robson.org.uk)
 #
 # *******************************************************************************************
 # *******************************************************************************************
 
-class AmoralException(Exception):
-	pass
-
-AmoralException.LINE = 0
-AmoralException.FILE = ""
+class VersionInformation(object):
+	def getDate(self):
+		return "16-Nov-20"
+	def getVersion(self):
+		return "0.01"

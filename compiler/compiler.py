@@ -9,6 +9,7 @@
 # *******************************************************************************************
 # *******************************************************************************************
 
+import sys
 from asm6502 import *
 from runtime import *
 from codemanager import *
@@ -38,6 +39,16 @@ class Compiler(BlockCompiler):
 		self.modes = { "fast":Compiler.FASTMODE,"slow":Compiler.SLOWMODE,"code":Compiler.CODEMODE }
 		self.pCodeRoutine = identMgr.find("run.pcode").getValue()
 	#
+	#		Compile one stream, report errors correctly and exit.
+	#
+	def compileManageErrors(self,stream):
+		try:
+			self.compile(stream)
+		except AmoralException as ex:
+			msg = "({0}:{1}) {2}\n".format(AmoralException.FILE,AmoralException.LINE,str(ex))
+			sys.stderr.write(msg)
+			sys.exit(1)
+
 	#		Compile one stream.
 	#
 	def compile(self,stream):
@@ -151,7 +162,7 @@ if __name__ == "__main__":
 		}
 	"""
 	src = src.split("\n")															# make into lines.
-	f = cm.compile(TextStream(src))													# compile 
+	f = cm.compileManageErrors(TextStream(src))										# compile 
 
 	cb.createApplication(im)														# dump it.
 	print("Next '"+cm.parser.get()+"'")												# check EOF

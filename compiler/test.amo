@@ -1,0 +1,19 @@
+#
+#		Amoral test program.
+#
+var ga,gb,gdemo;
+proc say.hi(n,n1) { 
+	print.hex(n+n1);
+	print.string(" HELLO, WORLD! FROM WRAPPER TEST.AMO");
+	print.crlf();
+}
+#
+#		Main program.
+#
+proc main() {
+	var i
+	print.hex(true);print.hex(false);print.crlf();
+	times(15,i) {
+		say.hi(i,100)
+	}
+}

@@ -9,7 +9,7 @@
 # *******************************************************************************************
 # *******************************************************************************************
 
-import re
+import re,sys
 from exception import *
 
 # *******************************************************************************************
@@ -19,7 +19,13 @@ from exception import *
 # *******************************************************************************************
 
 class Stream(object):
-	pass
+	#	
+	def setError(self,fileName):
+		AmoralException.LINE = 0
+		AmoralException.FILE = fileName
+	#
+	def nextLine(self):
+		AmoralException.LINE += 1
 
 # *******************************************************************************************
 #
@@ -32,11 +38,13 @@ class TextStream(Stream):
 	#		Set up
 	#
 	def __init__(self,streamText):
+		self.setError("<TextStream>")
 		self.streamText = streamText
 	#
 	#		Get next line.
 	#
 	def get(self):
+		self.nextLine()
 		return "" if self.isDone() else self.streamText.pop(0)
 	#
 	#		Check end of stream.
@@ -44,6 +52,22 @@ class TextStream(Stream):
 	def isDone(self):
 		return len(self.streamText) == 0
 
+# *******************************************************************************************
+#
+#						Simple input stream that works from a file
+#
+# *******************************************************************************************
+
+class FileStream(TextStream):
+	def __init__(self,srcFile):
+		try:
+			srcText = open(srcFile).readlines()
+		except FileNotFoundError:
+			print("No source file "+srcFile)
+			sys.exit(1)
+		TextStream.__init__(self,srcText)
+		self.setError(srcFile)
+		
 # *******************************************************************************************
 #
 #								Parse an input stream.
