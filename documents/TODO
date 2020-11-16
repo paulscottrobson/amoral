@@ -2,12 +2,10 @@ TODO List
 =========
 
 Compiler:
-	Work on:
-		- do some basic benchmarks just to see.
-		
 	Outer level ; function/Procedure definitions and variables (re-use vardef code for both)
-
 	Inline code blocks []
+
+Wrapper/Project:
 
 PostCompiler:
 	Write handler for structure generation.
