@@ -106,6 +106,8 @@ EndRunPCode:
 		.include 	"muldiv.asm"			; routines that provide support for 6502 code mul and div.
 		.include 	"utility.asm"			; utility functions.
 
+		.include "sys/x16/porting.asm"		; X16 specific stuff.
+		
 RuntimeEnd:		
 ;
 ;		As is, there is no end marker, so that code can be added on.

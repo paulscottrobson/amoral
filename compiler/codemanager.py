@@ -84,6 +84,11 @@ class CodeBlock(object):
 	def getAddr(self):
 		return self.nextFree	
 	#
+	#		Get variable base
+	#
+	def getVariableBase(self):
+		return self.variables
+	#
 	#		Open a new definition.
 	#	
 	def open(self,definitionName):

@@ -41,6 +41,11 @@ class BlockCompiler(object):
 		self.command = {	"!":RTOpcodes.STR,"+":RTOpcodes.ADD,"-":RTOpcodes.SUB,
 							"*":RTOpcodes.MLT,"/":RTOpcodes.DIV,"%":RTOpcodes.MOD,
 							"&":RTOpcodes.AND,"|":RTOpcodes.ORR,"^":RTOpcodes.XOR }
+		#
+		#		Test fails
+		#
+		self.testFail = { 	"==":RTOpcodes.BNE,"<>":RTOpcodes.BEQ, 
+							">=":RTOpcodes.BMI,"<":RTOpcodes.BPL }
 	#
 	#		Compile block, e.g. a piece of code between {}. This includes all those in
 	#		inner compile.
@@ -67,7 +72,15 @@ class BlockCompiler(object):
 			#
 			elif fs == "times":														# times()
 				self.parser.get()													# throw it.
-				self.timesStructure()				
+				self.timesStructure()	
+			#
+			elif fs == "while":														# while ?
+				self.parser.get()
+				self.whileStructure()			
+			#
+			elif fs == "if":														# if ?
+				self.parser.get()
+				self.ifStructure()			
 			#
 			elif fs[0] >= 'a' and fs[0] <= 'z':										# Identifier must be a call.
 				self.parser.get()													# throw it.
@@ -116,6 +129,12 @@ class BlockCompiler(object):
 			#																		# alphanumeric (variable)
 			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None and isinstance(ident,Variable):	
 				self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
+			#
+			elif s == "@":															# address of variable
+				ident = self.im.find(self.parser.get())
+				if ident is None or not isinstance(ident,Variable):
+					raise AmoralException("@ missing variable")
+				self.cg.cmdImm(RTOpcodes.LDR,ident.getValue()*2+self.cb.getVariableBase())
 			#
 			elif s in self.unary:													# unary operators.
 				self.cg.unary(self.unary[s])
@@ -214,11 +233,43 @@ class BlockCompiler(object):
 		self.cg.cmdVar(RTOpcodes.STR,varID)											# write it.
 		timesLoop = self.cb.getAddr()												# loop address			
 		#
-		#	Loop
-		#
 		self.cg.decVar(varID)														# decrement the variable.
 		self.blockCompile()															# loop body.
 		self.cg.loadBranchNonZero(varID,timesLoop)									# loop back if <> 0
+	#
+	#		Handle while
+	#
+	def whileStructure(self):
+		whileLoop = self.cb.getAddr()												# we come back here.
+		failPatch = self.compileCondition()											# compile the test
+		self.blockCompile()															# while body.
+		self.cg.branch(RTOpcodes.BRA,whileLoop)										# loop back at end.
+		self.cg.patchBranch(failPatch,self.cb.getAddr())							# jump here when test fails
+	#
+	#		Handle if
+	#
+	def ifStructure(self):
+		failPatch = self.compileCondition()											# compile the test
+		self.blockCompile()															# while body.
+		self.cg.patchBranch(failPatch,self.cb.getAddr())							# jump here when test fails
+	#
+	#		Compile condition, returns branch address when test fails.
+	#		
+	def compileCondition(self):
+		if self.parser.get() != "(":												# check (
+			raise AmoralException("Missing (")		
+		test = self.innerCompile()													# get value to test.		
+		if test not in self.testFail:
+			raise AmoralException("Bad test")
+		self.parser.get()															# consume test
+		cval = self.parser.get()													# get value to test against
+		if cval == "" or cval[0] < "0" or cval[0] >= "9":
+			raise AmoralException("Bad comparison constant")
+		if self.parser.get() != ")":												# check )
+			raise AmoralException("Missing )")		
+		if cval != "0":																# adjust for constant.
+			self.cg.cmdImm(RTOpcodes.SUB,int(cval))
+		return self.cg.branch(self.testFail[test])									# write branch, patched l8r
 	#
 	#		Set or clear generate PCode flag.
 	#							
@@ -226,31 +277,44 @@ class BlockCompiler(object):
 		self.usePCode = usePCode
 		self.cg = self.slowGenerator if usePCode else self.fastGenerator
 
-
-
 if __name__ == "__main__":
 	cb = CodeBlock()
 	im = FakeIdentifierManager()
 	cb.importRuntime(im)
-	cb.show = True
 	rt = RuntimeCodeGenerator(cb)
-	#
 	cm = BlockCompiler(im,cb,rt,None)
-	cb.open("main")
-	xa = im.find("run.pcode")
+	#
+	cb.open("main")																	# create new def
+	xa = im.find("run.pcode")														# write JSR run.pcode
 	cb.append(0x20)
 	cb.append16(xa.getValue())
-	src = '42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!"'
+	#
+	#		Test sources.
+	#
+	src = '{ 42 612 g0 l1 ++ << << +9 *2 *l0 "Hi!" }'
+
 	src = """{ var a,b,c; 43!a;print.character(42);print.character(a+1);
 			print.hex(32766);print.string("HELLO WORLD!")
 			halt.program(); }"""
 
 	src = "{ var a; times(2) { times(5,a) { print.hex(a); }} halt.program(); }"
+
 	src = '{ var a;print.string("START"); times(100) { times(1000) { a++!a }}	 print.string("END"); halt.program(); }'
-	src = src.split("\n")
-	cm.parser = Parser(TextStream(src))
-	f = cm.blockCompile()
-	cb.close()
-	cb.createApplication(im)
-	print("Next '"+cm.parser.get()+"'")
-	print(im.toString())	
+
+	src = """{ var a;4!a;
+				while (a < 10) { if (a%2 == 0) { print.hex(a); }
+								 a++!a; }
+				halt.program();
+			}"""
+
+	src = """{ var a,b,c;times(20) { times(4444) {} read.timer();print.hex(~) };halt.program(); }"""
+
+	cb.show = False																	# True to o/p code.
+
+	src = src.split("\n")															# make into parser
+	cm.parser = Parser(TextStream(src))												# set the parser (cheat)
+	f = cm.blockCompile()															# compile 
+	cb.close()																		# close definition
+	cb.createApplication(im)														# dump it.
+	print("Next '"+cm.parser.get()+"'")												# check EOF
+	print(im.toString())															# show identifiers

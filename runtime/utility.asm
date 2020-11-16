@@ -40,24 +40,11 @@ EndVariableClear:
 ;
 ; *******************************************************************************************
 
-		define 	"halt.program",EndHaltProgram
+		define 	"halt.program:0",EndHaltProgram
 HaltProgram:
 		jmp 	HaltProgram
 EndHaltProgram:
 		
-; *******************************************************************************************
-;
-;									Print Character
-;
-; *******************************************************************************************
-
-		define 	"print.character:1",EndPrintCharacter
-PrintCharacter:
-		jsr 	$FFD2
-		rts
-
-EndPrintCharacter:
-
 ; *******************************************************************************************
 ;
 ;								Print Hex w/leading space

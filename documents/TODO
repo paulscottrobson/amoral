@@ -3,7 +3,6 @@ TODO List
 
 Compiler:
 	Work on:
-		- structures (if, while)
 		- do some basic benchmarks just to see.
 		
 	Outer level ; function/Procedure definitions and variables (re-use vardef code for both)
@@ -24,3 +23,4 @@ Notes:
 	Compiler optimise for +/-1 *2/2 			?
 	Consider Length, Abs, Random, Sgn unary functions. ?
 	Comparison to constants ?
+	FFDE AXY Bug on timer.
