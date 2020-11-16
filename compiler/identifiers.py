@@ -101,7 +101,7 @@ class IdentifierManager(object):
 	def _add(self,identifier,isLocal):
 		name = identifier.getName()
 		if name in self.locals or name in self.globals:
-			raise "Duplicate identifier {0}".format(name)
+			raise AmoralException("Duplicate identifier {0}".format(name))
 		if isLocal:
 			self.locals[name] = identifier
 		else:

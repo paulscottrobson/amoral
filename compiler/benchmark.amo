@@ -1,0 +1,91 @@
+#
+#		Benchmarks . Adapted from PCW.
+#
+
+func sub.call() {}
+#
+#		Benchmark 1 (empty or loop) 0.08s
+#
+func benchmark1() {
+	var k;
+	times(1000,k) { }
+	40;
+}
+#
+#		Benchmark 2 (empty while loop, with GOTOs)
+#
+func benchmark2() {
+	var k; 0!k
+	while (k < 1000) { 
+		k++!k 
+	} 20;
+}
+#
+#		Benchmark 3 (var operator while loop, with GOTOs)
+#
+func benchmark3() {
+	var a,k; 0!k
+	while (k < 1000) { 
+		k++!k 
+		k*k/k+k-k !a
+	} 10;
+}
+#
+#		Benchmark 4 (const operator while loop, with GOTOs)
+#
+func benchmark4() {
+	var a,k; 0!k
+	while (k < 1000) { 
+		k++!k 
+		k*2/3+4-5 !a
+	} 10;
+}
+#
+#		Benchmark 5 (const operator/sub function while loop, with GOTOs)
+#
+func benchmark5() {
+	var a,k; 0!k
+	while (k < 1000) { 
+		k++!k 
+		k*2/3+4-5 !a
+		sub.call()
+	} 10;
+}
+#
+#		Benchmark 6 (const operator/sub function/loop while loop, with GOTOs)
+#
+func benchmark6() {
+	var a,k; 0!k
+	while (k < 1000) { 
+		k++!k 
+		k*2/3+4-5 !a
+		sub.call()
+		times(5) {}
+	} 10;
+}
+#
+#		Change this to decide which to run.
+#
+func bench.select() {
+	benchmark6()
+}
+
+proc main() {
+	var bm.count,start.time,end.time,elapsed;
+
+	bench.select() !bm.count 				# call once to find out how many.
+
+	read.timer() !start.time
+	times(bm.count) { bench.select(); }
+	read.timer() !end.time
+
+	print.hex(bm.count)
+	print.hex(start.time)
+	print.hex(end.time)
+
+	end.time-start.time*100/60/bm.count 	# calculate and scale for # calls and 60Hz clock.
+	print.hex(~);print.string(" CS")
+}
+
+
+

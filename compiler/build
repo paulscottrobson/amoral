@@ -8,5 +8,5 @@ pushd ../runtime >/dev/null
 cp runtime.prg ../compiler
 popd >/dev/null
 make -s
-python amoral.zip -o test.prg test.amo
+python amoral.zip -s -o test.prg benchmark.amo
 ../bin/x16emu -debug -prg test.prg -scale 2 -run
