@@ -125,7 +125,7 @@ class BlockCompiler(object):
 			elif s == "0":															# zero const use clear.
 				self.cg.unary(RTOpcodes.CLR)
 			#
-			elif s >= "0" and s <= "9":												# is it a constant ?
+			elif s[0] >= "0" and s[0] <= "9":										# is it a constant ?
 				self.cg.cmdImm(RTOpcodes.LDR,int(s))
 			#
 			elif s == "true" or s == "false":										# true/false

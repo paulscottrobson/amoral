@@ -1,19 +1,64 @@
-#
-#		Amoral test program.
-#
-struct point3d { x,y,z }
+var count
+var ballArray
+
+struct ball { x,y,xi,yi,colour }
+
+func times.16() {
+	<< << << <<
+}
+
+proc ball.draw(char) {
+	var addr,c
+	ball.r_x() << !addr
+	ball.r_y() times.16() times.16() +addr !addr
+	poke.v(0,addr,char)
+	ball.r_colour() !c poke.v(0,addr+1,c)
+}
+
+proc ball.x_flip() {
+	ball.r_xi() neg(~) ball.w_xi(~) 
+}
+
+proc ball.y_flip() {
+	ball.r_yi() neg(~) ball.w_yi(~) 
+}
+
+proc ball.move() {
+	var t
+	ball.draw(32)
+	ball.r_x() !t ball.r_xi() +t !t
+	if (t==79) { ball.x_flip() }
+	if (t==0) { ball.x_flip() }
+	t ball.w_x()
+
+	ball.r_y() !t ball.r_yi() +t !t
+	if (t==59) { ball.y_flip() }
+	if (t==0) { ball.y_flip() }
+	t ball.w_y()
+	ball.draw(42)
+}
+
+proc ball.initialise() {
+	random() % 68 ++ ball.w_x() 
+	random() % 48 ++ ball.w_y()
+	random() sgn() ball.w_xi()
+	random() sgn() ball.w_yi()
+	random() % 15 ++ ball.w_colour()
+}
 
 slow proc main() {
-	print.character(147)
-	
-	point3d.new() print.hex(~)
-	point3d.w_x(42)
-	point3d.w_y(442)
-	point3d.w_z(44442)
+	var i,a,ptr
+	print.character(144);print.character(1);print.character(147);print.character(142)
+	32 !count
+	<< alloc(~) !ballArray  print.hex(~)
+	times(count,i) {
+		i << +ballArray !ptr ball.new() !a poke.w(ptr,a)
+		ball.initialise()
+	}
 
-	point3d.r_x() print.int(~)
-	point3d.r_y() print.int(~)
-	point3d.r_z() print.int(~)
-
-	4 neg(~) print.sint(~)
+	times(55555) {
+		times(count,i) {
+			i << +ballArray peek.w(~) ball.use(~) ball.move()
+		}
+	}	
 }

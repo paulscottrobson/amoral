@@ -2,6 +2,8 @@ TODO List
 =========
 
 PostCompiler:
+	Any reason why functions can't be used in parameters ?? Not that I can think of. Consider it.
+	Useful for members of structures.
 
 	Write Balls/Amoral.
 

@@ -47,7 +47,7 @@ class StructureHelper(object):
 	#		Create use method.
 	#
 	def createUse(self):
-		code = self.createRoutine(self.name+".use")
+		code = self.createRoutine(self.name+".use",True)
 		self.cb.append(Asm6502.STA_Z)		# sta zp
 		self.cb.append(self.zpRef)
 		self.cb.append(Asm6502.STX_Z)		# stx zp+1
