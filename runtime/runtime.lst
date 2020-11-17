@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Mon Nov 16 21:26:40 2020
+; 64tass --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Tue Nov 17 06:02:46 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -31,10 +31,10 @@
 >1017	10						.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 >1018	00 10						.word 	BootAddr 					; the address of boot
 >101a	00 08						.word 	VarAddr 					; the address of the variables
->101c	d0 16						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	e6 16						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 .101e					AllocMem:
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
->1020	9b 02					.word 	EndRunPCode-* 							; offset to next entry
+>1020	b1 02					.word 	EndRunPCode-* 							; offset to next entry
 >1022	72 75 6e 2e 70 63 6f 64			.text 	"run.pcode:0",0 							; the text (must be lower case)
 >102a	65 3a 30 00
 >102e						.align 	2								; force to even boundary.
@@ -119,21 +119,21 @@
 >10a2	45 11					.word Xorhandler               ; $83 XOR
 >10a4	fb 10					.word Addhandler               ; $84 ADD
 >10a6	0e 11					.word Subhandler               ; $85 SUB
->10a8	36 12					.word MultiplyHandler          ; $86 MLT
->10aa	6b 12					.word DivideHandler            ; $87 DIV
->10ac	84 12					.word ModulusHandler           ; $88 MOD
->10ae	99 10					.word OpcodeError              ; $89 ?
+>10a8	4c 12					.word MultiplyHandler          ; $86 MLT
+>10aa	81 12					.word DivideHandler            ; $87 DIV
+>10ac	9a 12					.word ModulusHandler           ; $88 MOD
+>10ae	57 11					.word DecHandler               ; $89 DEC
 >10b0	ea 10					.word StoreHandler             ; $8a STR
->10b2	d4 11					.word Branch_Always            ; $8b BRA
->10b4	e3 11					.word Branch_Zero              ; $8c BEQ
->10b6	eb 11					.word Branch_NonZero           ; $8d BNE
->10b8	ff 11					.word Branch_Minus             ; $8e BMI
->10ba	05 12					.word Branch_Positive          ; $8f BPL
->10bc	0b 12					.word Inc_Unary                ; $f0 INC
->10be	14 12					.word Dec_Unary                ; $f1 DEC
->10c0	1f 12					.word Shl_Unary                ; $f2 SHL
->10c2	26 12					.word Shr_Unary                ; $f3 SHR
->10c4	2d 12					.word Clr_Unary                ; $f4 CLR
+>10b2	ea 11					.word Branch_Always            ; $8b BRA
+>10b4	f9 11					.word Branch_Zero              ; $8c BEQ
+>10b6	01 12					.word Branch_NonZero           ; $8d BNE
+>10b8	15 12					.word Branch_Minus             ; $8e BMI
+>10ba	1b 12					.word Branch_Positive          ; $8f BPL
+>10bc	21 12					.word Inc_Unary                ; $f0 INC
+>10be	2a 12					.word Dec_Unary                ; $f1 DEC
+>10c0	35 12					.word Shl_Unary                ; $f2 SHL
+>10c2	3c 12					.word Shr_Unary                ; $f3 SHR
+>10c4	43 12					.word Clr_Unary                ; $f4 CLR
 >10c6	74 10					.word Command_Return           ; $f5 RET
 >10c8	99 10					.word OpcodeError              ; $f6 ?
 >10ca	99 10					.word OpcodeError              ; $f7 ?
@@ -155,14 +155,14 @@
 ;******  Processing file: commands.asm
 
 .10dc					LoadHandler:
-.10dc	20 57 11	jsr $1157			jsr 	EvaluateValue 				; temp0 = target value.
+.10dc	20 6d 11	jsr $116d			jsr 	EvaluateValue 				; temp0 = target value.
 .10df	a5 0c		lda $0c				lda 	temp0						; copy value into register
 .10e1	85 08		sta $08				sta 	Reg16
 .10e3	a5 0d		lda $0d				lda 	temp0+1
 .10e5	85 09		sta $09				sta 	Reg16+1
 .10e7	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .10ea					StoreHandler:
-.10ea	20 8c 11	jsr $118c			jsr 	EvaluateAddress 			; temp0 = target address.
+.10ea	20 a2 11	jsr $11a2			jsr 	EvaluateAddress 			; temp0 = target address.
 .10ed	a0 00		ldy #$00			ldy 	#0							; write register out
 .10ef	a5 08		lda $08				lda 	Reg16
 .10f1	91 0c		sta ($0c),y			sta 	(temp0),y
@@ -171,7 +171,7 @@
 .10f6	91 0c		sta ($0c),y			sta 	(temp0),y
 .10f8	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .10fb					Addhandler:
-.10fb	20 57 11	jsr $1157			jsr 	EvaluateValue
+.10fb	20 6d 11	jsr $116d			jsr 	EvaluateValue
 .10fe	18		clc				clc
 .10ff	a5 08		lda $08				lda 	Reg16
 .1101	65 0c		adc $0c				adc 	temp0
@@ -181,7 +181,7 @@
 .1109	85 09		sta $09				sta 	Reg16+1
 .110b	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .110e					Subhandler:
-.110e	20 57 11	jsr $1157			jsr 	EvaluateValue
+.110e	20 6d 11	jsr $116d			jsr 	EvaluateValue
 .1111	38		sec				sec
 .1112	a5 08		lda $08				lda 	Reg16
 .1114	e5 0c		sbc $0c				sbc 	temp0
@@ -191,7 +191,7 @@
 .111c	85 09		sta $09				sta 	Reg16+1
 .111e	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .1121					Andhandler:
-.1121	20 57 11	jsr $1157			jsr 	EvaluateValue
+.1121	20 6d 11	jsr $116d			jsr 	EvaluateValue
 .1124	a5 08		lda $08				lda 	Reg16
 .1126	25 0c		and $0c				and 	temp0
 .1128	85 08		sta $08				sta 	Reg16
@@ -200,7 +200,7 @@
 .112e	85 09		sta $09				sta 	Reg16+1
 .1130	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .1133					Orhandler:
-.1133	20 57 11	jsr $1157			jsr 	EvaluateValue
+.1133	20 6d 11	jsr $116d			jsr 	EvaluateValue
 .1136	a5 08		lda $08				lda 	Reg16
 .1138	05 0c		ora $0c				ora 	temp0
 .113a	85 08		sta $08				sta 	Reg16
@@ -209,7 +209,7 @@
 .1140	85 09		sta $09				sta 	Reg16+1
 .1142	4c 3e 10	jmp $103e			jmp 	ExecLoop
 .1145					Xorhandler:
-.1145	20 57 11	jsr $1157			jsr 	EvaluateValue
+.1145	20 6d 11	jsr $116d			jsr 	EvaluateValue
 .1148	a5 08		lda $08				lda 	Reg16
 .114a	45 0c		eor $0c				eor 	temp0
 .114c	85 08		sta $08				sta 	Reg16
@@ -217,703 +217,715 @@
 .1150	45 0d		eor $0d				eor 	temp0+1
 .1152	85 09		sta $09				sta 	Reg16+1
 .1154	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.1157					DecHandler:
+.1157	20 a2 11	jsr $11a2			jsr 	EvaluateAddress 			; temp0 = target address.
+.115a	a0 00		ldy #$00			ldy 	#0
+.115c	38		sec				sec
+.115d	b1 0c		lda ($0c),y			lda 	(temp0),y 					; subtract one from the address
+.115f	e9 01		sbc #$01			sbc 	#1
+.1161	91 0c		sta ($0c),y			sta 	(temp0),y
+.1163	c8		iny				iny
+.1164	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1166	e9 01		sbc #$01			sbc 	#1
+.1168	91 0c		sta ($0c),y			sta 	(temp0),y
+.116a	4c 3e 10	jmp $103e			jmp 	ExecLoop
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: support.asm
 
-.1157					EvaluateValue:
-.1157	98		tya				tya 								; get EAC part and save in X
-.1158	29 70		and #$70			and 	#$70
-.115a	aa		tax				tax
-.115b	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
-.115d	b0 1d		bcs $117c			bcs 	_EDMemory
-.115f	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.1161	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1163	85 0c		sta $0c				sta 	temp0
-.1165	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.1167	e6 0a		inc $0a			inc 	Pctr
-.1169	d0 02		bne $116d		bne 	nocarry
-.116b	e6 0b		inc $0b			inc 	1+(Pctr)
-.116d					nocarry:
-.116d	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
-.116f	f0 0a		beq $117b			beq 	_EACalcValue
-.1171	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.1173	85 0d		sta $0d				sta 	temp0+1
-.1175	e6 0a		inc $0a			inc 	Pctr
-.1177	d0 02		bne $117b		bne 	nocarry
-.1179	e6 0b		inc $0b			inc 	1+(Pctr)
-.117b					nocarry:
-.117b					_EACalcValue:
-.117b	60		rts				rts
-.117c					_EDMemory:
-.117c	20 8c 11	jsr $118c			jsr	 	EvaluateAddress 			; evaluate the address.
-.117f	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
-.1181	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1183	aa		tax				tax
-.1184	c8		iny				iny
-.1185	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1187	86 0c		stx $0c				stx 	temp0
+.116d					EvaluateValue:
+.116d	98		tya				tya 								; get EAC part and save in X
+.116e	29 70		and #$70			and 	#$70
+.1170	aa		tax				tax
+.1171	c9 20		cmp #$20			cmp 	#$20 						; check if 00,01 if so it is variable or absolute
+.1173	b0 1d		bcs $1192			bcs 	_EDMemory
+.1175	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.1177	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.1179	85 0c		sta $0c				sta 	temp0
+.117b	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.117d	e6 0a		inc $0a			inc 	Pctr
+.117f	d0 02		bne $1183		bne 	nocarry
+.1181	e6 0b		inc $0b			inc 	1+(Pctr)
+.1183					nocarry:
+.1183	e0 00		cpx #$00			cpx 	#0 							; if it is 000 then it is a one byte
+.1185	f0 0a		beq $1191			beq 	_EACalcValue
+.1187	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
 .1189	85 0d		sta $0d				sta 	temp0+1
-.118b	60		rts				rts
-.118c					EvaluateAddress:
-.118c	98		tya				tya 								; get EAC part of opcode.
-.118d	29 70		and #$70			and 	#$70
-.118f	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
-.1191	f0 29		beq $11bc			beq 	_EAAbsolute
-.1193	aa		tax				tax 								; save in X
-.1194	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
-.1196	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.1198	85 0c		sta $0c				sta 	temp0
-.119a	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
-.119c	e6 0a		inc $0a			inc 	Pctr
-.119e	d0 02		bne $11a2		bne 	nocarry
-.11a0	e6 0b		inc $0b			inc 	1+(Pctr)
-.11a2					nocarry:
-.11a2	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
-.11a4	f0 0a		beq $11b0			beq 	_EACalcVarAddress
-.11a6	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
-.11a8	85 0d		sta $0d				sta 	temp0+1
-.11aa	e6 0a		inc $0a			inc 	Pctr
-.11ac	d0 02		bne $11b0		bne 	nocarry
-.11ae	e6 0b		inc $0b			inc 	1+(Pctr)
-.11b0					nocarry:
-.11b0					_EACalcVarAddress:
-.11b0	06 0c		asl $0c				asl 	temp0 						; double the variable number
-.11b2	26 0d		rol $0d				rol 	temp0+1
-.11b4	18		clc				clc 								; add the page address of variable data on.
-.11b5	a5 0d		lda $0d				lda 	temp0+1
-.11b7	69 08		adc #$08			adc 	#VarAddr/256
-.11b9	85 0d		sta $0d				sta 	temp0+1
-.11bb	60		rts				rts
-.11bc					_EAAbsolute:
-.11bc	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
-.11be	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.11c0	85 0c		sta $0c				sta 	temp0
-.11c2	c8		iny				iny
-.11c3	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.11c5	85 0d		sta $0d				sta 	temp0+1
-.11c7					ReturnBump2
-.11c7	e6 0a		inc $0a			inc 	Pctr
-.11c9	d0 02		bne $11cd		bne 	nocarry
-.11cb	e6 0b		inc $0b			inc 	1+(Pctr)
-.11cd					nocarry:
-.11cd					ReturnBump1:
-.11cd	e6 0a		inc $0a			inc 	Pctr
-.11cf	d0 02		bne $11d3		bne 	nocarry
-.11d1	e6 0b		inc $0b			inc 	1+(Pctr)
-.11d3					nocarry:
-.11d3	60		rts				rts
+.118b	e6 0a		inc $0a			inc 	Pctr
+.118d	d0 02		bne $1191		bne 	nocarry
+.118f	e6 0b		inc $0b			inc 	1+(Pctr)
+.1191					nocarry:
+.1191					_EACalcValue:
+.1191	60		rts				rts
+.1192					_EDMemory:
+.1192	20 a2 11	jsr $11a2			jsr	 	EvaluateAddress 			; evaluate the address.
+.1195	a0 00		ldy #$00			ldy 	#0 							; 16 bit load indirect (temp0) => temp0
+.1197	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1199	aa		tax				tax
+.119a	c8		iny				iny
+.119b	b1 0c		lda ($0c),y			lda 	(temp0),y
+.119d	86 0c		stx $0c				stx 	temp0
+.119f	85 0d		sta $0d				sta 	temp0+1
+.11a1	60		rts				rts
+.11a2					EvaluateAddress:
+.11a2	98		tya				tya 								; get EAC part of opcode.
+.11a3	29 70		and #$70			and 	#$70
+.11a5	c9 40		cmp #$40			cmp 	#$40 						; is it an absolute address
+.11a7	f0 29		beq $11d2			beq 	_EAAbsolute
+.11a9	aa		tax				tax 								; save in X
+.11aa	a0 00		ldy #$00			ldy 	#0 							; read first byte into temp0
+.11ac	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11ae	85 0c		sta $0c				sta 	temp0
+.11b0	84 0d		sty $0d				sty 	temp0+1 					; make it 16 bit.
+.11b2	e6 0a		inc $0a			inc 	Pctr
+.11b4	d0 02		bne $11b8		bne 	nocarry
+.11b6	e6 0b		inc $0b			inc 	1+(Pctr)
+.11b8					nocarry:
+.11b8	e0 20		cpx #$20			cpx 	#$20 						; if it is 010 then it is a one byte
+.11ba	f0 0a		beq $11c6			beq 	_EACalcVarAddress
+.11bc	b1 0a		lda ($0a),y			lda 	(Pctr),y 					; read 2nd byte into temp0+1
+.11be	85 0d		sta $0d				sta 	temp0+1
+.11c0	e6 0a		inc $0a			inc 	Pctr
+.11c2	d0 02		bne $11c6		bne 	nocarry
+.11c4	e6 0b		inc $0b			inc 	1+(Pctr)
+.11c6					nocarry:
+.11c6					_EACalcVarAddress:
+.11c6	06 0c		asl $0c				asl 	temp0 						; double the variable number
+.11c8	26 0d		rol $0d				rol 	temp0+1
+.11ca	18		clc				clc 								; add the page address of variable data on.
+.11cb	a5 0d		lda $0d				lda 	temp0+1
+.11cd	69 08		adc #$08			adc 	#VarAddr/256
+.11cf	85 0d		sta $0d				sta 	temp0+1
+.11d1	60		rts				rts
+.11d2					_EAAbsolute:
+.11d2	a0 00		ldy #$00			ldy 	#0 							; get the address into temp0
+.11d4	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11d6	85 0c		sta $0c				sta 	temp0
+.11d8	c8		iny				iny
+.11d9	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11db	85 0d		sta $0d				sta 	temp0+1
+.11dd					ReturnBump2
+.11dd	e6 0a		inc $0a			inc 	Pctr
+.11df	d0 02		bne $11e3		bne 	nocarry
+.11e1	e6 0b		inc $0b			inc 	1+(Pctr)
+.11e3					nocarry:
+.11e3					ReturnBump1:
+.11e3	e6 0a		inc $0a			inc 	Pctr
+.11e5	d0 02		bne $11e9		bne 	nocarry
+.11e7	e6 0b		inc $0b			inc 	1+(Pctr)
+.11e9					nocarry:
+.11e9	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: branches.asm
 
-.11d4					Branch_Always:
-.11d4	a0 00		ldy #$00			ldy 	#0
-.11d6	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.11d8	aa		tax				tax
-.11d9	c8		iny				iny
-.11da	b1 0a		lda ($0a),y			lda 	(Pctr),y
-.11dc	85 0b		sta $0b				sta 	Pctr+1
-.11de	86 0a		stx $0a				stx 	Pctr
-.11e0	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.11e3					Branch_Zero:
-.11e3	a5 08		lda $08				lda 	Reg16
-.11e5	05 09		ora $09				ora 	Reg16+1
-.11e7	f0 eb		beq $11d4			beq 	Branch_Always
-.11e9	d0 06		bne $11f1			bne 	Branch_Fail
-.11eb					Branch_NonZero:
-.11eb	a5 08		lda $08				lda 	Reg16
-.11ed	05 09		ora $09				ora 	Reg16+1
-.11ef	d0 e3		bne $11d4			bne 	Branch_Always
-.11f1					Branch_Fail:
-.11f1	18		clc				clc
-.11f2	a5 0a		lda $0a				lda 	Pctr
-.11f4	69 02		adc #$02			adc 	#2
-.11f6	85 0a		sta $0a				sta 	Pctr
-.11f8	d0 02		bne $11fc			bne 	_BFNoCarry
-.11fa	e6 0b		inc $0b				inc 	Pctr+1
-.11fc					_BFNoCarry:
-.11fc	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.11ff					Branch_Minus:
-.11ff	a5 09		lda $09				lda 	Reg16+1
-.1201	30 d1		bmi $11d4			bmi 	Branch_Always
-.1203	10 ec		bpl $11f1			bpl 	Branch_Fail
-.1205					Branch_Positive:
-.1205	a5 09		lda $09				lda 	Reg16+1
-.1207	10 cb		bpl $11d4			bpl 	Branch_Always
-.1209	30 e6		bmi $11f1			bmi 	Branch_Fail
+.11ea					Branch_Always:
+.11ea	a0 00		ldy #$00			ldy 	#0
+.11ec	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11ee	aa		tax				tax
+.11ef	c8		iny				iny
+.11f0	b1 0a		lda ($0a),y			lda 	(Pctr),y
+.11f2	85 0b		sta $0b				sta 	Pctr+1
+.11f4	86 0a		stx $0a				stx 	Pctr
+.11f6	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.11f9					Branch_Zero:
+.11f9	a5 08		lda $08				lda 	Reg16
+.11fb	05 09		ora $09				ora 	Reg16+1
+.11fd	f0 eb		beq $11ea			beq 	Branch_Always
+.11ff	d0 06		bne $1207			bne 	Branch_Fail
+.1201					Branch_NonZero:
+.1201	a5 08		lda $08				lda 	Reg16
+.1203	05 09		ora $09				ora 	Reg16+1
+.1205	d0 e3		bne $11ea			bne 	Branch_Always
+.1207					Branch_Fail:
+.1207	18		clc				clc
+.1208	a5 0a		lda $0a				lda 	Pctr
+.120a	69 02		adc #$02			adc 	#2
+.120c	85 0a		sta $0a				sta 	Pctr
+.120e	d0 02		bne $1212			bne 	_BFNoCarry
+.1210	e6 0b		inc $0b				inc 	Pctr+1
+.1212					_BFNoCarry:
+.1212	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.1215					Branch_Minus:
+.1215	a5 09		lda $09				lda 	Reg16+1
+.1217	30 d1		bmi $11ea			bmi 	Branch_Always
+.1219	10 ec		bpl $1207			bpl 	Branch_Fail
+.121b					Branch_Positive:
+.121b	a5 09		lda $09				lda 	Reg16+1
+.121d	10 cb		bpl $11ea			bpl 	Branch_Always
+.121f	30 e6		bmi $1207			bmi 	Branch_Fail
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: unary.asm
 
-.120b					Inc_Unary:
-.120b	e6 08		inc $08			inc 	Reg16
-.120d	d0 02		bne $1211		bne 	nocarry
-.120f	e6 09		inc $09			inc 	1+(Reg16)
-.1211					nocarry:
-.1211	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1214					Dec_Unary:
-.1214	a5 08		lda $08			lda 	Reg16
-.1216	d0 02		bne $121a		bne 	noborrow
-.1218	c6 09		dec $09			dec 	1+(Reg16)
-.121a					noborrow:
-.121a	c6 08		dec $08			dec 	Reg16
-.121c	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.121f					Shl_Unary:
-.121f	06 08		asl $08				asl 	Reg16
-.1221	26 09		rol $09				rol 	Reg16+1
-.1223	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1226					Shr_Unary:
-.1226	46 09		lsr $09				lsr 	Reg16+1
-.1228	66 08		ror $08				ror 	Reg16
-.122a	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.122d					Clr_Unary:
-.122d	a9 00		lda #$00			lda 	#0
-.122f	85 08		sta $08				sta		Reg16
-.1231	85 09		sta $09				sta 	Reg16+1
-.1233	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.1221					Inc_Unary:
+.1221	e6 08		inc $08			inc 	Reg16
+.1223	d0 02		bne $1227		bne 	nocarry
+.1225	e6 09		inc $09			inc 	1+(Reg16)
+.1227					nocarry:
+.1227	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.122a					Dec_Unary:
+.122a	a5 08		lda $08			lda 	Reg16
+.122c	d0 02		bne $1230		bne 	noborrow
+.122e	c6 09		dec $09			dec 	1+(Reg16)
+.1230					noborrow:
+.1230	c6 08		dec $08			dec 	Reg16
+.1232	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.1235					Shl_Unary:
+.1235	06 08		asl $08				asl 	Reg16
+.1237	26 09		rol $09				rol 	Reg16+1
+.1239	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.123c					Shr_Unary:
+.123c	46 09		lsr $09				lsr 	Reg16+1
+.123e	66 08		ror $08				ror 	Reg16
+.1240	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.1243					Clr_Unary:
+.1243	a9 00		lda #$00			lda 	#0
+.1245	85 08		sta $08				sta		Reg16
+.1247	85 09		sta $09				sta 	Reg16+1
+.1249	4c 3e 10	jmp $103e			jmp 	ExecLoop
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: multiply.asm
 
-.1236					MultiplyHandler:
-.1236	20 57 11	jsr $1157			jsr 	EvaluateValue 				; temp0 = target value.
-.1239	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
-.123b	85 0e		sta $0e				sta 	temp1
-.123d	a5 09		lda $09				lda	 	Reg16+1
-.123f	85 0f		sta $0f				sta 	temp1+1
-.1241	20 47 12	jsr $1247			jsr 	Multiply 					; Reg16 := temp0 * temp1
-.1244	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1247					Multiply:
-.1247	a9 00		lda #$00			lda 	#0 							; zero total.
-.1249	85 08		sta $08				sta 	Reg16
-.124b	85 09		sta $09				sta 	Reg16+1
-.124d					_MultLoop:
-.124d	46 0d		lsr $0d				lsr 	temp0+1
-.124f	66 0c		ror $0c				ror 	temp0
-.1251	90 0d		bcc $1260			bcc 	_MultNoAdd
-.1253	18		clc				clc
-.1254	a5 0e		lda $0e				lda 	temp1
-.1256	65 08		adc $08				adc 	Reg16
-.1258	85 08		sta $08				sta 	Reg16
-.125a	a5 0f		lda $0f				lda 	temp1+1
-.125c	65 09		adc $09				adc 	Reg16+1
-.125e	85 09		sta $09				sta 	Reg16+1
-.1260					_MultNoAdd:
-.1260	06 0e		asl $0e				asl 	temp1
-.1262	26 0f		rol $0f				rol 	temp1+1
-.1264	a5 0c		lda $0c				lda 	temp0
-.1266	05 0d		ora $0d				ora 	temp0+1
-.1268	d0 e3		bne $124d			bne 	_MultLoop
-.126a	60		rts				rts
+.124c					MultiplyHandler:
+.124c	20 6d 11	jsr $116d			jsr 	EvaluateValue 				; temp0 = target value.
+.124f	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.1251	85 0e		sta $0e				sta 	temp1
+.1253	a5 09		lda $09				lda	 	Reg16+1
+.1255	85 0f		sta $0f				sta 	temp1+1
+.1257	20 5d 12	jsr $125d			jsr 	Multiply 					; Reg16 := temp0 * temp1
+.125a	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.125d					Multiply:
+.125d	a9 00		lda #$00			lda 	#0 							; zero total.
+.125f	85 08		sta $08				sta 	Reg16
+.1261	85 09		sta $09				sta 	Reg16+1
+.1263					_MultLoop:
+.1263	46 0d		lsr $0d				lsr 	temp0+1
+.1265	66 0c		ror $0c				ror 	temp0
+.1267	90 0d		bcc $1276			bcc 	_MultNoAdd
+.1269	18		clc				clc
+.126a	a5 0e		lda $0e				lda 	temp1
+.126c	65 08		adc $08				adc 	Reg16
+.126e	85 08		sta $08				sta 	Reg16
+.1270	a5 0f		lda $0f				lda 	temp1+1
+.1272	65 09		adc $09				adc 	Reg16+1
+.1274	85 09		sta $09				sta 	Reg16+1
+.1276					_MultNoAdd:
+.1276	06 0e		asl $0e				asl 	temp1
+.1278	26 0f		rol $0f				rol 	temp1+1
+.127a	a5 0c		lda $0c				lda 	temp0
+.127c	05 0d		ora $0d				ora 	temp0+1
+.127e	d0 e3		bne $1263			bne 	_MultLoop
+.1280	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: divide.asm
 
-.126b					DivideHandler:
-.126b	20 57 11	jsr $1157			jsr 	EvaluateValue 				; temp0 = target value.
-.126e	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
-.1270	85 0e		sta $0e				sta 	temp1
-.1272	a5 09		lda $09				lda	 	Reg16+1
-.1274	85 0f		sta $0f				sta 	temp1+1
-.1276	20 95 12	jsr $1295			jsr 	Divide 						; temp1 := temp1 / temp0
-.1279	a5 0e		lda $0e				lda 	temp1 						; copy result into register
-.127b	85 08		sta $08				sta 	Reg16
-.127d	a5 0f		lda $0f				lda 	temp1+1
-.127f	85 09		sta $09				sta 	Reg16+1
-.1281	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1284					ModulusHandler:
-.1284	20 57 11	jsr $1157			jsr 	EvaluateValue 				; temp0 = target value.
-.1287	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
-.1289	85 0e		sta $0e				sta 	temp1
-.128b	a5 09		lda $09				lda	 	Reg16+1
-.128d	85 0f		sta $0f				sta 	temp1+1
-.128f	20 95 12	jsr $1295			jsr 	Divide 						; temp1 := temp1 / temp0, mod => Reg16
-.1292	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1295					Divide:
-.1295	a9 00		lda #$00			lda 	#0 							; set A = 0
-.1297	85 08		sta $08				sta 	Reg16
-.1299	85 09		sta $09				sta 	Reg16+1
-.129b	a0 10		ldy #$10			ldy 	#16 						; loop round 16 times.
-.129d					_DivLoop:
-.129d	06 0e		asl $0e				asl 	temp1 						; shift QA left. Q first
-.129f	26 0f		rol $0f				rol 	temp1+1
-.12a1	26 08		rol $08				rol 	Reg16 						; shift A left carrying in.
-.12a3	26 09		rol $09				rol 	Reg16+1
-.12a5	38		sec				sec 								; calculate A-M, result in XA/C
-.12a6	a5 08		lda $08				lda 	Reg16
-.12a8	e5 0c		sbc $0c				sbc 	temp0
-.12aa	aa		tax				tax
-.12ab	a5 09		lda $09				lda 	Reg16+1
-.12ad	e5 0d		sbc $0d				sbc 	temp0+1
-.12af	90 06		bcc $12b7			bcc 	_DivNoUpdate 				; if A >= M then store result and set Q bit 0.
-.12b1	85 09		sta $09				sta 	Reg16+1
-.12b3	86 08		stx $08				stx 	Reg16
-.12b5	e6 0e		inc $0e				inc 	temp1 						; we know it is even.
-.12b7					_DivNoUpdate:
-.12b7	88		dey				dey
-.12b8	d0 e3		bne $129d			bne 	_DivLoop
-.12ba	60		rts				rts
+.1281					DivideHandler:
+.1281	20 6d 11	jsr $116d			jsr 	EvaluateValue 				; temp0 = target value.
+.1284	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.1286	85 0e		sta $0e				sta 	temp1
+.1288	a5 09		lda $09				lda	 	Reg16+1
+.128a	85 0f		sta $0f				sta 	temp1+1
+.128c	20 ab 12	jsr $12ab			jsr 	Divide 						; temp1 := temp1 / temp0
+.128f	a5 0e		lda $0e				lda 	temp1 						; copy result into register
+.1291	85 08		sta $08				sta 	Reg16
+.1293	a5 0f		lda $0f				lda 	temp1+1
+.1295	85 09		sta $09				sta 	Reg16+1
+.1297	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.129a					ModulusHandler:
+.129a	20 6d 11	jsr $116d			jsr 	EvaluateValue 				; temp0 = target value.
+.129d	a5 08		lda $08				lda 	Reg16 						; temp1 = reg16
+.129f	85 0e		sta $0e				sta 	temp1
+.12a1	a5 09		lda $09				lda	 	Reg16+1
+.12a3	85 0f		sta $0f				sta 	temp1+1
+.12a5	20 ab 12	jsr $12ab			jsr 	Divide 						; temp1 := temp1 / temp0, mod => Reg16
+.12a8	4c 3e 10	jmp $103e			jmp 	ExecLoop
+.12ab					Divide:
+.12ab	a9 00		lda #$00			lda 	#0 							; set A = 0
+.12ad	85 08		sta $08				sta 	Reg16
+.12af	85 09		sta $09				sta 	Reg16+1
+.12b1	a0 10		ldy #$10			ldy 	#16 						; loop round 16 times.
+.12b3					_DivLoop:
+.12b3	06 0e		asl $0e				asl 	temp1 						; shift QA left. Q first
+.12b5	26 0f		rol $0f				rol 	temp1+1
+.12b7	26 08		rol $08				rol 	Reg16 						; shift A left carrying in.
+.12b9	26 09		rol $09				rol 	Reg16+1
+.12bb	38		sec				sec 								; calculate A-M, result in XA/C
+.12bc	a5 08		lda $08				lda 	Reg16
+.12be	e5 0c		sbc $0c				sbc 	temp0
+.12c0	aa		tax				tax
+.12c1	a5 09		lda $09				lda 	Reg16+1
+.12c3	e5 0d		sbc $0d				sbc 	temp0+1
+.12c5	90 06		bcc $12cd			bcc 	_DivNoUpdate 				; if A >= M then store result and set Q bit 0.
+.12c7	85 09		sta $09				sta 	Reg16+1
+.12c9	86 08		stx $08				stx 	Reg16
+.12cb	e6 0e		inc $0e				inc 	temp1 						; we know it is even.
+.12cd					_DivNoUpdate:
+.12cd	88		dey				dey
+.12ce	d0 e3		bne $12b3			bne 	_DivLoop
+.12d0	60		rts				rts
 
 ;******  Return to file: runtime.asm
 
-.12bb					EndRunPCode:
+.12d1					EndRunPCode:
 
 ;******  Processing file: muldiv.asm
 
->12bb	40 00					.word 	EndStringConstant-* 							; offset to next entry
->12bd	73 74 72 69 6e 67 2e 63			.text 	"string.constant:0",0 							; the text (must be lower case)
->12c5	6f 6e 73 74 61 6e 74 3a 30 00
->12cf						.align 	2								; force to even boundary.
-.12d0					StringConstant:
-.12d0	68		pla				pla 										; pull address and save in temp0
-.12d1	85 0c		sta $0c				sta 	temp0
-.12d3	68		pla				pla
-.12d4	85 0d		sta $0d				sta 	temp0+1
-.12d6	e6 0c		inc $0c			inc 	temp0
-.12d8	d0 02		bne $12dc		bne 	nocarry
-.12da	e6 0d		inc $0d			inc 	1+(temp0)
-.12dc					nocarry:
-.12dc	a0 00		ldy #$00			ldy 	#0 									; figure out the end of the string.
-.12de	b1 0c		lda ($0c),y	_SCEnd:	lda 	(temp0),y
-.12e0	c8		iny				iny
-.12e1	c9 00		cmp #$00			cmp 	#0
-.12e3	d0 f9		bne $12de			bne 	_SCEnd
-.12e5	18		clc				clc 										; add Y to temp0, to continue, while putting
-.12e6	84 0e		sty $0e				sty 	temp1 								; original value into XY
-.12e8	18		clc				clc
-.12e9	a5 0c		lda $0c				lda 	temp0
-.12eb	a8		tay				tay
-.12ec	65 0e		adc $0e				adc 	temp1
-.12ee	85 0c		sta $0c				sta 	temp0
-.12f0	a5 0d		lda $0d				lda 	temp0+1
-.12f2	aa		tax				tax
-.12f3	69 00		adc #$00			adc 	#0
-.12f5	85 0d		sta $0d				sta 	temp0+1
-.12f7	98		tya				tya 										; value now in XA
-.12f8	6c 0c 00	jmp ($000c)			jmp 	(temp0)								; and continue.
-.12fb					EndStringConstant:
->12fb	22 00					.word 	EndMultiplyImmediate-* 							; offset to next entry
->12fd	6d 75 6c 74 69 70 6c 79			.text 	"multiply.immediate:0",0 							; the text (must be lower case)
->1305	2e 69 6d 6d 65 64 69 61 74 65 3a 30 00
->1312						.align 	2								; force to even boundary.
-.1312					MultiplyImmediate:
-.1312	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.1315	20 47 12	jsr $1247			jsr 	Multiply
-.1318	a5 08		lda $08				lda 	Reg16
-.131a	a6 09		ldx $09				ldx 	Reg16+1
-.131c	60		rts				rts
-.131d					EndMultiplyImmediate:
->131d	25 00					.word 	EndMultiplyAbsolute-* 							; offset to next entry
->131f	6d 75 6c 74 69 70 6c 79			.text 	"multiply.absolute:0",0 							; the text (must be lower case)
->1327	2e 61 62 73 6f 6c 75 74 65 3a 30 00
->1333						.align 	2								; force to even boundary.
-.1334					MultiplyAbsolute:
-.1334	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.1337	20 f1 13	jsr $13f1			jsr 	LoadIndirectTemp0
-.133a	20 47 12	jsr $1247			jsr 	Multiply
-.133d	a5 08		lda $08				lda 	Reg16
-.133f	a6 09		ldx $09				ldx 	Reg16+1
-.1341	60		rts				rts
-.1342					EndMultiplyAbsolute:
->1342	21 00					.word 	EndDivideImmediate-* 							; offset to next entry
->1344	64 69 76 69 64 65 2e 69			.text 	"divide.immediate:0",0 							; the text (must be lower case)
->134c	6d 6d 65 64 69 61 74 65 3a 30 00
->1357						.align 	2								; force to even boundary.
-.1358					DivideImmediate:
-.1358	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.135b	20 95 12	jsr $1295			jsr 	Divide
-.135e	a5 0e		lda $0e				lda 	temp1
-.1360	a6 0f		ldx $0f				ldx 	temp1+1
-.1362	60		rts				rts
-.1363					EndDivideImmediate:
->1363	23 00					.word 	EndDivideAbsolute-* 							; offset to next entry
->1365	64 69 76 69 64 65 2e 61			.text 	"divide.absolute:0",0 							; the text (must be lower case)
->136d	62 73 6f 6c 75 74 65 3a 30 00
->1377						.align 	2								; force to even boundary.
-.1378					DivideAbsolute:
-.1378	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.137b	20 f1 13	jsr $13f1			jsr 	LoadIndirectTemp0
-.137e	20 95 12	jsr $1295			jsr 	Divide
-.1381	a5 0e		lda $0e				lda 	temp1
-.1383	a6 0f		ldx $0f				ldx 	temp1+1
-.1385	60		rts				rts
-.1386					EndDivideAbsolute:
->1386	21 00					.word 	EndModulusImmediate-* 							; offset to next entry
->1388	6d 6f 64 75 6c 75 73 2e			.text 	"modulus.immediate:0",0 							; the text (must be lower case)
->1390	69 6d 6d 65 64 69 61 74 65 3a 30 00
->139c						.align 	2								; force to even boundary.
-.139c					ModulusImmediate:
-.139c	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.139f	20 95 12	jsr $1295			jsr 	Divide
-.13a2	a5 08		lda $08				lda 	Reg16
-.13a4	a6 09		ldx $09				ldx 	Reg16+1
-.13a6	60		rts				rts
-.13a7					EndModulusImmediate:
->13a7	57 00					.word 	EndMulDivContent-* 							; offset to next entry
->13a9	6d 6f 64 75 6c 75 73 2e			.text 	"modulus.absolute:0",0 							; the text (must be lower case)
->13b1	61 62 73 6f 6c 75 74 65 3a 30 00
->13bc						.align 	2								; force to even boundary.
-.13bc					ModulusAbsolute:
-.13bc	20 ca 13	jsr $13ca			jsr 	SaveXTemp1GetTemp0
-.13bf	20 f1 13	jsr $13f1			jsr 	LoadIndirectTemp0
-.13c2	20 95 12	jsr $1295			jsr 	Divide
-.13c5	a5 08		lda $08				lda 	Reg16
-.13c7	a6 09		ldx $09				ldx 	Reg16+1
-.13c9	60		rts				rts
-.13ca					SaveXTemp1GetTemp0:
-.13ca	85 0e		sta $0e				sta 	temp1 						; write XA out.
-.13cc	86 0f		stx $0f				stx 	temp1+1
-.13ce	ba		tsx				tsx 								; get stack pointer so we can access return two up.
-.13cf	18		clc				clc 								; copy the address to temp0, adding 2 and updating.
-.13d0	bd 03 01	lda $0103,x			lda 	$0103,x
-.13d3	85 0c		sta $0c				sta 	temp0
-.13d5	69 02		adc #$02			adc 	#2
-.13d7	9d 03 01	sta $0103,x			sta 	$0103,x
-.13da	bd 04 01	lda $0104,x			lda 	$0104,x
-.13dd	85 0d		sta $0d				sta 	temp0+1
-.13df	69 00		adc #$00			adc 	#0
-.13e1	9d 04 01	sta $0104,x			sta 	$0104,x
-.13e4	a0 01		ldy #$01			ldy 	#1 							; temp0 points to high byte of call, rts works that way
-.13e6	b1 0c		lda ($0c),y			lda 	(temp0),y 					; so get the word there.
-.13e8	aa		tax				tax
-.13e9	c8		iny				iny
-.13ea	b1 0c		lda ($0c),y			lda 	(temp0),y
-.13ec	85 0d		sta $0d				sta 	temp0+1
-.13ee	86 0c		stx $0c				stx 	temp0
-.13f0	60		rts				rts
-.13f1					LoadIndirectTemp0:
-.13f1	a0 00		ldy #$00			ldy 	#0							; low byte into X
-.13f3	b1 0c		lda ($0c),y			lda 	(temp0),y
-.13f5	aa		tax				tax
-.13f6	c8		iny				iny
-.13f7	b1 0c		lda ($0c),y			lda 	(temp0),y 					; high byte into A
-.13f9	85 0d		sta $0d				sta 	temp0+1 					; copy out.
-.13fb	86 0c		stx $0c				stx 	temp0
-.13fd	60		rts				rts
-.13fe					EndMulDivContent:
+>12d1	40 00					.word 	EndStringConstant-* 							; offset to next entry
+>12d3	73 74 72 69 6e 67 2e 63			.text 	"string.constant:0",0 							; the text (must be lower case)
+>12db	6f 6e 73 74 61 6e 74 3a 30 00
+>12e5						.align 	2								; force to even boundary.
+.12e6					StringConstant:
+.12e6	68		pla				pla 										; pull address and save in temp0
+.12e7	85 0c		sta $0c				sta 	temp0
+.12e9	68		pla				pla
+.12ea	85 0d		sta $0d				sta 	temp0+1
+.12ec	e6 0c		inc $0c			inc 	temp0
+.12ee	d0 02		bne $12f2		bne 	nocarry
+.12f0	e6 0d		inc $0d			inc 	1+(temp0)
+.12f2					nocarry:
+.12f2	a0 00		ldy #$00			ldy 	#0 									; figure out the end of the string.
+.12f4	b1 0c		lda ($0c),y	_SCEnd:	lda 	(temp0),y
+.12f6	c8		iny				iny
+.12f7	c9 00		cmp #$00			cmp 	#0
+.12f9	d0 f9		bne $12f4			bne 	_SCEnd
+.12fb	18		clc				clc 										; add Y to temp0, to continue, while putting
+.12fc	84 0e		sty $0e				sty 	temp1 								; original value into XY
+.12fe	18		clc				clc
+.12ff	a5 0c		lda $0c				lda 	temp0
+.1301	a8		tay				tay
+.1302	65 0e		adc $0e				adc 	temp1
+.1304	85 0c		sta $0c				sta 	temp0
+.1306	a5 0d		lda $0d				lda 	temp0+1
+.1308	aa		tax				tax
+.1309	69 00		adc #$00			adc 	#0
+.130b	85 0d		sta $0d				sta 	temp0+1
+.130d	98		tya				tya 										; value now in XA
+.130e	6c 0c 00	jmp ($000c)			jmp 	(temp0)								; and continue.
+.1311					EndStringConstant:
+>1311	22 00					.word 	EndMultiplyImmediate-* 							; offset to next entry
+>1313	6d 75 6c 74 69 70 6c 79			.text 	"multiply.immediate:0",0 							; the text (must be lower case)
+>131b	2e 69 6d 6d 65 64 69 61 74 65 3a 30 00
+>1328						.align 	2								; force to even boundary.
+.1328					MultiplyImmediate:
+.1328	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.132b	20 5d 12	jsr $125d			jsr 	Multiply
+.132e	a5 08		lda $08				lda 	Reg16
+.1330	a6 09		ldx $09				ldx 	Reg16+1
+.1332	60		rts				rts
+.1333					EndMultiplyImmediate:
+>1333	25 00					.word 	EndMultiplyAbsolute-* 							; offset to next entry
+>1335	6d 75 6c 74 69 70 6c 79			.text 	"multiply.absolute:0",0 							; the text (must be lower case)
+>133d	2e 61 62 73 6f 6c 75 74 65 3a 30 00
+>1349						.align 	2								; force to even boundary.
+.134a					MultiplyAbsolute:
+.134a	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.134d	20 07 14	jsr $1407			jsr 	LoadIndirectTemp0
+.1350	20 5d 12	jsr $125d			jsr 	Multiply
+.1353	a5 08		lda $08				lda 	Reg16
+.1355	a6 09		ldx $09				ldx 	Reg16+1
+.1357	60		rts				rts
+.1358					EndMultiplyAbsolute:
+>1358	21 00					.word 	EndDivideImmediate-* 							; offset to next entry
+>135a	64 69 76 69 64 65 2e 69			.text 	"divide.immediate:0",0 							; the text (must be lower case)
+>1362	6d 6d 65 64 69 61 74 65 3a 30 00
+>136d						.align 	2								; force to even boundary.
+.136e					DivideImmediate:
+.136e	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.1371	20 ab 12	jsr $12ab			jsr 	Divide
+.1374	a5 0e		lda $0e				lda 	temp1
+.1376	a6 0f		ldx $0f				ldx 	temp1+1
+.1378	60		rts				rts
+.1379					EndDivideImmediate:
+>1379	23 00					.word 	EndDivideAbsolute-* 							; offset to next entry
+>137b	64 69 76 69 64 65 2e 61			.text 	"divide.absolute:0",0 							; the text (must be lower case)
+>1383	62 73 6f 6c 75 74 65 3a 30 00
+>138d						.align 	2								; force to even boundary.
+.138e					DivideAbsolute:
+.138e	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.1391	20 07 14	jsr $1407			jsr 	LoadIndirectTemp0
+.1394	20 ab 12	jsr $12ab			jsr 	Divide
+.1397	a5 0e		lda $0e				lda 	temp1
+.1399	a6 0f		ldx $0f				ldx 	temp1+1
+.139b	60		rts				rts
+.139c					EndDivideAbsolute:
+>139c	21 00					.word 	EndModulusImmediate-* 							; offset to next entry
+>139e	6d 6f 64 75 6c 75 73 2e			.text 	"modulus.immediate:0",0 							; the text (must be lower case)
+>13a6	69 6d 6d 65 64 69 61 74 65 3a 30 00
+>13b2						.align 	2								; force to even boundary.
+.13b2					ModulusImmediate:
+.13b2	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.13b5	20 ab 12	jsr $12ab			jsr 	Divide
+.13b8	a5 08		lda $08				lda 	Reg16
+.13ba	a6 09		ldx $09				ldx 	Reg16+1
+.13bc	60		rts				rts
+.13bd					EndModulusImmediate:
+>13bd	57 00					.word 	EndMulDivContent-* 							; offset to next entry
+>13bf	6d 6f 64 75 6c 75 73 2e			.text 	"modulus.absolute:0",0 							; the text (must be lower case)
+>13c7	61 62 73 6f 6c 75 74 65 3a 30 00
+>13d2						.align 	2								; force to even boundary.
+.13d2					ModulusAbsolute:
+.13d2	20 e0 13	jsr $13e0			jsr 	SaveXTemp1GetTemp0
+.13d5	20 07 14	jsr $1407			jsr 	LoadIndirectTemp0
+.13d8	20 ab 12	jsr $12ab			jsr 	Divide
+.13db	a5 08		lda $08				lda 	Reg16
+.13dd	a6 09		ldx $09				ldx 	Reg16+1
+.13df	60		rts				rts
+.13e0					SaveXTemp1GetTemp0:
+.13e0	85 0e		sta $0e				sta 	temp1 						; write XA out.
+.13e2	86 0f		stx $0f				stx 	temp1+1
+.13e4	ba		tsx				tsx 								; get stack pointer so we can access return two up.
+.13e5	18		clc				clc 								; copy the address to temp0, adding 2 and updating.
+.13e6	bd 03 01	lda $0103,x			lda 	$0103,x
+.13e9	85 0c		sta $0c				sta 	temp0
+.13eb	69 02		adc #$02			adc 	#2
+.13ed	9d 03 01	sta $0103,x			sta 	$0103,x
+.13f0	bd 04 01	lda $0104,x			lda 	$0104,x
+.13f3	85 0d		sta $0d				sta 	temp0+1
+.13f5	69 00		adc #$00			adc 	#0
+.13f7	9d 04 01	sta $0104,x			sta 	$0104,x
+.13fa	a0 01		ldy #$01			ldy 	#1 							; temp0 points to high byte of call, rts works that way
+.13fc	b1 0c		lda ($0c),y			lda 	(temp0),y 					; so get the word there.
+.13fe	aa		tax				tax
+.13ff	c8		iny				iny
+.1400	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1402	85 0d		sta $0d				sta 	temp0+1
+.1404	86 0c		stx $0c				stx 	temp0
+.1406	60		rts				rts
+.1407					LoadIndirectTemp0:
+.1407	a0 00		ldy #$00			ldy 	#0							; low byte into X
+.1409	b1 0c		lda ($0c),y			lda 	(temp0),y
+.140b	aa		tax				tax
+.140c	c8		iny				iny
+.140d	b1 0c		lda ($0c),y			lda 	(temp0),y 					; high byte into A
+.140f	85 0d		sta $0d				sta 	temp0+1 					; copy out.
+.1411	86 0c		stx $0c				stx 	temp0
+.1413	60		rts				rts
+.1414					EndMulDivContent:
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: utility1.asm
 
->13fe	2c 00					.word 	EndVariableClear-* 							; offset to next entry
->1400	63 6c 65 61 72 2e 76 61			.text 	"clear.variables:0",0 							; the text (must be lower case)
->1408	72 69 61 62 6c 65 73 3a 30 00
->1412						.align 	2								; force to even boundary.
-.1412					VariableClear:
-.1412	a9 00		lda #$00			lda 	#VarAddr & $FF
-.1414	85 0c		sta $0c				sta 	temp0
-.1416	a9 08		lda #$08			lda 	#VarAddr >> 8
-.1418	85 0d		sta $0d				sta		temp0+1
-.141a	a2 08		ldx #$08			ldx 	#VarPages
-.141c	a0 00		ldy #$00			ldy 	#0
-.141e	98		tya				tya
-.141f	91 0c		sta ($0c),y	_VCLoop:sta 	(temp0),y
-.1421	c8		iny				iny
-.1422	d0 fb		bne $141f			bne 	_VCLoop
-.1424	e6 0d		inc $0d				inc 	temp0+1
-.1426	ca		dex				dex
-.1427	d0 f6		bne $141f			bne 	_VCLoop
-.1429	60		rts				rts
-.142a					EndVariableClear:
->142a	15 00					.word 	EndHaltProgram-* 							; offset to next entry
->142c	68 61 6c 74 2e 70 72 6f			.text 	"halt.program:0",0 							; the text (must be lower case)
->1434	67 72 61 6d 3a 30 00
->143b						.align 	2								; force to even boundary.
-.143c					HaltProgram:
-.143c	4c 3c 14	jmp $143c			jmp 	HaltProgram
-.143f					EndHaltProgram:
->143f	16 00					.word 	EndBootAddress-* 							; offset to next entry
->1441	62 6f 6f 74 2e 61 64 64			.text 	"boot.address:0",0 							; the text (must be lower case)
->1449	72 65 73 73 3a 30 00
->1450						.align 	2								; force to even boundary.
-.1450	a9 00		lda #$00			lda 	#BootAddr & $FF
-.1452	a2 10		ldx #$10			ldx 	#BootAddr >> 8
-.1454	60		rts				rts
-.1455					EndBootAddress:
->1455	30 00					.word 	EndPrintHex-* 							; offset to next entry
->1457	70 72 69 6e 74 2e 68 65			.text 	"print.hex:1",0 							; the text (must be lower case)
->145f	78 3a 31 00
->1463						.align 	2								; force to even boundary.
-.1464					PrintHex:
-.1464	48		pha				pha
-.1465	a9 20		lda #$20			lda 	#32
-.1467	20 64 16	jsr $1664			jsr 	PrintCharacter
-.146a	8a		txa				txa
-.146b	20 6f 14	jsr $146f			jsr 	_PHex
-.146e	68		pla				pla
-.146f	48		pha		_PHex:	pha
-.1470	4a		lsr a				lsr 	a
-.1471	4a		lsr a				lsr 	a
-.1472	4a		lsr a				lsr 	a
-.1473	4a		lsr a				lsr 	a
-.1474	20 78 14	jsr $1478			jsr 	_PNibl
-.1477	68		pla				pla
-.1478	29 0f		and #$0f	_PNibl:	and 	#15
-.147a	c9 0a		cmp #$0a			cmp 	#10
-.147c	90 02		bcc $1480			bcc 	_PNoSkip
-.147e	69 06		adc #$06			adc 	#6
-.1480					_PNoSkip:
-.1480	69 30		adc #$30			adc 	#48
-.1482	4c 64 16	jmp $1664			jmp 	PrintCharacter
-.1485					EndPrintHex:
->1485	22 00					.word 	EndPrintString-* 							; offset to next entry
->1487	70 72 69 6e 74 2e 73 74			.text 	"print.string:1",0 							; the text (must be lower case)
->148f	72 69 6e 67 3a 31 00
->1496						.align 	2								; force to even boundary.
-.1496					PrintString:
-.1496	85 0c		sta $0c				sta 	temp0
-.1498	86 0d		stx $0d				stx 	temp0+1
-.149a	a0 00		ldy #$00			ldy 	#0
-.149c	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
-.149e	f0 06		beq $14a6			beq 	_PSExit
-.14a0	20 64 16	jsr $1664			jsr 	PrintCharacter
-.14a3	c8		iny				iny
-.14a4	d0 f6		bne $149c			bne 	_PSLoop
-.14a6	60		rts		_PSExit:rts
-.14a7					EndPrintString
->14a7	37 00					.word 	EndPrintDecimal-* 							; offset to next entry
->14a9	70 72 69 6e 74 2e 69 6e			.text 	"print.int:1",0 							; the text (must be lower case)
->14b1	74 3a 31 00
->14b5						.align 	2								; force to even boundary.
-.14b6					PrintDecimal:
-.14b6	48		pha				pha
-.14b7	a9 20		lda #$20			lda 	#32							; leading spaces.
-.14b9	20 64 16	jsr $1664			jsr 	PrintCharacter
-.14bc	68		pla				pla
-.14bd					PDEntry:
-.14bd	85 0e		sta $0e				sta 	temp1						; save in temp1
-.14bf	86 0f		stx $0f				stx 	temp1+1
-.14c1					_PDRecurse:
-.14c1	a9 0a		lda #$0a			lda 	#10 						; set base to 10.
-.14c3	85 0c		sta $0c				sta 	temp0
-.14c5	a9 00		lda #$00			lda 	#0
-.14c7	85 0d		sta $0d				sta 	temp0+1
-.14c9	20 95 12	jsr $1295			jsr 	Divide
-.14cc	a5 08		lda $08				lda 	Reg16 						; push remainder on stack.
-.14ce	48		pha				pha
-.14cf	a5 0e		lda $0e				lda 	temp1						; call recursively if not zero
-.14d1	05 0f		ora $0f				ora 	temp1+1
-.14d3	f0 03		beq $14d8			beq 	_PDNoRecurse
-.14d5	20 c1 14	jsr $14c1			jsr 	_PDRecurse 					; recursively print
-.14d8					_PDNoRecurse:
-.14d8	68		pla				pla 								; restore and print
-.14d9	09 30		ora #$30			ora 	#48
-.14db	4c 64 16	jmp $1664			jmp 	PrintCharacter
-.14de					EndPrintDecimal:
->14de	26 00					.word 	EndPrintSignedInt-* 							; offset to next entry
->14e0	70 72 69 6e 74 2e 73 69			.text 	"print.sint:1",0 							; the text (must be lower case)
->14e8	6e 74 3a 31 00
->14ed						.align 	2								; force to even boundary.
-.14ee	e0 00		cpx #$00			cpx 	#0
-.14f0	f0 c4		beq $14b6			beq 	PrintDecimal
-.14f2	48		pha				pha
-.14f3	a9 20		lda #$20			lda 	#32
-.14f5	20 64 16	jsr $1664			jsr 	PrintCharacter
-.14f8	a9 2d		lda #$2d			lda 	#'-'
-.14fa	20 64 16	jsr $1664			jsr 	PrintCharacter
-.14fd	68		pla				pla
-.14fe	20 4a 15	jsr $154a			jsr 	Negate
-.1501	4c bd 14	jmp $14bd			jmp 	PDEntry
-.1504					EndPrintSignedInt:
+>1414	2c 00					.word 	EndVariableClear-* 							; offset to next entry
+>1416	63 6c 65 61 72 2e 76 61			.text 	"clear.variables:0",0 							; the text (must be lower case)
+>141e	72 69 61 62 6c 65 73 3a 30 00
+>1428						.align 	2								; force to even boundary.
+.1428					VariableClear:
+.1428	a9 00		lda #$00			lda 	#VarAddr & $FF
+.142a	85 0c		sta $0c				sta 	temp0
+.142c	a9 08		lda #$08			lda 	#VarAddr >> 8
+.142e	85 0d		sta $0d				sta		temp0+1
+.1430	a2 08		ldx #$08			ldx 	#VarPages
+.1432	a0 00		ldy #$00			ldy 	#0
+.1434	98		tya				tya
+.1435	91 0c		sta ($0c),y	_VCLoop:sta 	(temp0),y
+.1437	c8		iny				iny
+.1438	d0 fb		bne $1435			bne 	_VCLoop
+.143a	e6 0d		inc $0d				inc 	temp0+1
+.143c	ca		dex				dex
+.143d	d0 f6		bne $1435			bne 	_VCLoop
+.143f	60		rts				rts
+.1440					EndVariableClear:
+>1440	15 00					.word 	EndHaltProgram-* 							; offset to next entry
+>1442	68 61 6c 74 2e 70 72 6f			.text 	"halt.program:0",0 							; the text (must be lower case)
+>144a	67 72 61 6d 3a 30 00
+>1451						.align 	2								; force to even boundary.
+.1452					HaltProgram:
+.1452	4c 52 14	jmp $1452			jmp 	HaltProgram
+.1455					EndHaltProgram:
+>1455	16 00					.word 	EndBootAddress-* 							; offset to next entry
+>1457	62 6f 6f 74 2e 61 64 64			.text 	"boot.address:0",0 							; the text (must be lower case)
+>145f	72 65 73 73 3a 30 00
+>1466						.align 	2								; force to even boundary.
+.1466	a9 00		lda #$00			lda 	#BootAddr & $FF
+.1468	a2 10		ldx #$10			ldx 	#BootAddr >> 8
+.146a	60		rts				rts
+.146b					EndBootAddress:
+>146b	30 00					.word 	EndPrintHex-* 							; offset to next entry
+>146d	70 72 69 6e 74 2e 68 65			.text 	"print.hex:1",0 							; the text (must be lower case)
+>1475	78 3a 31 00
+>1479						.align 	2								; force to even boundary.
+.147a					PrintHex:
+.147a	48		pha				pha
+.147b	a9 20		lda #$20			lda 	#32
+.147d	20 7a 16	jsr $167a			jsr 	PrintCharacter
+.1480	8a		txa				txa
+.1481	20 85 14	jsr $1485			jsr 	_PHex
+.1484	68		pla				pla
+.1485	48		pha		_PHex:	pha
+.1486	4a		lsr a				lsr 	a
+.1487	4a		lsr a				lsr 	a
+.1488	4a		lsr a				lsr 	a
+.1489	4a		lsr a				lsr 	a
+.148a	20 8e 14	jsr $148e			jsr 	_PNibl
+.148d	68		pla				pla
+.148e	29 0f		and #$0f	_PNibl:	and 	#15
+.1490	c9 0a		cmp #$0a			cmp 	#10
+.1492	90 02		bcc $1496			bcc 	_PNoSkip
+.1494	69 06		adc #$06			adc 	#6
+.1496					_PNoSkip:
+.1496	69 30		adc #$30			adc 	#48
+.1498	4c 7a 16	jmp $167a			jmp 	PrintCharacter
+.149b					EndPrintHex:
+>149b	22 00					.word 	EndPrintString-* 							; offset to next entry
+>149d	70 72 69 6e 74 2e 73 74			.text 	"print.string:1",0 							; the text (must be lower case)
+>14a5	72 69 6e 67 3a 31 00
+>14ac						.align 	2								; force to even boundary.
+.14ac					PrintString:
+.14ac	85 0c		sta $0c				sta 	temp0
+.14ae	86 0d		stx $0d				stx 	temp0+1
+.14b0	a0 00		ldy #$00			ldy 	#0
+.14b2	b1 0c		lda ($0c),y	_PSLoop:lda 	(temp0),y
+.14b4	f0 06		beq $14bc			beq 	_PSExit
+.14b6	20 7a 16	jsr $167a			jsr 	PrintCharacter
+.14b9	c8		iny				iny
+.14ba	d0 f6		bne $14b2			bne 	_PSLoop
+.14bc	60		rts		_PSExit:rts
+.14bd					EndPrintString
+>14bd	37 00					.word 	EndPrintDecimal-* 							; offset to next entry
+>14bf	70 72 69 6e 74 2e 69 6e			.text 	"print.int:1",0 							; the text (must be lower case)
+>14c7	74 3a 31 00
+>14cb						.align 	2								; force to even boundary.
+.14cc					PrintDecimal:
+.14cc	48		pha				pha
+.14cd	a9 20		lda #$20			lda 	#32							; leading spaces.
+.14cf	20 7a 16	jsr $167a			jsr 	PrintCharacter
+.14d2	68		pla				pla
+.14d3					PDEntry:
+.14d3	85 0e		sta $0e				sta 	temp1						; save in temp1
+.14d5	86 0f		stx $0f				stx 	temp1+1
+.14d7					_PDRecurse:
+.14d7	a9 0a		lda #$0a			lda 	#10 						; set base to 10.
+.14d9	85 0c		sta $0c				sta 	temp0
+.14db	a9 00		lda #$00			lda 	#0
+.14dd	85 0d		sta $0d				sta 	temp0+1
+.14df	20 ab 12	jsr $12ab			jsr 	Divide
+.14e2	a5 08		lda $08				lda 	Reg16 						; push remainder on stack.
+.14e4	48		pha				pha
+.14e5	a5 0e		lda $0e				lda 	temp1						; call recursively if not zero
+.14e7	05 0f		ora $0f				ora 	temp1+1
+.14e9	f0 03		beq $14ee			beq 	_PDNoRecurse
+.14eb	20 d7 14	jsr $14d7			jsr 	_PDRecurse 					; recursively print
+.14ee					_PDNoRecurse:
+.14ee	68		pla				pla 								; restore and print
+.14ef	09 30		ora #$30			ora 	#48
+.14f1	4c 7a 16	jmp $167a			jmp 	PrintCharacter
+.14f4					EndPrintDecimal:
+>14f4	26 00					.word 	EndPrintSignedInt-* 							; offset to next entry
+>14f6	70 72 69 6e 74 2e 73 69			.text 	"print.sint:1",0 							; the text (must be lower case)
+>14fe	6e 74 3a 31 00
+>1503						.align 	2								; force to even boundary.
+.1504	e0 00		cpx #$00			cpx 	#0
+.1506	f0 c4		beq $14cc			beq 	PrintDecimal
+.1508	48		pha				pha
+.1509	a9 20		lda #$20			lda 	#32
+.150b	20 7a 16	jsr $167a			jsr 	PrintCharacter
+.150e	a9 2d		lda #$2d			lda 	#'-'
+.1510	20 7a 16	jsr $167a			jsr 	PrintCharacter
+.1513	68		pla				pla
+.1514	20 60 15	jsr $1560			jsr 	Negate
+.1517	4c d3 14	jmp $14d3			jmp 	PDEntry
+.151a					EndPrintSignedInt:
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: utility2.asm
 
->1504	1b 00					.word 	EndMax-* 							; offset to next entry
->1506	6d 61 78 3a 32 00			.text 	"max:2",0 							; the text (must be lower case)
->150c						.align 	2								; force to even boundary.
-.150c	a8		tay				tay 								; save in Y
-.150d	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
-.1510	8a		txa				txa
-.1511	ed 01 08	sbc $0801			sbc 	Param1+1
-.1514	98		tya				tya 								; ready to return original value.
-.1515	90 01		bcc $1518			bcc 	MMReturnP1
-.1517	60		rts				rts
-.1518					MMReturnP1:
-.1518	ad 00 08	lda $0800			lda 	Param1
-.151b	ae 01 08	ldx $0801			ldx 	Param1+1
-.151e	60		rts				rts
-.151f					EndMax:
->151f	15 00					.word 	EndMin-* 							; offset to next entry
->1521	6d 69 6e 3a 32 00			.text 	"min:2",0 							; the text (must be lower case)
->1527						.align 	2								; force to even boundary.
-.1528	a8		tay				tay 								; save in Y
-.1529	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
-.152c	8a		txa				txa
-.152d	ed 01 08	sbc $0801			sbc 	Param1+1
-.1530	98		tya				tya 								; ready to return original value.
-.1531	b0 e5		bcs $1518			bcs 	MMReturnP1
-.1533	60		rts				rts
-.1534					EndMin:
->1534	0d 00					.word 	EndAbs-* 							; offset to next entry
->1536	61 62 73 3a 31 00			.text 	"abs:1",0 							; the text (must be lower case)
->153c						.align 	2								; force to even boundary.
-.153c	e0 00		cpx #$00			cpx 	#0
-.153e	30 0a		bmi $154a			bmi 	Negate
-.1540	60		rts				rts
-.1541					EndAbs:
->1541	18 00					.word 	EndNegate-* 							; offset to next entry
->1543	6e 65 67 3a 31 00			.text 	"neg:1",0 							; the text (must be lower case)
->1549						.align 	2								; force to even boundary.
-.154a	48		pha		Negate:	pha
-.154b	8a		txa				txa
-.154c	49 ff		eor #$ff			eor 	#$FF
-.154e	aa		tax				tax
-.154f	68		pla				pla
-.1550	49 ff		eor #$ff			eor 	#$FF
-.1552	18		clc				clc
-.1553	69 01		adc #$01			adc 	#1
-.1555	90 01		bcc $1558			bcc 	_NGExit
-.1557	e8		inx				inx
-.1558	60		rts		_NGExit:rts
-.1559					EndNegate:
->1559	1e 00					.word 	EndSgn-* 							; offset to next entry
->155b	73 67 6e 3a 31 00			.text 	"sgn:1",0 							; the text (must be lower case)
->1561						.align 	2								; force to even boundary.
-.1562	a0 ff		ldy #$ff			ldy 	#$FF
-.1564	e0 00		cpx #$00			cpx 	#0
-.1566	30 07		bmi $156f			bmi 	_SGRetYA
-.1568	d0 08		bne $1572			bne 	_SGPositive
-.156a	c8		iny				iny
-.156b	c9 00		cmp #$00			cmp 	#0
-.156d	d0 03		bne $1572			bne 	_SGPositive
-.156f					_SGRetYA:
-.156f	98		tya				tya
-.1570	aa		tax				tax
-.1571	60		rts				rts
-.1572					_SGPositive:
-.1572	a9 01		lda #$01			lda 	#1
-.1574	a2 00		ldx #$00			ldx 	#0
-.1576	60		rts				rts
-.1577					EndSgn:
->1577	17 00					.word 	EndLen-* 							; offset to next entry
->1579	6c 65 6e 3a 31 00			.text 	"len:1",0 							; the text (must be lower case)
->157f						.align 	2								; force to even boundary.
-.1580	85 0c		sta $0c				sta 	temp0
-.1582	86 0d		stx $0d				stx 	temp0+1
-.1584	a0 ff		ldy #$ff			ldy 	#255
-.1586	c8		iny		_GetLen:iny
-.1587	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1589	d0 fb		bne $1586			bne 	_GetLen
-.158b	aa		tax				tax
-.158c	98		tya				tya
-.158d	60		rts				rts
-.158e					EndLen:
->158e	26 00					.word 	EndAlloc-* 							; offset to next entry
->1590	61 6c 6c 6f 63 3a 31 00			.text 	"alloc:1",0 							; the text (must be lower case)
->1598						.align 	2								; force to even boundary.
-.1598	a8		tay				tay 								; XY is size.
-.1599	ad 1e 10	lda $101e			lda 	AllocMem 					; push allocated addr on stack
-.159c	48		pha				pha
-.159d	ad 1f 10	lda $101f			lda 	AllocMem+1
-.15a0	48		pha				pha
-.15a1	18		clc				clc 								; add XY to alloc mem
+>151a	1b 00					.word 	EndMax-* 							; offset to next entry
+>151c	6d 61 78 3a 32 00			.text 	"max:2",0 							; the text (must be lower case)
+>1522						.align 	2								; force to even boundary.
+.1522	a8		tay				tay 								; save in Y
+.1523	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
+.1526	8a		txa				txa
+.1527	ed 01 08	sbc $0801			sbc 	Param1+1
+.152a	98		tya				tya 								; ready to return original value.
+.152b	90 01		bcc $152e			bcc 	MMReturnP1
+.152d	60		rts				rts
+.152e					MMReturnP1:
+.152e	ad 00 08	lda $0800			lda 	Param1
+.1531	ae 01 08	ldx $0801			ldx 	Param1+1
+.1534	60		rts				rts
+.1535					EndMax:
+>1535	15 00					.word 	EndMin-* 							; offset to next entry
+>1537	6d 69 6e 3a 32 00			.text 	"min:2",0 							; the text (must be lower case)
+>153d						.align 	2								; force to even boundary.
+.153e	a8		tay				tay 								; save in Y
+.153f	cd 00 08	cmp $0800			cmp 	Param1 						; compare XA vs param1
+.1542	8a		txa				txa
+.1543	ed 01 08	sbc $0801			sbc 	Param1+1
+.1546	98		tya				tya 								; ready to return original value.
+.1547	b0 e5		bcs $152e			bcs 	MMReturnP1
+.1549	60		rts				rts
+.154a					EndMin:
+>154a	0d 00					.word 	EndAbs-* 							; offset to next entry
+>154c	61 62 73 3a 31 00			.text 	"abs:1",0 							; the text (must be lower case)
+>1552						.align 	2								; force to even boundary.
+.1552	e0 00		cpx #$00			cpx 	#0
+.1554	30 0a		bmi $1560			bmi 	Negate
+.1556	60		rts				rts
+.1557					EndAbs:
+>1557	18 00					.word 	EndNegate-* 							; offset to next entry
+>1559	6e 65 67 3a 31 00			.text 	"neg:1",0 							; the text (must be lower case)
+>155f						.align 	2								; force to even boundary.
+.1560	48		pha		Negate:	pha
+.1561	8a		txa				txa
+.1562	49 ff		eor #$ff			eor 	#$FF
+.1564	aa		tax				tax
+.1565	68		pla				pla
+.1566	49 ff		eor #$ff			eor 	#$FF
+.1568	18		clc				clc
+.1569	69 01		adc #$01			adc 	#1
+.156b	90 01		bcc $156e			bcc 	_NGExit
+.156d	e8		inx				inx
+.156e	60		rts		_NGExit:rts
+.156f					EndNegate:
+>156f	1e 00					.word 	EndSgn-* 							; offset to next entry
+>1571	73 67 6e 3a 31 00			.text 	"sgn:1",0 							; the text (must be lower case)
+>1577						.align 	2								; force to even boundary.
+.1578	a0 ff		ldy #$ff			ldy 	#$FF
+.157a	e0 00		cpx #$00			cpx 	#0
+.157c	30 07		bmi $1585			bmi 	_SGRetYA
+.157e	d0 08		bne $1588			bne 	_SGPositive
+.1580	c8		iny				iny
+.1581	c9 00		cmp #$00			cmp 	#0
+.1583	d0 03		bne $1588			bne 	_SGPositive
+.1585					_SGRetYA:
+.1585	98		tya				tya
+.1586	aa		tax				tax
+.1587	60		rts				rts
+.1588					_SGPositive:
+.1588	a9 01		lda #$01			lda 	#1
+.158a	a2 00		ldx #$00			ldx 	#0
+.158c	60		rts				rts
+.158d					EndSgn:
+>158d	17 00					.word 	EndLen-* 							; offset to next entry
+>158f	6c 65 6e 3a 31 00			.text 	"len:1",0 							; the text (must be lower case)
+>1595						.align 	2								; force to even boundary.
+.1596	85 0c		sta $0c				sta 	temp0
+.1598	86 0d		stx $0d				stx 	temp0+1
+.159a	a0 ff		ldy #$ff			ldy 	#255
+.159c	c8		iny		_GetLen:iny
+.159d	b1 0c		lda ($0c),y			lda 	(temp0),y
+.159f	d0 fb		bne $159c			bne 	_GetLen
+.15a1	aa		tax				tax
 .15a2	98		tya				tya
-.15a3	6d 1e 10	adc $101e			adc 	AllocMem
-.15a6	8d 1e 10	sta $101e			sta 	AllocMem
-.15a9	8a		txa				txa
-.15aa	6d 1f 10	adc $101f			adc 	AllocMem+1
-.15ad	8d 1f 10	sta $101f			sta 	AllocMem+1
-.15b0	68		pla				pla 								; restore and exit
-.15b1	aa		tax				tax
-.15b2	68		pla				pla
-.15b3	60		rts				rts
-.15b4					EndAlloc:
->15b4	35 00					.word 	EndRandom-* 							; offset to next entry
->15b6	72 61 6e 64 6f 6d 3a 30			.text 	"random:0",0 							; the text (must be lower case)
->15be	00
->15bf						.align 	2								; force to even boundary.
-.15c0	ad 04 08	lda $0804			lda 	RandomSeed 					; initialise if nonzero
-.15c3	0d 05 08	ora $0805			ora 	RandomSeed+1
-.15c6	d0 0a		bne $15d2			bne 	_R16_NoInit
-.15c8	a9 a3		lda #$a3			lda 	#$A3
-.15ca	8d 04 08	sta $0804			sta 	RandomSeed
-.15cd	a9 75		lda #$75			lda 	#$75
-.15cf	8d 05 08	sta $0805			sta 	RandomSeed+1
-.15d2					_R16_NoInit:
-.15d2	4e 05 08	lsr $0805			lsr 	RandomSeed+1				; shift seed right
-.15d5	6e 04 08	ror $0804			ror 	RandomSeed
-.15d8	90 08		bcc $15e2			bcc 	_R16_NoXor
-.15da	ad 05 08	lda $0805			lda 	RandomSeed+1				; xor MSB with $B4 if bit set.
-.15dd	49 b4		eor #$b4			eor 	#$B4 						; like the Wikipedia one.
-.15df	8d 05 08	sta $0805			sta 	RandomSeed+1
-.15e2					_R16_NoXor:
-.15e2	ad 04 08	lda $0804			lda 	RandomSeed					; copy result to evaluate stack.
-.15e5	ae 05 08	ldx $0805			ldx 	RandomSeed+1
-.15e8	60		rts				rts
-.15e9					EndRandom
+.15a3	60		rts				rts
+.15a4					EndLen:
+>15a4	26 00					.word 	EndAlloc-* 							; offset to next entry
+>15a6	61 6c 6c 6f 63 3a 31 00			.text 	"alloc:1",0 							; the text (must be lower case)
+>15ae						.align 	2								; force to even boundary.
+.15ae	a8		tay				tay 								; XY is size.
+.15af	ad 1e 10	lda $101e			lda 	AllocMem 					; push allocated addr on stack
+.15b2	48		pha				pha
+.15b3	ad 1f 10	lda $101f			lda 	AllocMem+1
+.15b6	48		pha				pha
+.15b7	18		clc				clc 								; add XY to alloc mem
+.15b8	98		tya				tya
+.15b9	6d 1e 10	adc $101e			adc 	AllocMem
+.15bc	8d 1e 10	sta $101e			sta 	AllocMem
+.15bf	8a		txa				txa
+.15c0	6d 1f 10	adc $101f			adc 	AllocMem+1
+.15c3	8d 1f 10	sta $101f			sta 	AllocMem+1
+.15c6	68		pla				pla 								; restore and exit
+.15c7	aa		tax				tax
+.15c8	68		pla				pla
+.15c9	60		rts				rts
+.15ca					EndAlloc:
+>15ca	35 00					.word 	EndRandom-* 							; offset to next entry
+>15cc	72 61 6e 64 6f 6d 3a 30			.text 	"random:0",0 							; the text (must be lower case)
+>15d4	00
+>15d5						.align 	2								; force to even boundary.
+.15d6	ad 04 08	lda $0804			lda 	RandomSeed 					; initialise if nonzero
+.15d9	0d 05 08	ora $0805			ora 	RandomSeed+1
+.15dc	d0 0a		bne $15e8			bne 	_R16_NoInit
+.15de	a9 a3		lda #$a3			lda 	#$A3
+.15e0	8d 04 08	sta $0804			sta 	RandomSeed
+.15e3	a9 75		lda #$75			lda 	#$75
+.15e5	8d 05 08	sta $0805			sta 	RandomSeed+1
+.15e8					_R16_NoInit:
+.15e8	4e 05 08	lsr $0805			lsr 	RandomSeed+1				; shift seed right
+.15eb	6e 04 08	ror $0804			ror 	RandomSeed
+.15ee	90 08		bcc $15f8			bcc 	_R16_NoXor
+.15f0	ad 05 08	lda $0805			lda 	RandomSeed+1				; xor MSB with $B4 if bit set.
+.15f3	49 b4		eor #$b4			eor 	#$B4 						; like the Wikipedia one.
+.15f5	8d 05 08	sta $0805			sta 	RandomSeed+1
+.15f8					_R16_NoXor:
+.15f8	ad 04 08	lda $0804			lda 	RandomSeed					; copy result to evaluate stack.
+.15fb	ae 05 08	ldx $0805			ldx 	RandomSeed+1
+.15fe	60		rts				rts
+.15ff					EndRandom
 
 ;******  Return to file: runtime.asm
 
 
 ;******  Processing file: utility3.asm
 
->15e9	16 00					.word 	EndPeekB-* 							; offset to next entry
->15eb	70 65 65 6b 2e 62 3a 31			.text 	"peek.b:1",0 							; the text (must be lower case)
->15f3	00
->15f4						.align 	2								; force to even boundary.
-.15f4	85 0c		sta $0c				sta 	temp0
-.15f6	86 0d		stx $0d				stx 	temp0+1
-.15f8	a0 00		ldy #$00			ldy 	#0
-.15fa	b1 0c		lda ($0c),y			lda 	(temp0),y
-.15fc	a2 00		ldx #$00			ldx 	#0
-.15fe	60		rts				rts
-.15ff					EndPeekB:
->15ff	18 00					.word 	EndPeekW-* 							; offset to next entry
->1601	70 65 65 6b 2e 77 3a 31			.text 	"peek.w:1",0 							; the text (must be lower case)
+>15ff	16 00					.word 	EndPeekB-* 							; offset to next entry
+>1601	70 65 65 6b 2e 62 3a 31			.text 	"peek.b:1",0 							; the text (must be lower case)
 >1609	00
 >160a						.align 	2								; force to even boundary.
 .160a	85 0c		sta $0c				sta 	temp0
 .160c	86 0d		stx $0d				stx 	temp0+1
-.160e	a0 01		ldy #$01			ldy 	#1
+.160e	a0 00		ldy #$00			ldy 	#0
 .1610	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1612	aa		tax				tax
-.1613	88		dey				dey
-.1614	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1616	60		rts				rts
-.1617					EndPeekW:
->1617	1a 00					.word 	EndPokeB-* 							; offset to next entry
->1619	70 6f 6b 65 2e 62 3a 32			.text 	"poke.b:2",0 							; the text (must be lower case)
->1621	00
->1622						.align 	2								; force to even boundary.
-.1622	ac 00 08	ldy $0800			ldy 	Param1
-.1625	84 0c		sty $0c				sty 	temp0
-.1627	ac 01 08	ldy $0801			ldy 	Param1+1
-.162a	84 0d		sty $0d				sty 	temp0+1
-.162c	a0 00		ldy #$00			ldy 	#0
-.162e	91 0c		sta ($0c),y			sta 	(temp0),y
-.1630	60		rts				rts
-.1631					EndPokeB:
->1631	1e 00					.word 	EndPokeW-* 							; offset to next entry
->1633	70 6f 6b 65 2e 77 3a 32			.text 	"poke.w:2",0 							; the text (must be lower case)
->163b	00
->163c						.align 	2								; force to even boundary.
-.163c	ac 00 08	ldy $0800			ldy 	Param1
-.163f	84 0c		sty $0c				sty 	temp0
-.1641	ac 01 08	ldy $0801			ldy 	Param1+1
-.1644	84 0d		sty $0d				sty 	temp0+1
-.1646	a0 00		ldy #$00			ldy 	#0
-.1648	91 0c		sta ($0c),y			sta 	(temp0),y
-.164a	c8		iny				iny
-.164b	8a		txa				txa
-.164c	91 0c		sta ($0c),y			sta 	(temp0),y
-.164e	60		rts				rts
-.164f					EndPokeW:
+.1612	a2 00		ldx #$00			ldx 	#0
+.1614	60		rts				rts
+.1615					EndPeekB:
+>1615	18 00					.word 	EndPeekW-* 							; offset to next entry
+>1617	70 65 65 6b 2e 77 3a 31			.text 	"peek.w:1",0 							; the text (must be lower case)
+>161f	00
+>1620						.align 	2								; force to even boundary.
+.1620	85 0c		sta $0c				sta 	temp0
+.1622	86 0d		stx $0d				stx 	temp0+1
+.1624	a0 01		ldy #$01			ldy 	#1
+.1626	b1 0c		lda ($0c),y			lda 	(temp0),y
+.1628	aa		tax				tax
+.1629	88		dey				dey
+.162a	b1 0c		lda ($0c),y			lda 	(temp0),y
+.162c	60		rts				rts
+.162d					EndPeekW:
+>162d	1a 00					.word 	EndPokeB-* 							; offset to next entry
+>162f	70 6f 6b 65 2e 62 3a 32			.text 	"poke.b:2",0 							; the text (must be lower case)
+>1637	00
+>1638						.align 	2								; force to even boundary.
+.1638	ac 00 08	ldy $0800			ldy 	Param1
+.163b	84 0c		sty $0c				sty 	temp0
+.163d	ac 01 08	ldy $0801			ldy 	Param1+1
+.1640	84 0d		sty $0d				sty 	temp0+1
+.1642	a0 00		ldy #$00			ldy 	#0
+.1644	91 0c		sta ($0c),y			sta 	(temp0),y
+.1646	60		rts				rts
+.1647					EndPokeB:
+>1647	1e 00					.word 	EndPokeW-* 							; offset to next entry
+>1649	70 6f 6b 65 2e 77 3a 32			.text 	"poke.w:2",0 							; the text (must be lower case)
+>1651	00
+>1652						.align 	2								; force to even boundary.
+.1652	ac 00 08	ldy $0800			ldy 	Param1
+.1655	84 0c		sty $0c				sty 	temp0
+.1657	ac 01 08	ldy $0801			ldy 	Param1+1
+.165a	84 0d		sty $0d				sty 	temp0+1
+.165c	a0 00		ldy #$00			ldy 	#0
+.165e	91 0c		sta ($0c),y			sta 	(temp0),y
+.1660	c8		iny				iny
+.1661	8a		txa				txa
+.1662	91 0c		sta ($0c),y			sta 	(temp0),y
+.1664	60		rts				rts
+.1665					EndPokeW:
 
 ;******  Return to file: runtime.asm
 
@@ -921,58 +933,58 @@
 ;******  Processing file: sys/x16/porting.asm
 
 =$9f20					Vera = $9F20
->164f	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
->1651	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
->1659	61 72 61 63 74 65 72 3a 31 00
->1663						.align 	2								; force to even boundary.
-.1664					PrintCharacter:
-.1664	20 d2 ff	jsr $ffd2			jsr 	$FFD2
-.1667	60		rts				rts
-.1668					EndPrintCharacter:
->1668	15 00					.word 	EndPrintCRLF-* 							; offset to next entry
->166a	70 72 69 6e 74 2e 63 72			.text 	"print.crlf:0",0 							; the text (must be lower case)
->1672	6c 66 3a 30 00
->1677						.align 	2								; force to even boundary.
-.1678	a9 0d		lda #$0d			lda 	#13
-.167a	4c 64 16	jmp $1664			jmp 	PrintCharacter
-.167d					EndPrintCRLF:
->167d	13 00					.word 	EndReadTimer-* 							; offset to next entry
->167f	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
->1687	65 72 3a 30 00
->168c						.align 	2								; force to even boundary.
-.168c					ReadTimer:
-.168c	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
-.168f	60		rts				rts
-.1690					EndReadTimer:
->1690	23 00					.word 	EndVPoke-* 							; offset to next entry
->1692	70 6f 6b 65 2e 76 3a 33			.text 	"poke.v:3",0 							; the text (must be lower case)
->169a	00
->169b						.align 	2								; force to even boundary.
-.169c	a8		tay				tay 								; save byte in Y
-.169d	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
-.16a0	8d 22 9f	sta $9f22			sta 	Vera+2
-.16a3	ad 03 08	lda $0803			lda 	Param2+1
-.16a6	8d 21 9f	sta $9f21			sta 	Vera+1
-.16a9	ad 02 08	lda $0802			lda 	Param2
-.16ac	8d 20 9f	sta $9f20			sta 	Vera
-.16af	8c 23 9f	sty $9f23			sty 	Vera+3
-.16b2	60		rts				rts
-.16b3					EndVPoke:
->16b3	1d 00					.word 	EndVPeek-* 							; offset to next entry
->16b5	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
->16bd	00
->16be						.align 	2								; force to even boundary.
-.16be	8e 21 9f	stx $9f21			stx 	Vera+1
-.16c1	8d 20 9f	sta $9f20			sta 	Vera
-.16c4	ad 00 08	lda $0800			lda 	Param1
-.16c7	8d 22 9f	sta $9f22			sta 	Vera+2
-.16ca	ad 23 9f	lda $9f23			lda 	Vera+3
-.16cd	a2 00		ldx #$00			ldx 	#0
-.16cf	60		rts				rts
-.16d0					EndVPeek:
+>1665	19 00					.word 	EndPrintCharacter-* 							; offset to next entry
+>1667	70 72 69 6e 74 2e 63 68			.text 	"print.character:1",0 							; the text (must be lower case)
+>166f	61 72 61 63 74 65 72 3a 31 00
+>1679						.align 	2								; force to even boundary.
+.167a					PrintCharacter:
+.167a	20 d2 ff	jsr $ffd2			jsr 	$FFD2
+.167d	60		rts				rts
+.167e					EndPrintCharacter:
+>167e	15 00					.word 	EndPrintCRLF-* 							; offset to next entry
+>1680	70 72 69 6e 74 2e 63 72			.text 	"print.crlf:0",0 							; the text (must be lower case)
+>1688	6c 66 3a 30 00
+>168d						.align 	2								; force to even boundary.
+.168e	a9 0d		lda #$0d			lda 	#13
+.1690	4c 7a 16	jmp $167a			jmp 	PrintCharacter
+.1693					EndPrintCRLF:
+>1693	13 00					.word 	EndReadTimer-* 							; offset to next entry
+>1695	72 65 61 64 2e 74 69 6d			.text 	"read.timer:0",0 							; the text (must be lower case)
+>169d	65 72 3a 30 00
+>16a2						.align 	2								; force to even boundary.
+.16a2					ReadTimer:
+.16a2	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
+.16a5	60		rts				rts
+.16a6					EndReadTimer:
+>16a6	23 00					.word 	EndVPoke-* 							; offset to next entry
+>16a8	70 6f 6b 65 2e 76 3a 33			.text 	"poke.v:3",0 							; the text (must be lower case)
+>16b0	00
+>16b1						.align 	2								; force to even boundary.
+.16b2	a8		tay				tay 								; save byte in Y
+.16b3	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
+.16b6	8d 22 9f	sta $9f22			sta 	Vera+2
+.16b9	ad 03 08	lda $0803			lda 	Param2+1
+.16bc	8d 21 9f	sta $9f21			sta 	Vera+1
+.16bf	ad 02 08	lda $0802			lda 	Param2
+.16c2	8d 20 9f	sta $9f20			sta 	Vera
+.16c5	8c 23 9f	sty $9f23			sty 	Vera+3
+.16c8	60		rts				rts
+.16c9					EndVPoke:
+>16c9	1d 00					.word 	EndVPeek-* 							; offset to next entry
+>16cb	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
+>16d3	00
+>16d4						.align 	2								; force to even boundary.
+.16d4	8e 21 9f	stx $9f21			stx 	Vera+1
+.16d7	8d 20 9f	sta $9f20			sta 	Vera
+.16da	ad 00 08	lda $0800			lda 	Param1
+.16dd	8d 22 9f	sta $9f22			sta 	Vera+2
+.16e0	ad 23 9f	lda $9f23			lda 	Vera+3
+.16e3	a2 00		ldx #$00			ldx 	#0
+.16e5	60		rts				rts
+.16e6					EndVPeek:
 
 ;******  Return to file: runtime.asm
 
-.16d0					RuntimeEnd:
+.16e6					RuntimeEnd:
 
 ;******  End of listing

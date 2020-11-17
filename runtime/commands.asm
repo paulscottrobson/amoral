@@ -102,3 +102,22 @@ Xorhandler: 	;; XOR $83
 		eor 	temp0+1
 		sta 	Reg16+1
 		jmp 	ExecLoop
+
+; *******************************************************************************************
+;
+;									Handles decrement
+;
+; *******************************************************************************************
+
+DecHandler: 	;; DEC $89
+		jsr 	EvaluateAddress 			; temp0 = target address.
+		ldy 	#0						
+		sec
+		lda 	(temp0),y 					; subtract one from the address
+		sbc 	#1
+		sta 	(temp0),y
+		iny
+		lda 	(temp0),y
+		sbc 	#1
+		sta 	(temp0),y
+		jmp 	ExecLoop

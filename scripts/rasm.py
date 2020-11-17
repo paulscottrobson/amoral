@@ -24,7 +24,7 @@ class Assembler(object):
 		#
 		#		These are hardcoded. Bad practice, but this is just a testing assembler.
 		#
-		commands = "ldr,and,orr,xor,add,sub,mlt,div,mod,xxx,str,bra,beq,bne,bmi,bpl".split(",")
+		commands = "ldr,and,orr,xor,add,sub,mlt,div,mod,dec,str,bra,beq,bne,bmi,bpl".split(",")
 		unary = "inc,dec,shl,shr,clr,ret".split(",")
 		#
 		self.commands = {}

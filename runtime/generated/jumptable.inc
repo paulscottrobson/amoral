@@ -10,7 +10,7 @@
 	.word MultiplyHandler          ; $86 MLT
 	.word DivideHandler            ; $87 DIV
 	.word ModulusHandler           ; $88 MOD
-	.word OpcodeError              ; $89 ?
+	.word DecHandler               ; $89 DEC
 	.word StoreHandler             ; $8a STR
 	.word Branch_Always            ; $8b BRA
 	.word Branch_Zero              ; $8c BEQ
