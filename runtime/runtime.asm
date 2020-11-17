@@ -32,9 +32,11 @@ test = 0									; test to run (default is build final)
 
 .endweak
 
-Param1 = VarAddr 							; parameter #1 of 2 for 2 param utility methods
-Param2 = VarAddr+2 							; parameter #2 of 3 for 3 param utility methods.
-RandomSeed = VarAddr+4 						; 3rd var is random# seed.
+Param1 = VarAddr 							; 0 parameter #1 of 2 for 2 param utility methods
+Param2 = VarAddr+2 							; 1 parameter #2 of 3 for 3 param utility methods.
+Param3 = VarAddr+4 							; 2 parameter #3 of 4 for 4 param utility methods
+RandomSeed = VarAddr+6 						; 3 3rd var is random# seed.
+SwapVar = VarAddr+8 						; 4 Var used for structure swap.
 
 ; *******************************************************************************************
 ;

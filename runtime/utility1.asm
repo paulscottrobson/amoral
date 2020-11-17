@@ -64,12 +64,17 @@ EndBootAddress:
 
 		define 	"print.hex:1",EndPrintHex
 PrintHex:
+		phxa
 		pha
 		lda 	#32
 		jsr 	PrintCharacter
 		txa
 		jsr 	_PHex
 		pla
+		jsr 	_PHex
+		plxa
+		rts
+
 _PHex:	pha
 		lsr 	a
 		lsr 	a
@@ -95,6 +100,7 @@ EndPrintHex:
 
 		define 	"print.string:1",EndPrintString
 PrintString:
+		phxa
 		sta 	temp0
 		stx 	temp0+1
 		ldy 	#0
@@ -103,7 +109,8 @@ _PSLoop:lda 	(temp0),y
 		jsr 	PrintCharacter
 		iny
 		bne 	_PSLoop
-_PSExit:rts		
+_PSExit:plxa
+		rts		
 
 EndPrintString
 
@@ -115,10 +122,15 @@ EndPrintString
 
 		define "print.int:1",EndPrintDecimal
 PrintDecimal:
+		phxa
 		pha
 		lda 	#32							; leading spaces.
 		jsr 	PrintCharacter
 		pla
+		jsr 	PDEntry
+		plxa
+		rts
+		;
 PDEntry:		
 		sta 	temp1						; save in temp1
 		stx 	temp1+1
@@ -143,6 +155,7 @@ EndPrintDecimal:
 		define "print.sint:1",EndPrintSignedInt
 		cpx 	#0
 		beq 	PrintDecimal
+		phxa
 		pha
 		lda 	#32
 		jsr 	PrintCharacter
@@ -150,7 +163,7 @@ EndPrintDecimal:
 		jsr 	PrintCharacter
 		pla
 		jsr 	Negate
-		jmp 	PDEntry
+		jsr 	PDEntry
+		plxa
+		rts
 EndPrintSignedInt:
-
-

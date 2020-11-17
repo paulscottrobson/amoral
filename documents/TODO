@@ -3,9 +3,6 @@ TODO List
 
 PostCompiler:
 
-	Make display etc. routines not change R.
-		pshxa / popxa macros.
-
 	Structure code generation.
 		Swap
 		Member accessors (use common code in first, just set Y and jump)

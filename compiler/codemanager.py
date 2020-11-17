@@ -42,7 +42,7 @@ class CodeBlock(object):
 		self.show = False 															# debug output
 		self.currentHeader = None 													# not in a definition.
 		self.executeAddress = None													# what we run.
-		self.nextVariable = 4														# next allocatable variable
+		self.nextVariable = 6														# next allocatable variable
 		self.nextZeroPage = self.binary[23]											# next free zp slot
 		#
 		#	Variable zero is the first param of two for system calls with 2 parameters.

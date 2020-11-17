@@ -19,7 +19,9 @@ Vera = $9F20
 
 		define 	"print.character:1",EndPrintCharacter
 PrintCharacter:
+		phxa
 		jsr 	$FFD2
+		plxa
 		rts
 EndPrintCharacter:
 
@@ -30,8 +32,11 @@ EndPrintCharacter:
 ; *******************************************************************************************
 
 		define 	"print.crlf:0",EndPrintCRLF
+		pha
 		lda 	#13
-		jmp 	PrintCharacter
+		jsr 	PrintCharacter
+		pla
+		rts
 EndPrintCRLF:
 
 ; *******************************************************************************************
@@ -62,6 +67,7 @@ EndReadTimer:
 		lda 	Param2
 		sta 	Vera
 		sty 	Vera+3
+		tya
 		rts
 EndVPoke:		
 

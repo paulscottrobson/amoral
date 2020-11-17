@@ -52,6 +52,7 @@ EndPeekW:
 EndPokeB:
 
 		define 	"poke.w:2",EndPokeW
+		pha
 		ldy 	Param1
 		sty 	temp0
 		ldy 	Param1+1
@@ -61,5 +62,6 @@ EndPokeB:
 		iny
 		txa
 		sta 	(temp0),y
+		pla
 		rts
 EndPokeW:

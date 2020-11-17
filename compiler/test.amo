@@ -5,4 +5,7 @@ struct point3d { x,y,z }
 
 slow proc main() {
 	times(4) { point3d.new() print.hex(~) }
+	print.int(42);
+	print.sint(42);print.sint(65534)
+	poke.v(0,0,42)
 }
