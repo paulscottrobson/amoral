@@ -17,6 +17,7 @@ from codegenerator import *
 from exception import *
 from parser import *
 from block import *
+from structure import *
 
 # *******************************************************************************************
 #
@@ -38,6 +39,7 @@ class Compiler(BlockCompiler):
 		self.fastBytes = 0
 		self.modes = { "fast":Compiler.FASTMODE,"slow":Compiler.SLOWMODE,"code":Compiler.CODEMODE }
 		self.pCodeRoutine = identMgr.find("run.pcode").getValue()
+		self.structureHelper = StructureHelper(identMgr,codeBlock)
 	#
 	#		Compile one stream, report errors correctly and exit.
 	#
@@ -67,6 +69,8 @@ class Compiler(BlockCompiler):
 				self.setMode(self.modes[nxt])
 			elif nxt == "func" or nxt == "proc":									# these are identical.
 				self.defineProcedure()
+			elif nxt == "struct":													# structure
+				self.createStructureMethods()
 			else:	
 				raise AmoralException("Syntax error")	
 	#
@@ -125,7 +129,29 @@ class Compiler(BlockCompiler):
 			self.slowBytes += codeUsed
 		else:
 			self.fastBytes += codeUsed
-
+	#
+	#
+	#
+	def createStructureMethods(self):
+		sName = self.parser.get()													# get name
+		if sName == "" or sName[0] < 'a' or sName[0] > 'z':
+			raise AmoralException("Bad structure name "+sName)
+		sList = []
+		if self.parser.get() != "{":												# member list open
+			raise AmoralException("Missing ( on call")
+		done = False
+		while not done:																# get members
+			member = self.parser.get()
+			if member == "" or member[0] < 'a' or member[0] > 'z':
+				raise AmoralException("Bad structure member "+sName)
+			nxt = self.parser.get()
+			sList.append(member)													# add to list
+			if nxt != "," and nxt != "}":											# next , or }
+				raise AmoralException("Syntax error")
+			done = nxt == "}"
+		self.structureHelper.create(sName,sList)									# create it.
+	#
+	#		Show slow/fast memory usage.
 	#
 	def codeStats(self):
 		totalCode = self.slowBytes+self.fastBytes

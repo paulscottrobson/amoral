@@ -2,12 +2,12 @@ TODO List
 =========
 
 PostCompiler:
-	Write handler for structure generation.
+	Structure code generation.
 	Write Balls/Amoral.
 	Write Mario/Amoral nick graphic from Lean.
 
 Compiler#2:
-	Write 6502 code generation. (in project file)	
+	Write 6502 code generation.	
 	Do some tests regarding speed up of various optimisations.
 	
 Notes:	

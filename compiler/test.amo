@@ -1,13 +1,7 @@
 #
 #		Amoral test program.
 #
-code func test() {
-	["DB 60"]
-}
+struct point { x,y }
 
 slow proc main() {
-	var i
-	@i print.hex(~)
-	@test print.hex(~)
-
 }

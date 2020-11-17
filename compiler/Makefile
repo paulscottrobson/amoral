@@ -14,7 +14,7 @@ endif
 
 all : amoral.zip
 
-DEPS = asm6502.py benchmark.py block.py codegenerator.py codemanager.py compiler.py exception.py identifiers.py parser.py runtime.py version.py wrapper.py
+DEPS = asm6502.py benchmark.py block.py codegenerator.py codemanager.py compiler.py exception.py identifiers.py parser.py runtime.py structure.py version.py wrapper.py
 
 amoral.zip : $(DEPS)
 	zip -q amoral.zip $^ __main__.py

@@ -11,6 +11,6 @@
 
 class VersionInformation(object):
 	def getDate(self):
-		return "16-Nov-20"
+		return "17-Nov-20"
 	def getVersion(self):
-		return "0.01"
+		return "0.011"
