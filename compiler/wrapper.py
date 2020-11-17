@@ -36,6 +36,7 @@ class CompilerWrapper(object):
 		self.outputFile = "application.prg"											# default output file
 		self.showStats = False 														# show statistics
 		self.showIdentifiers = False
+		self.hasCode = False
 	#
 	#		Compile a stream
 	#
@@ -51,6 +52,8 @@ class CompilerWrapper(object):
 					option = cmdList[i][1].lower()
 					if option == "s":												# stand alones
 						self.showStats = True
+					elif option == "n":												
+						self.codeBlock.stripNames()
 					elif option == "i":
 						self.showIdentifiers = True
 					#	
@@ -70,10 +73,14 @@ class CompilerWrapper(object):
 						sys.exit(1)
 				else:
 					self.compile(FileStream(cmdList[i]))
+					self.hasCode = True
 	#
 	#		End a build.
 	#
 	def complete(self,fileName = None):
+		if not self.hasCode:
+			print("No source files.")
+			sys.exit(1)
 		fileName = fileName if fileName is not None else self.outputFile
 		self.codeBlock.createApplication(self.identMgr,fileName)					# write out the result.
 		if self.showStats:
@@ -88,6 +95,7 @@ class CompilerWrapper(object):
 		print("AMORAL Compiler by Paul Robson (paul@robsons.org.uk) v{0} ({1})".format(v.getVersion(),v.getDate()))
 		print("\tamoral <options> <source files>")
 		print("\t\t -i                Display identifiers")
+		print("\t\t -n                Remove identifiers from program")
 		print("\t\t -o <output file>  Specify output file")
 		print("\t\t -s                Display slow/fast usage")
 

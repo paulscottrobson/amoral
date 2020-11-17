@@ -3,29 +3,22 @@ TODO List
 
 PostCompiler:
 
-	Structure code generation.
-		Swap
-		Member accessors (use common code in first, just set Y and jump)
-
-	Shift Helper Functions >> << as functions
-
-	Option to strip labels out of new code
-
 	Write Balls/Amoral.
 
 	Write Mario/Amoral nick graphic from Lean.
-	Update Graphic converter.
 
+	Update Graphic converter.
 
 Compiler#2:
 
 	Write 6502 code generation.	
 
-	Re benchmark it.
+	Shift Helper Functions >> << as functions
+
+	Re benchmark those using times.
 
 Notes:	
-
-	Error on no compile files.
+	Add constant identifier.
 
 	Compiler optimise for +/-1 *2/2 *8/8 etc ??
 

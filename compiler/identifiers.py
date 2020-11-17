@@ -91,7 +91,6 @@ class IdentifierManager(object):
 	#		Find identifier
 	#
 	def find(self,name):
-		name = name.strip().lower()
 		if name in self.locals:
 			return self.locals[name]
 		return self.globals[name] if name in self.globals else None

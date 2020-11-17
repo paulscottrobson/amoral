@@ -88,7 +88,7 @@ opcodes = """
 84 z STY oper
 85 z STA oper
 86 z STX oper
-88 _ DEC
+88 _ DEY
 8A _ TXA
 8C a STY oper
 8D a STA oper
@@ -132,7 +132,7 @@ C5 z CMP oper
 C6 z DEC oper
 C8 _ INY
 C9 im CMP #oper
-CA _ DEC
+CA _ DEX
 CC a CPY oper
 CD a CMP oper
 CE a DEC oper

@@ -4,8 +4,16 @@
 struct point3d { x,y,z }
 
 slow proc main() {
-	times(4) { point3d.new() print.hex(~) }
-	print.int(42);
-	print.sint(42);print.sint(65534)
-	poke.v(0,0,42)
+	print.character(147)
+	
+	point3d.new() print.hex(~)
+	point3d.w_x(42)
+	point3d.w_y(442)
+	point3d.w_z(44442)
+
+	point3d.r_x() print.int(~)
+	point3d.r_y() print.int(~)
+	point3d.r_z() print.int(~)
+
+	4 neg(~) print.sint(~)
 }

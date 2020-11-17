@@ -40,6 +40,9 @@ class StructureHelper(object):
 		#
 		self.useCode = self.createUse()
 		self.createNew()
+		self.createSwap()
+		self.createMemberFunctions(True)
+		self.createMemberFunctions(False)
 	#
 	#		Create use method.
 	#
@@ -74,7 +77,7 @@ class StructureHelper(object):
 		ident = Procedure(name,self.cb.getAddr())
 		self.im.addGlobal(ident)
 		if hasParameter:
-			assert False
+			ident.addParameter(Variable("v",-1))
 		return self.cb.getAddr()
 	#
 	#		Create JMP or JSR to a named routine
@@ -84,4 +87,57 @@ class StructureHelper(object):
 		assert ident is not None
 		self.cb.append(opcode)
 		self.cb.append16(ident.getValue())
-		
+	#
+	#		Create Swap with variable 4.
+	#
+	def createSwap(self):
+		code = self.createRoutine(self.name+".swap")
+		swapVar = self.cb.getVariableBase()+4*2
+		self.cb.append(0xDB)
+		self.cb.append(Asm6502.PHA)
+		for s in range(0,2):
+			self.cb.append(Asm6502.LDA_Z)	# lda zp
+			self.cb.append(self.zpRef+s)
+			self.cb.append(Asm6502.LDY_A)	# ldy v
+			self.cb.append16(swapVar+s)
+			self.cb.append(Asm6502.STA_A)	# sta v
+			self.cb.append16(swapVar+s)
+			self.cb.append(Asm6502.STY_Z)	# sty zp
+			self.cb.append(self.zpRef+s)
+		self.cb.append(Asm6502.PLA)
+		self.cb.append(Asm6502.RTS)
+		self.cb.close()
+	#
+	#		Create Member functions
+	#
+	def createMemberFunctions(self,isGet):
+		assert len(self.members) < 60
+		for n in range(0,len(self.members)):
+			self.createRoutine(self.name+"."+("r" if isGet else "w")+"_"+self.members[n],not isGet)
+			#
+			self.cb.append(Asm6502.LDY_IM)	# ldy #offset
+			self.cb.append(n*2+(1 if isGet else 0))
+			if n == 0:															# first time do code.
+				commonRoutine = self.cb.getAddr()
+				if isGet:														# fetch code.
+					self.cb.append(Asm6502.LDA_IY)	# lda (zPage),y
+					self.cb.append(self.zpRef)
+					self.cb.append(Asm6502.TAX)		# tax
+					self.cb.append(Asm6502.DEY)		# dey
+					self.cb.append(Asm6502.LDA_IY)	# lda (zPage),y
+					self.cb.append(self.zpRef)
+					self.cb.append(Asm6502.RTS)		# rts
+				else:															# write code
+					self.cb.append(Asm6502.PHA)		# pha
+					self.cb.append(Asm6502.STA_IY)	# sta (zPage),y
+					self.cb.append(self.zpRef)
+					self.cb.append(Asm6502.TXA)		# txa
+					self.cb.append(Asm6502.INY)		# iny
+					self.cb.append(Asm6502.STA_IY)	# sta (zPage),y
+					self.cb.append(self.zpRef)
+					self.cb.append(Asm6502.PLA)		# pla
+					self.cb.append(Asm6502.RTS)		# rts
+			else:
+				self.cb.append(Asm6502.BPL)										# save a byte.
+				self.cb.append(0x100-1-(self.cb.getAddr()-commonRoutine))
+			self.cb.close()

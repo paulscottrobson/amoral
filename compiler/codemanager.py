@@ -44,6 +44,7 @@ class CodeBlock(object):
 		self.executeAddress = None													# what we run.
 		self.nextVariable = 6														# next allocatable variable
 		self.nextZeroPage = self.binary[23]											# next free zp slot
+		self.clipNames = False														# don't store names.
 		#
 		#	Variable zero is the first param of two for system calls with 2 parameters.
 		#
@@ -91,15 +92,22 @@ class CodeBlock(object):
 	def getVariableBase(self):
 		return self.variables
 	#
+	#		Strip variable names from dictionary
+	#
+	def stripNames(self):
+		self.clipNames = True
+	#
 	#		Open a new definition.
 	#	
 	def open(self,definitionName):
 		assert self.currentHeader is None 											# not already open.
-		definitionName = definitionName.strip().lower()+chr(0)						# preprocess
+		definitionName = definitionName.strip().lower()								# preprocess
 		self.currentHeader = self.getAddr()											# remember header
 		self.append16(0)															# dummy offset patched later
-		for c in definitionName:													# name of routine
-			self.append(ord(c))
+		if not self.clipNames:
+			for c in definitionName:												# name of routine
+				self.append(ord(c))
+		self.append(0)																# ASCIIZ
 		if self.getAddr() % 2 != 0:													# make even address.
 			self.append(0)
 		self.executeAddress = self.getAddr()										# run last defined.
