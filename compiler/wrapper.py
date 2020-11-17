@@ -87,7 +87,7 @@ class CompilerWrapper(object):
 		v = VersionInformation()
 		print("AMORAL Compiler by Paul Robson (paul@robsons.org.uk) v{0} ({1})".format(v.getVersion(),v.getDate()))
 		print("\tamoral <options> <source files>")
-		print("\t\t -i  				Display identifiers")
+		print("\t\t -i                Display identifiers")
 		print("\t\t -o <output file>  Specify output file")
 		print("\t\t -s                Display slow/fast usage")
 

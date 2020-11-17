@@ -2,15 +2,36 @@ TODO List
 =========
 
 PostCompiler:
+
+	Make display etc. routines not change R.
+		pshxa / popxa macros.
+
 	Structure code generation.
+		Swap
+		Member accessors (use common code in first, just set Y and jump)
+
+	Shift Helper Functions >> << as functions
+
+	Option to strip labels out of new code
+
 	Write Balls/Amoral.
+
 	Write Mario/Amoral nick graphic from Lean.
+	Update Graphic converter.
+
 
 Compiler#2:
+
 	Write 6502 code generation.	
-	Do some tests regarding speed up of various optimisations.
-	
+
+	Re benchmark it.
+
 Notes:	
-	Compiler optimise for +/-1 *2/2 			?
+
+	Error on no compile files.
+
+	Compiler optimise for +/-1 *2/2 *8/8 etc ??
+
 	Array system (?)
+
 	object:method() => method(object,xxx) ?

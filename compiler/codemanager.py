@@ -43,6 +43,7 @@ class CodeBlock(object):
 		self.currentHeader = None 													# not in a definition.
 		self.executeAddress = None													# what we run.
 		self.nextVariable = 4														# next allocatable variable
+		self.nextZeroPage = self.binary[23]											# next free zp slot
 		#
 		#	Variable zero is the first param of two for system calls with 2 parameters.
 		#
@@ -171,7 +172,13 @@ class CodeBlock(object):
 	def allocateVariable(self):
 		self.nextVariable += 1
 		return self.nextVariable-1
-
+	#
+	#		Allocate zero page 2 bytes
+	#
+	def allocateZeroPage(self):
+		self.nextZeroPage += 2
+		return self.nextZeroPage-2
+		
 if __name__ == "__main__":
 	cb = CodeBlock()		
 	im = IdentifierManager()

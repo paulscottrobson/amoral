@@ -1,7 +1,8 @@
 #
 #		Amoral test program.
 #
-struct point { x,y }
+struct point3d { x,y,z }
 
 slow proc main() {
+	times(4) { point3d.new() print.hex(~) }
 }
