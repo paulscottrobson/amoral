@@ -20,13 +20,6 @@ from codemanager import *
 
 class BaseCodeGenerator(object):
 	#
-	#		Decrement a variable, common operator which can be improved.
-	#
-	def decVar(self,address):
-		self.cmdVar(RTOpcodes.LDR,address)
-		self.unary(RTOpcodes.DEC)
-		self.cmdVar(RTOpcodes.STR,address)
-	#
 	#		Load variable branch if non-zero
 	#
 	def loadBranchNonZero(self,varID,address):

@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
-; 64tass --m6502 -o runtime.prg -L runtime.lst runtime.asm
-; Tue Nov 17 06:02:46 2020
+; 64tass -q --m6502 -o runtime.prg -L runtime.lst runtime.asm
+; Tue Nov 17 06:29:05 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -122,7 +122,7 @@
 >10a8	4c 12					.word MultiplyHandler          ; $86 MLT
 >10aa	81 12					.word DivideHandler            ; $87 DIV
 >10ac	9a 12					.word ModulusHandler           ; $88 MOD
->10ae	57 11					.word DecHandler               ; $89 DEC
+>10ae	57 11					.word DecVarHandler            ; $89 DCV
 >10b0	ea 10					.word StoreHandler             ; $8a STR
 >10b2	ea 11					.word Branch_Always            ; $8b BRA
 >10b4	f9 11					.word Branch_Zero              ; $8c BEQ
@@ -217,7 +217,7 @@
 .1150	45 0d		eor $0d				eor 	temp0+1
 .1152	85 09		sta $09				sta 	Reg16+1
 .1154	4c 3e 10	jmp $103e			jmp 	ExecLoop
-.1157					DecHandler:
+.1157					DecVarHandler:
 .1157	20 a2 11	jsr $11a2			jsr 	EvaluateAddress 			; temp0 = target address.
 .115a	a0 00		ldy #$00			ldy 	#0
 .115c	38		sec				sec
@@ -226,7 +226,7 @@
 .1161	91 0c		sta ($0c),y			sta 	(temp0),y
 .1163	c8		iny				iny
 .1164	b1 0c		lda ($0c),y			lda 	(temp0),y
-.1166	e9 01		sbc #$01			sbc 	#1
+.1166	e9 00		sbc #$00			sbc 	#0
 .1168	91 0c		sta ($0c),y			sta 	(temp0),y
 .116a	4c 3e 10	jmp $103e			jmp 	ExecLoop
 

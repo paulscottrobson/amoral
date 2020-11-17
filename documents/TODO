@@ -1,12 +1,6 @@
 TODO List
 =========
 
-Compiler:	
-	Inline code blocks [] / data access.
-	Non-zero decrement and branch) (and recheck benchmarks)
-		Needs to be 6502ish as well.
-		Decrement Load ? Stop when -ve.
-
 PostCompiler:
 	Write handler for structure generation.
 	Write Balls/Amoral.

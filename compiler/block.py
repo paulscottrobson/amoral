@@ -99,6 +99,7 @@ class BlockCompiler(object):
 	#			Integer and String Constants
 	#			Variable Load and Store, Operations on Constants and Variables
 	#			Unary operators (not RET)
+	#			Inline code.
 	#
 	def innerCompile(self):
 		failed = None 																# not None when exit
@@ -115,6 +116,9 @@ class BlockCompiler(object):
 			elif s == "~":															# ignore ~
 				pass
 			#
+			elif s == "[":															# inline code.
+				self.inlineCode()
+			#
 			elif s.startswith('"'):													# quoted string
 				self.cg.string(s[1:])
 			#
@@ -130,11 +134,14 @@ class BlockCompiler(object):
 			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None and isinstance(ident,Variable):	
 				self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
 			#
-			elif s == "@":															# address of variable
+			elif s == "@":															# address of variable/proc
 				ident = self.im.find(self.parser.get())
-				if ident is None or not isinstance(ident,Variable):
+				if ident is None:
 					raise AmoralException("@ missing variable")
-				self.cg.cmdImm(RTOpcodes.LDR,ident.getValue()*2+self.cb.getVariableBase())
+				n = ident.getValue()												# get address
+				if isinstance(ident,Variable):										# make variables real address
+					n = n*2+self.cb.getVariableBase()
+				self.cg.cmdImm(RTOpcodes.LDR,n)										# load it in.
 			#
 			elif s in self.unary:													# unary operators.
 				self.cg.unary(self.unary[s])
@@ -229,11 +236,11 @@ class BlockCompiler(object):
 		else:
 			varID = self.cb.allocateVariable()										# allocate unnamed variable
 		if self.parser.get() != ")":												# check )
-			raise AmoralException("Missing )")		
+			raise AmoralException("Missing )")							
 		self.cg.cmdVar(RTOpcodes.STR,varID)											# write it.
 		timesLoop = self.cb.getAddr()												# loop address			
 		#
-		self.cg.decVar(varID)														# decrement the variable.
+		self.cg.cmdVar(RTOpcodes.DCV,varID)											# decrement the variable.
 		self.blockCompile()															# loop body.
 		self.cg.loadBranchNonZero(varID,timesLoop)									# loop back if <> 0
 	#
@@ -277,9 +284,21 @@ class BlockCompiler(object):
 		self.usePCode = usePCode
 		self.cg = self.slowGenerator if usePCode else self.fastGenerator
 		assert self.cg is not None
+	#
+	#		Assemble inline code.
+	#
+	def inlineCode(self):
+		code = self.parser.get().lower().replace(" ","")
+		if not code.startswith('"') or len(code)%2 == 0:							# validate len/type
+			raise AmoralException("Bad code block")
+		for p in range(1,len(code),2):
+			try:
+				self.cb.append(int(code[p:p+2],16))
+			except ValueError:
+				raise AmoralException("Bad hex byte "+code[p:p+2])
 
-
-
+		if self.parser.get() != "]":
+			raise AmoralException("Missing ]")
 
 if __name__ == "__main__":
 	cb = CodeBlock()

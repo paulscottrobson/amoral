@@ -109,7 +109,7 @@ Xorhandler: 	;; XOR $83
 ;
 ; *******************************************************************************************
 
-DecHandler: 	;; DEC $89
+DecVarHandler: 	;; DCV $89
 		jsr 	EvaluateAddress 			; temp0 = target address.
 		ldy 	#0						
 		sec
@@ -118,6 +118,6 @@ DecHandler: 	;; DEC $89
 		sta 	(temp0),y
 		iny
 		lda 	(temp0),y
-		sbc 	#1
+		sbc 	#0
 		sta 	(temp0),y
 		jmp 	ExecLoop

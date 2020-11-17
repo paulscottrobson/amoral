@@ -2,10 +2,12 @@
 #		Amoral test program.
 #
 code func test() {
-	
+	["DB 60"]
 }
 
 slow proc main() {
 	var i
-	times($3E00,i) { poke.v(0,i,42); }
+	@i print.hex(~)
+	@test print.hex(~)
+
 }
