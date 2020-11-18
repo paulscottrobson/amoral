@@ -1,4 +1,0 @@
-#!/bin/bash
-set -e
-./build -D Test=2
-../bin/x16emu -debug -prg runtime.prg -scale 2 -run

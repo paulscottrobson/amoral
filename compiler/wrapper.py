@@ -13,7 +13,7 @@ import sys
 from codemanager import *
 from codegenerator import *
 from exception import *
-from parser import *
+from aparser import *
 from block import *
 from compiler import *
 from version import *
@@ -72,7 +72,7 @@ class CompilerWrapper(object):
 						print("Unknown option "+cmdList[i])
 						sys.exit(1)
 				else:
-					self.compile(FileStream(cmdList[i]))
+					self.compile(SourceFileStream(cmdList[i]))
 					self.hasCode = True
 	#
 	#		End a build.

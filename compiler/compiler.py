@@ -15,7 +15,7 @@ from runtime import *
 from codemanager import *
 from codegenerator import *
 from exception import *
-from parser import *
+from aparser import *
 from block import *
 from structure import *
 
@@ -55,7 +55,7 @@ class Compiler(BlockCompiler):
 	#
 	def compile(self,stream):
 		self.stream = stream 														# remember stream.
-		self.parser = Parser(stream)												# create parser for it
+		self.parser = AmoralParser(stream)											# create parser for it
 		done = False
 		while not done:
 			nxt = self.parser.get()													# what's next
