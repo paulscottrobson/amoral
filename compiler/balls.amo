@@ -1,70 +1,106 @@
-var count
-var ballArray
+# *********************************************************************************************
+#
+#								Balls Demo in AMORAL
+#
+#						Written by Paul Robson November 2020
+#
+#		To calculate FPS, if 400 Frames in 12000 ticks then it is 400/12000*60 FPS
+#
+# *********************************************************************************************
 
-struct ball { x,y,xi,yi,colour }
+var count											# Holds number of balls
+var ballArray										# addr of Word array of ball references 
+													# (arrays need fixing)
 
-func times.16() {
-	<< << << <<
+struct ball { x,y,xi,yi,colour }					# structure with ball members
+
+#
+#		Multiply R by 4
+#
+func times.16() {	
+	<< << << << 									# it's quicker than *16 :) << is shift left
 }
 
+#
+#		Draw current ball
+#
 proc ball.draw(char) {
 	var addr
-	ball.r_x() << !addr
-	ball.r_y() times.16() times.16() +addr !addr
-	poke.v(0,addr,char)
-	poke.v(0,addr+1,ball.r_colour())
+	ball.r_x() << !addr 							# x * 2 => addr
+	ball.r_y() times.16() times.16() +addr !addr 	# y * 256 + x * 2 => addr
+	poke.v(0,addr,char) 							# Poke to video mem char
+	poke.v(0,addr+1,ball.r_colour()) 				# and colour
 }
 
+#
+#		Flip XI and YI
+#
 proc ball.x_flip() {
-	ball.w_xi(neg(ball.r_xi())) 
+	ball.w_xi(neg(ball.r_xi()))  					# e.g. if xi is -1 make it 1
 }
-
 proc ball.y_flip() {
 	ball.w_yi(neg(ball.r_yi())) 
 }
 
+#
+#		Move current ball
+#
 proc ball.move() {
 	var t
-	ball.draw(32)
-	ball.r_x() !t ball.r_xi() +t !t
-	if (t==79) { ball.x_flip() }
+	ball.draw(32)									# erase old ball.
+	ball.r_x() !t ball.r_xi() +t !t 				# ball.x -> t, ball.xi+t -> t
+	if (t==79) { ball.x_flip() } 					# flip if at edge
 	if (t==0) { ball.x_flip() }
-	ball.w_x(t)
+	ball.w_x(t)										# write back
 
-	ball.r_y() !t ball.r_yi() +t !t
+	ball.r_y() !t ball.r_yi() +t !t 				# same for Y
 	if (t==59) { ball.y_flip() }
 	if (t==0) { ball.y_flip() }
 	ball.w_y(t)
-	ball.draw(42)
+
+	ball.draw(42)									# draw the ball
 }
 
-proc ball.initialise() {
-	ball.w_x(random() % 68 ++) 
-	ball.w_y(random() % 48 ++)
-	ball.w_xi(sgn(random()))
-	ball.w_yi(sgn(random()))
-	ball.w_colour(random() % 15 ++)
+#
+#		Initialise current ball
+#
+proc ball.initialise() {	
+	ball.w_x(random() % 68 ++) 						# write 1..69
+	ball.w_y(random() % 48 ++) 						# write 1..49
+	ball.w_xi(sgn(random())) 						# -1 or 1 as it's a galois LSFR so can't
+	ball.w_yi(sgn(random())) 						# return zero in 16 bits
+	ball.w_colour(random() % 15 ++)					# 1 - 15 colour
 }
-
-slow proc main() {
+#
+# 		Main program.
+#
+proc main() {
 	var i,a,ptr,frames
-	print.character(144);print.character(1);print.character(147);print.character(142)
+	print.character(144);print.character(1);		# set up screen
+	print.character(147);print.character(142)
 	print.character(129)
-	32 !count
-	<< alloc(~) !ballArray  
-	times(count,i) {
-		poke.w(i << +ballArray,ball.new())
-		ball.initialise()
+	32 !count										# 32 -> count
+
+	<< alloc(~) !ballArray   						# 2* this allocated for ball array
+													# ~ is 'current number'
+
+	times(count,i) { 								# do count times, i is count-31 to 0
+		poke.w(i << +ballArray,ball.new())			# write into ball array memory for ball
+		ball.initialise()							# set it up (no constructors, it's not C++)
 	}
 
-	times(55555) {
-		times(count,i) {
-			  ball.use(peek.w(i << +ballArray)) ball.move()
+	times(55555) {									# lots of times.
+		times(count,i) {							# for count-1 downto 0 inclusive
+			  ball.use(peek.w(i << +ballArray)) 	# use the ball read from the array
+			  ball.move()							# and move it.
 		}
-	  frames ++ !frames
-	  if (frames & 15 == 0) {
-		  print.character(19)	 
+	  frames ++ !frames 							# bump frame counter
+	  if (frames & 15 == 0) { 						# 1 time in 16 update it.
+		  print.character(19)	 					# home cursor
+		  print.string("FRAME")
 		  print.int(frames)
+		  print.string(" TICKS")
+		  print.int(read.timer())
 		}
 	}	
 }

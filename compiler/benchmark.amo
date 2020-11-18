@@ -1,8 +1,16 @@
+# *********************************************************************************************
 #
-#		Benchmarks . Adapted from PCW.
+#	  						  PCW Benchmarks in AMORAL
 #
+#						Written by Paul Robson November 2020
+#
+# *********************************************************************************************
 
+#
+#		Some functions need a subroutine to call.
+#
 func sub.call() {}
+
 #
 #		Benchmark 1 (empty or loop) 0.08s
 #
