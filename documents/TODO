@@ -1,12 +1,6 @@
 TODO List
 =========
 
-PostCompiler:
-
-	Write Mario/Amoral nick graphic from Lean.
-
-	Update Graphic converter.
-
 Compiler#2:
 
 	Write 6502 code generation.	
@@ -15,7 +9,14 @@ Compiler#2:
 
 	Re benchmark those using times.
 
+PostCompiler:
+
+	Write Mario/Amoral nick graphic from Lean.
+
+	Update Graphic converter.
+
 Notes:	
+
 	Add constant identifier.
 
 	Compiler optimise for +/-1 *2/2 *8/8 etc ??

@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -q --m65c02 -o runtime.prg -L runtime.lst runtime.asm
-; Wed Nov 18 16:50:25 2020
+; Wed Nov 18 20:20:53 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -33,7 +33,7 @@
 >1017	10						.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 >1018	00 10						.word 	BootAddr 					; the address of boot
 >101a	00 08						.word 	VarAddr 					; the address of the variables
->101c	0c 17						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	20 17						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 .101e					AllocMem:
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 >1020	b1 02					.word 	EndRunPCode-* 							; offset to next entry
@@ -989,36 +989,42 @@
 .16c6	20 de ff	jsr $ffde			jsr 	$FFDE						; the documentation is mostly wrong it's YXA.
 .16c9	60		rts				rts
 .16ca					EndReadTimer:
->16ca	24 00					.word 	EndVPoke-* 							; offset to next entry
->16cc	70 6f 6b 65 2e 76 3a 33			.text 	"poke.v:3",0 							; the text (must be lower case)
->16d4	00
->16d5						.align 	2								; force to even boundary.
-.16d6	a8		tay				tay 								; save byte in Y
-.16d7	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
-.16da	8d 22 9f	sta $9f22			sta 	Vera+2
-.16dd	ad 03 08	lda $0803			lda 	Param2+1
-.16e0	8d 21 9f	sta $9f21			sta 	Vera+1
-.16e3	ad 02 08	lda $0802			lda 	Param2
-.16e6	8d 20 9f	sta $9f20			sta 	Vera
-.16e9	8c 23 9f	sty $9f23			sty 	Vera+3
-.16ec	98		tya				tya
-.16ed	60		rts				rts
-.16ee					EndVPoke:
->16ee	1e 00					.word 	EndVPeek-* 							; offset to next entry
->16f0	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
->16f8	00
->16f9						.align 	2								; force to even boundary.
-.16fa	8e 21 9f	stx $9f21			stx 	Vera+1
-.16fd	8d 20 9f	sta $9f20			sta 	Vera
-.1700	ad 00 08	lda $0800			lda 	Param1
-.1703	8d 22 9f	sta $9f22			sta 	Vera+2
-.1706	ad 23 9f	lda $9f23			lda 	Vera+3
-.1709	a2 00		ldx #$00			ldx 	#0
-.170b	60		rts				rts
-.170c					EndVPeek:
+>16ca	15 00					.word 	EndExitEmulator-* 							; offset to next entry
+>16cc	65 78 69 74 2e 65 6d 75			.text 	"exit.emulator:0",0 							; the text (must be lower case)
+>16d4	6c 61 74 6f 72 3a 30 00
+>16dc						.align 	2								; force to even boundary.
+.16dc	4c ff ff	jmp $ffff			jmp 	$FFFF
+.16df					EndExitEmulator:
+>16df	23 00					.word 	EndVPoke-* 							; offset to next entry
+>16e1	70 6f 6b 65 2e 76 3a 33			.text 	"poke.v:3",0 							; the text (must be lower case)
+>16e9	00
+>16ea						.align 	2								; force to even boundary.
+.16ea	a8		tay				tay 								; save byte in Y
+.16eb	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
+.16ee	8d 22 9f	sta $9f22			sta 	Vera+2
+.16f1	ad 03 08	lda $0803			lda 	Param2+1
+.16f4	8d 21 9f	sta $9f21			sta 	Vera+1
+.16f7	ad 02 08	lda $0802			lda 	Param2
+.16fa	8d 20 9f	sta $9f20			sta 	Vera
+.16fd	8c 23 9f	sty $9f23			sty 	Vera+3
+.1700	98		tya				tya
+.1701	60		rts				rts
+.1702					EndVPoke:
+>1702	1e 00					.word 	EndVPeek-* 							; offset to next entry
+>1704	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
+>170c	00
+>170d						.align 	2								; force to even boundary.
+.170e	8e 21 9f	stx $9f21			stx 	Vera+1
+.1711	8d 20 9f	sta $9f20			sta 	Vera
+.1714	ad 00 08	lda $0800			lda 	Param1
+.1717	8d 22 9f	sta $9f22			sta 	Vera+2
+.171a	ad 23 9f	lda $9f23			lda 	Vera+3
+.171d	a2 00		ldx #$00			ldx 	#0
+.171f	60		rts				rts
+.1720					EndVPeek:
 
 ;******  Return to file: runtime.asm
 
-.170c					RuntimeEnd:
+.1720					RuntimeEnd:
 
 ;******  End of listing

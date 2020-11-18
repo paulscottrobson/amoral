@@ -47,10 +47,11 @@ proc ball.initialise() {
 }
 
 slow proc main() {
-	var i,a,ptr
+	var i,a,ptr,frames
 	print.character(144);print.character(1);print.character(147);print.character(142)
+	print.character(129)
 	32 !count
-	<< alloc(~) !ballArray  print.hex(~)
+	<< alloc(~) !ballArray  
 	times(count,i) {
 		poke.w(i << +ballArray,ball.new())
 		ball.initialise()
@@ -59,6 +60,11 @@ slow proc main() {
 	times(55555) {
 		times(count,i) {
 			  ball.use(peek.w(i << +ballArray)) ball.move()
+		}
+	  frames ++ !frames
+	  if (frames & 15 == 0) {
+		  print.character(19)	 
+		  print.int(frames)
 		}
 	}	
 }
