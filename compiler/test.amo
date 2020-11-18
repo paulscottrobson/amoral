@@ -8,19 +8,19 @@ func times.16() {
 }
 
 proc ball.draw(char) {
-	var addr,c
+	var addr
 	ball.r_x() << !addr
 	ball.r_y() times.16() times.16() +addr !addr
 	poke.v(0,addr,char)
-	ball.r_colour() !c poke.v(0,addr+1,c)
+	poke.v(0,addr+1,ball.r_colour())
 }
 
 proc ball.x_flip() {
-	ball.r_xi() neg(~) ball.w_xi(~) 
+	ball.w_xi(neg(ball.r_xi())) 
 }
 
 proc ball.y_flip() {
-	ball.r_yi() neg(~) ball.w_yi(~) 
+	ball.w_yi(neg(ball.r_yi())) 
 }
 
 proc ball.move() {
@@ -29,21 +29,21 @@ proc ball.move() {
 	ball.r_x() !t ball.r_xi() +t !t
 	if (t==79) { ball.x_flip() }
 	if (t==0) { ball.x_flip() }
-	t ball.w_x()
+	ball.w_x(t)
 
 	ball.r_y() !t ball.r_yi() +t !t
 	if (t==59) { ball.y_flip() }
 	if (t==0) { ball.y_flip() }
-	t ball.w_y()
+	ball.w_y(t)
 	ball.draw(42)
 }
 
 proc ball.initialise() {
-	random() % 68 ++ ball.w_x() 
-	random() % 48 ++ ball.w_y()
-	random() sgn() ball.w_xi()
-	random() sgn() ball.w_yi()
-	random() % 15 ++ ball.w_colour()
+	ball.w_x(random() % 68 ++) 
+	ball.w_y(random() % 48 ++)
+	ball.w_xi(sgn(random()))
+	ball.w_yi(sgn(random()))
+	ball.w_colour(random() % 15 ++)
 }
 
 slow proc main() {
@@ -52,13 +52,13 @@ slow proc main() {
 	32 !count
 	<< alloc(~) !ballArray  print.hex(~)
 	times(count,i) {
-		i << +ballArray !ptr ball.new() !a poke.w(ptr,a)
+		poke.w(i << +ballArray,ball.new())
 		ball.initialise()
 	}
 
 	times(55555) {
 		times(count,i) {
-			i << +ballArray peek.w(~) ball.use(~) ball.move()
+			  ball.use(peek.w(i << +ballArray)) ball.move()
 		}
 	}	
 }

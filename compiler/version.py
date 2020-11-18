@@ -17,10 +17,11 @@
 
 class VersionInformation(object):
 	def getDate(self):
-		return "17-Nov-20"
+		return "18-Nov-20"
 	def getVersion(self):
 		return "0.01a"
 
 #	Date 		Version		Notes
 #	====		=======		=====
 #	16/11/20	0.01a		Development version. Core mostly works, no 6502 code yet. 
+#	18/11/20				Function calls now allowed in parameter sequences

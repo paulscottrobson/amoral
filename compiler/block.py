@@ -80,12 +80,6 @@ class BlockCompiler(object):
 				self.parser.get()
 				self.ifStructure()			
 			#
-			elif fs[0] >= 'a' and fs[0] <= 'z':										# Identifier must be a call.
-				self.parser.get()													# throw it.
-				proc = self.im.find(fs)												# look up the name
-				if proc is None or not isinstance(proc,Procedure):					# check okay.
-					raise AmoralException("Unknown procedure "+fs)
-				self.callProcedure(proc)											# generate code.
 			#
 			else:
 				raise AmoralException("Syntax Error "+fs)
@@ -131,8 +125,13 @@ class BlockCompiler(object):
 			elif s == "true" or s == "false":										# true/false
 				self.cg.cmdImm(RTOpcodes.LDR,0xFFFF if s == "true" else 0)
 			#																		# alphanumeric (variable)
-			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None and isinstance(ident,Variable):	
-				self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
+			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None:					# identifier 
+				if isinstance(ident,Variable):										# variable
+					self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
+				elif isinstance(ident,Procedure):									# proc/func invoke
+					self.callProcedure(ident)										# generate code.
+				else:
+					assert False,"What else ?"
 			#
 			elif s == "@":															# address of variable/proc
 				ident = self.im.find(self.parser.get())
