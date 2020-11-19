@@ -112,6 +112,42 @@ class M6502CodeGenerator(BaseCodeGenerator):
 		if cmd == RTOpcodes.CLR:												# CLR uses LDR#
 			self.cmdImm(RTOpcodes.LDR,0)
 			return
+		if cmd == RTOpcodes.INC:												# INC 65C02 opt.
+			self.cb.append(Asm6502.CLC)
+			self.cb.append(Asm6502.ADC_IM)
+			self.cb.append(1)
+			self.cb.append(Asm6502.BNE)
+			self.cb.append(1)
+			self.cb.append(Asm6502.INX)
+			return
+		#
+		if cmd == RTOpcodes.DEC:												# DEC 65C02
+			self.cb.append(Asm6502.SEC)
+			self.cb.append(Asm6502.SBC_IM)
+			self.cb.append(1)
+			self.cb.append(Asm6502.BCS)
+			self.cb.append(1)
+			self.cb.append(Asm6502.DEX)
+			return
+		#
+		if cmd == RTOpcodes.SHL:
+			self.cb.append(Asm6502.ASL)											# ASLA
+			self.cb.append(Asm6502.TAY)											# TAY
+			self.cb.append(Asm6502.TXA)											# TXA
+			self.cb.append(Asm6502.ROL)											# ROLA
+			self.cb.append(Asm6502.TAX)											# TAX
+			self.cb.append(Asm6502.TYA)											# TYA
+			return
+		#
+		if cmd == RTOpcodes.SHR:
+			self.cb.append(Asm6502.TAY)											# TAY
+			self.cb.append(Asm6502.TXA)											# TXA
+			self.cb.append(Asm6502.LSR)											# LSRA
+			self.cb.append(Asm6502.TAX)											# TAX
+			self.cb.append(Asm6502.TYA)											# TYA
+			self.cb.append(Asm6502.ROR)											# RORA
+			return
+		#
 		assert False
 	#
 	#		Compile a call to the given addres
@@ -134,7 +170,11 @@ class M6502CodeGenerator(BaseCodeGenerator):
 	#		String constant.
 	#
 	def string(self,s):
-		assert False
+		self.cb.append(Asm6502.JSR_A)
+		self.cb.append16(self.im.find("string.constant").getValue())
+		for c in s:
+			self.cb.append(ord(c))
+		self.cb.append(0)
 
 if __name__ == "__main__":
 	cb = CodeBlock()
