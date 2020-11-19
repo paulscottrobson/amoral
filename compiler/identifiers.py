@@ -36,6 +36,10 @@ class Variable(Identifier):
 	def getType(self):
 		return "V"
 
+class Constant(Identifier):
+	def getType(self):
+		return "C"
+
 class Procedure(Identifier):
 	def __init__(self,name,value):
 		Identifier.__init__(self,name,value)

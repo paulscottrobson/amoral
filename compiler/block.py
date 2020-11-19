@@ -127,9 +127,21 @@ class BlockCompiler(object):
 			#																		# alphanumeric (variable)
 			elif s[0] >= 'a' and s[0] <= 'z' and ident is not None:					# identifier 
 				if isinstance(ident,Variable):										# variable
-					self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())
+					nxt = self.parser.get()											# array access
+					if nxt == "[":
+						nxt = self.innerCompile()									# compile index.
+						if nxt != "]":												# must end in ]
+							raise AmoralException("Missing ] on index")
+						self.cg.indexCalculate(ident.getValue())
+						self.parser.get()											# throw ]
+					else:															# variable
+						self.parser.put(nxt)										# put it back.
+						self.cg.cmdVar(RTOpcodes.LDR,ident.getValue())				
+				#
 				elif isinstance(ident,Procedure):									# proc/func invoke
 					self.callProcedure(ident)										# generate code.
+				elif isinstance(ident,Constant):									# constant.
+					self.cg.cmdImm(RTOpcodes.LDR,ident.getValue())
 				else:
 					assert False,"What else ?"
 			#
@@ -171,9 +183,12 @@ class BlockCompiler(object):
 			ident = self.im.find(s)													# find the identifier.
 			if ident is None:														# validate it.
 				raise AmoralException("Unknown identifier "+s)
-			if not isinstance(ident,Variable):
-				raise AmoralException("Identifier "+s+" not a variable")
-			self.cg.cmdVar(self.command[op],ident.getValue())						# generate code
+			if isinstance(ident,Constant):											# <op>constant
+				self.cg.cmdImm(self.command[op],ident.getValue())			
+			elif isinstance(ident,Variable):
+				self.cg.cmdVar(self.command[op],ident.getValue())					# <op>variable
+			else:
+				raise AmoralException("Identifier "+s+" not a variable/constant")
 	#
 	#		Declare variables ; next element should be first variable.
 	#		Returns count.

@@ -1,19 +1,6 @@
 TODO List
 =========
 
-Compiler#2:
-	
-	Add arrays
-		array[x] -> array is an identifier.
-						evaluate x, double it, add array.
-						then it can be poke.w'd.
-
-
-	Add constants e.g.
-		const BALLCOUNT 32
-
-	Go to 0.100 beta
-
 PostCompiler:
 
 	Write Mario/Amoral nick graphic from Lean.

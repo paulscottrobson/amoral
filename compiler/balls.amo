@@ -10,17 +10,18 @@
 # *********************************************************************************************
 # *********************************************************************************************
 #
-#		FPS rates/Slow code/Fast code (150 balls 8Mhz X16)
+#		FPS rates/Slow code/Fast code (100 balls 8Mhz X16)
 #
-#			All Slow 		4.2 fps 	337 bytes 	0 bytes 			P-Code
-# 			All fast 		37.6 fps 	0 bytes 	744 bytes 			6502 Code
-# 			Partial  		21.1 fps	183 bytes 	339 bytes 			Mixture (unoptimised)
+#			All Slow 		6.2 fps 	345 bytes 	0 bytes 			P-Code
+# 			All fast 		56.6 fps 	0 bytes 	764 bytes 			6502 Code
+# 			Partial  		31.5 fps	191 bytes 	339 bytes 			Mixture (unoptimised)
 #
 # *********************************************************************************************
 
 var count											# Holds number of balls
 var ballArray										# addr of Word array of ball references 
-													# (arrays need fixing)
+
+const BALLS 100
 
 fast
 
@@ -38,8 +39,8 @@ func times.16() {
 #
 proc ball.draw(char) {
 	var addr
-	ball.r_x() << !addr 							# x * 2 => addr
-	ball.r_y() times.16() times.16() +addr !addr 	# y * 256 + x * 2 => addr
+	ball.r_x() << ->addr 							# x * 2 => addr
+	ball.r_y() times.16() times.16() +addr =>addr 	# y * 256 + x * 2 => addr
 	poke.v(0,addr,char) 							# Poke to video mem char
 	poke.v(0,addr+1,ball.r_colour()) 				# and colour
 }
@@ -60,12 +61,12 @@ proc ball.y_flip() {
 proc ball.move() {
 	var t
 	ball.draw(32)									# erase old ball.
-	ball.r_x() !t ball.r_xi() +t !t 				# ball.x -> t, ball.xi+t -> t
+	ball.r_x() ->t ball.r_xi() +t ->t 				# ball.x -> t, ball.xi+t -> t
 	if (t==79) { ball.x_flip() } 					# flip if at edge
 	if (t==0) { ball.x_flip() }
 	ball.w_x(t)										# write back
 
-	ball.r_y() !t ball.r_yi() +t !t 				# same for Y
+	ball.r_y() ->t ball.r_yi() +t ->t 				# same for Y
 	if (t==59) { ball.y_flip() }
 	if (t==0) { ball.y_flip() }
 	ball.w_y(t)
@@ -73,6 +74,7 @@ proc ball.move() {
 	ball.draw(42)									# draw the ball
 }
 
+slow
 #
 #		Initialise current ball
 #
@@ -91,24 +93,24 @@ proc main() {
 	print.character(144);print.character(1);		# set up screen
 	print.character(147);print.character(142)
 	print.character(129)
-	150 -> count									# 32 -> count
-	150 => count 									# pick your own syntax :)
-	150 ! count 									# these are all the same.
+	BALLS -> count									# balls const -> count
+	BALLS => count 									# pick your own syntax :)
+	BALLS ! count 									# these are all the same.
 
-	<< alloc(~) !ballArray   						# 2* this allocated for ball array
+	<< alloc(~) ->ballArray   						# 2* this allocated for ball array
 													# ~ is 'current number'
 
 	times(count,i) { 								# do count times, i is count-31 to 0
-		poke.w(i << +ballArray,ball.new())			# write into ball array memory for ball
+		poke.w(ballArray[i],ball.new())				# write into ball array memory for ball
 		ball.initialise()							# set it up (no constructors, it's not C++)
 	}
 
 	times(55555) {									# lots of times.
 		times(count,i) {							# for count-1 downto 0 inclusive
-			  ball.use(peek.w(i << +ballArray)) 	# use the ball read from the array
+			  ball.use(peek.w(ballArray[i])) 		# use the ball read from the array
 			  ball.move()							# and move it.
 		}
-	  frames ++ !frames 							# bump frame counter
+	  frames ++ ->frames 							# bump frame counter
 	  if (frames & 15 == 0) { 						# 1 time in 16 update it.
 		  print.character(19)	 					# home cursor
 		  print.string("FRAME")

@@ -25,6 +25,12 @@ class BaseCodeGenerator(object):
 	def loadBranchNonZero(self,varID,address):
 		self.cmdVar(RTOpcodes.LDR,varID)
 		self.branch(RTOpcodes.BNE,address)
+	#
+	#		Calculate index address. index is in R.
+	#
+	def indexCalculate(self,varID):
+		self.unary(RTOpcodes.SHL)
+		self.cmdVar(RTOpcodes.ADD,varID)
 
 # *******************************************************************************************
 #

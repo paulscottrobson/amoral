@@ -72,6 +72,8 @@ class Compiler(BlockCompiler):
 				self.defineProcedure()
 			elif nxt == "struct":													# structure
 				self.createStructureMethods()
+			elif nxt == "const":													# constant
+				self.defineConstant()
 			else:	
 				raise AmoralException("Syntax error")	
 	#
@@ -80,6 +82,17 @@ class Compiler(BlockCompiler):
 	def setMode(self,mode):
 		self.mode = mode 															# remember mode
 		self.setPCode(mode != Compiler.FASTMODE)									# P-Code unless Fast.
+	#
+	#		Define a constant
+	#
+	def defineConstant(self):
+		cName = self.parser.get()													# get name
+		if cName == "" or cName[0] < 'a' or cName[0] > 'z':
+			raise AmoralException("Bad constant name "+cName)
+		cValue = self.parser.get()													# get value
+		if cValue == "" or cValue[0] < '0' or cValue[0] > '9':
+			raise AmoralException("Bad constant value "+cValue)
+		self.im.addGlobal(Constant(cName,int(cValue)))								# add global in.
 	#
 	#		Define a new procedure
 	#
