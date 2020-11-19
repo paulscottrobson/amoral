@@ -73,7 +73,6 @@ proc ball.move() {
 	ball.draw(42)									# draw the ball
 }
 
-slow
 #
 #		Initialise current ball
 #

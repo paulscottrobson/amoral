@@ -26,3 +26,4 @@ class VersionInformation(object):
 #	16/11/20	0.01a		Development version. Core mostly works, no 6502 code yet. 
 #	18/11/20				Function calls now allowed in parameter sequences
 # 	19/11/20 	0.02a 		First 6502 code generator working. Added => -> syntax mirrors.
+#							Changed [] to [[ ]]

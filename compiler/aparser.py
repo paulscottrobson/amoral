@@ -80,7 +80,7 @@ class AmoralParser(object):
 		self.currentLine = ""														# current line text.
 		self.parseObjectStack = []													# returned objects
 		self.doubleTokens = { ">>":0,"<<":0,"++":0,"--":0,">=":0,"==":0,"<>":0,		# supported 2 char tokens
-							  "=>":0,"->":0 }
+							  "=>":0,"->":0,"[[":0,"]]":0 }
 	#
 	#		Get next parsed object.
 	#

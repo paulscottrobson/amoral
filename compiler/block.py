@@ -110,7 +110,7 @@ class BlockCompiler(object):
 			elif s == "~":															# ignore ~
 				pass
 			#
-			elif s == "[":															# inline code.
+			elif s == "[[":															# inline code.
 				self.inlineCode()
 			#
 			elif s.startswith('"'):													# quoted string
@@ -296,8 +296,8 @@ class BlockCompiler(object):
 			except ValueError:
 				raise AmoralException("Bad hex byte "+code[p:p+2])
 
-		if self.parser.get() != "]":
-			raise AmoralException("Missing ]")
+		if self.parser.get() != "]]":
+			raise AmoralException("Missing ]]")
 
 if __name__ == "__main__":
 	cb = CodeBlock()
