@@ -79,7 +79,8 @@ class AmoralParser(object):
 		self.stream = stream 														# source.
 		self.currentLine = ""														# current line text.
 		self.parseObjectStack = []													# returned objects
-		self.doubleTokens = { ">>":0,"<<":0,"++":0,"--":0,">=":0,"==":0,"<>":0 }	# supported 2 char tokens
+		self.doubleTokens = { ">>":0,"<<":0,"++":0,"--":0,">=":0,"==":0,"<>":0,		# supported 2 char tokens
+							  "=>":0,"->":0 }
 	#
 	#		Get next parsed object.
 	#
@@ -127,7 +128,7 @@ class AmoralParser(object):
 		if self.currentLine[:2] in self.doubleTokens:								# 2 char punctuation
 			s = self.currentLine[:2]
 			self.currentLine = self.currentLine[2:].strip()
-			return s
+			return "!" if s == "->" or s == "=>" else s 
 		#
 		s = self.currentLine[0]
 		self.currentLine = self.currentLine[1:].strip()

@@ -6,6 +6,7 @@
 #
 # *********************************************************************************************
 
+fast
 #
 #		Some functions need a subroutine to call.
 #
@@ -81,7 +82,9 @@ func bench.select() {
 proc main() {
 	var bm.count,start.time,end.time,elapsed;
 
-	bench.select() !bm.count 				# call once to find out how many.
+	bench.select() 							# call once to find out how many.
+	*10 									# scale for fast only.
+	!bm.count 				
 
 	read.timer() !start.time
 	times(bm.count) { bench.select(); }

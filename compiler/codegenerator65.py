@@ -95,7 +95,7 @@ class M6502CodeGenerator(BaseCodeGenerator):
 			c65 = self.bin1[baseCmd]
 			self.cb.append(c65) 												# ADC# low
 			self.cb.append(const & 0xFF)
-			if (const >> 8) == 0 and self.canOptimiseShort(c65):				# 0-255 constants.
+			if (const >> 8) == 0 and self.canOptimiseShort(baseCmd):			# 0-255 constants.
 				return
 			self.cb.append(Asm6502.TAY)											# TAY
 			self.cb.append(Asm6502.TXA)											# TXA
@@ -113,9 +113,24 @@ class M6502CodeGenerator(BaseCodeGenerator):
 		#
 		assert False
 	#
-	#		Can optimise short constants ?
+	#		Can optimise short constants ? 0-255
 	#
 	def canOptimiseShort(self,opim):
+		if opim == RTOpcodes.ORR or opim == RTOpcodes.XOR:						# ORR/XOR unchanged
+			return True
+		#
+		if opim == RTOpcodes.AND:												# AND zeros MSB
+			self.cb.append(Asm6502.LDX_IM)
+			self.cb.append(0)
+			return True
+		#
+		if opim == RTOpcodes.ADD or opim == RTOpcodes.SUB:						# ADD/SUB do carry.
+			self.cb.append(Asm6502.BCC if opim == RTOpcodes.ADD else Asm6502.BCS)
+			self.cb.append(1)
+			self.cb.append(Asm6502.INX if opim == RTOpcodes.ADD else Asm6502.DEX)
+			return True
+		#
+		print("Fail {0:x}".format(opim))
 		return False
 	#
 	#		Compile a unary function INC/DEC/RTN etc.
@@ -210,7 +225,13 @@ class M6502CodeGenerator(BaseCodeGenerator):
 			self.cb.append16(target)
 			return code
 		#
-		assert False
+		if cmd == RTOpcodes.BRA:												# always
+			self.cb.append(Asm6502.JMP_A)
+			code = self.cb.getAddr()
+			self.cb.append16(target)
+			return code
+		#
+		assert False, "Opcode {0:x}".format(cmd)
 	#
 	#		Patch a branch
 	#

@@ -3,16 +3,8 @@ TODO List
 
 Compiler#2:
 
-	Write 6502 code generation.	
-
-		Optimise short immediates.
-		=========================
-		<Recheck validation>
-
-	Balls with fast code.
-	Re benchmark with fast code
-
-	Add => -> Syntax
+	Add arrays
+	Add constants
 
 PostCompiler:
 
@@ -21,13 +13,9 @@ PostCompiler:
 	Update Graphic converter.
 
 Notes:	
-	65C02 optimisation (INC a rather than CLC ADC #1 in Unary ++)
-	Add constant identifier.
+No	65C02 optimisation (INC a rather than CLC ADC #1 in Unary ++)
 
-	Compiler optimise for +/-1 *2/2 *8/8 etc ??
+?	Compiler optimise for +/-1 *2/2 *8/8 etc ??
 
-	Array system (?)
+?	object:method() => method(object,xxx) ?
 
-	object:method() => method(object,xxx) ?
-
-	Consider -> => syntax.

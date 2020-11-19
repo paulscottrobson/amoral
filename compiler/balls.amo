@@ -1,4 +1,5 @@
 # *********************************************************************************************
+# *********************************************************************************************
 #
 #								Balls Demo in AMORAL
 #
@@ -7,12 +8,13 @@
 #		To calculate FPS, if 400 Frames in 12000 ticks then it is 400/12000*60 FPS
 #
 # *********************************************************************************************
+# *********************************************************************************************
 #
-#		FPS rates/Slow code/Fast code:
+#		FPS rates/Slow code/Fast code (150 balls 8Mhz X16)
 #
-#			All Slow 		19.6 fps 	337 bytes 	0 bytes
-# 			All fast
-# 			Partial fast
+#			All Slow 		4.2 fps 	337 bytes 	0 bytes 			P-Code
+# 			All fast 		37.6 fps 	0 bytes 	744 bytes 			6502 Code
+# 			Partial  		21.1 fps	183 bytes 	339 bytes 			Mixture (unoptimised)
 #
 # *********************************************************************************************
 
@@ -71,6 +73,7 @@ proc ball.move() {
 	ball.draw(42)									# draw the ball
 }
 
+slow
 #
 #		Initialise current ball
 #
@@ -89,7 +92,9 @@ proc main() {
 	print.character(144);print.character(1);		# set up screen
 	print.character(147);print.character(142)
 	print.character(129)
-	32 !count										# 32 -> count
+	150 -> count									# 32 -> count
+	150 => count 									# pick your own syntax :)
+	150 ! count 									# these are all the same.
 
 	<< alloc(~) !ballArray   						# 2* this allocated for ball array
 													# ~ is 'current number'
