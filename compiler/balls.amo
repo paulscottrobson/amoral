@@ -7,6 +7,14 @@
 #		To calculate FPS, if 400 Frames in 12000 ticks then it is 400/12000*60 FPS
 #
 # *********************************************************************************************
+#
+#		FPS rates/Slow code/Fast code:
+#
+#			All Slow 		19.6 fps 	337 bytes 	0 bytes
+# 			All fast
+# 			Partial fast
+#
+# *********************************************************************************************
 
 var count											# Holds number of balls
 var ballArray										# addr of Word array of ball references 

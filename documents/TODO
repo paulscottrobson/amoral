@@ -5,9 +5,22 @@ Compiler#2:
 
 	Write 6502 code generation.	
 
-	Shift Helper Functions >> << as functions
+		Strings
+		Unary
+		=========================
+		DCV
+		Branch/PatchBranch
+		=========================
+		<Recheck>
+		=========================
+		Optimise short immediates.
+		=========================
+		<Recheck>
 
-	Re benchmark those using times.
+	Balls with fast code.
+	Re benchmark with fast code
+
+	Add => -> Syntax
 
 PostCompiler:
 

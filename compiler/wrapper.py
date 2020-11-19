@@ -12,6 +12,7 @@
 import sys
 from codemanager import *
 from codegenerator import *
+from codegenerator65 import *
 from exception import *
 from aparser import *
 from block import *
@@ -31,7 +32,7 @@ class CompilerWrapper(object):
 		self.identMgr = IdentifierManager()											# identifier manager
 		self.codeBlock.importRuntime(self.identMgr)									# import from runtime
 		self.rtSlow = RuntimeCodeGenerator(self.codeBlock)							# slow runtime
-		self.rtFast = None 															# fast runtime
+		self.rtFast = M6502CodeGenerator(self.codeBlock,self.identMgr) 				# fast runtime
 		self.compiler = Compiler(self.identMgr,self.codeBlock,self.rtSlow,self.rtFast) # compiler object
 		self.outputFile = "application.prg"											# default output file
 		self.showStats = False 														# show statistics

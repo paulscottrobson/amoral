@@ -14,6 +14,7 @@ from asm6502 import *
 from runtime import *
 from codemanager import *
 from codegenerator import *
+from codegenerator65 import *
 from exception import *
 from aparser import *
 from block import *

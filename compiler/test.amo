@@ -1,0 +1,17 @@
+var x
+
+slow
+
+proc prompt(n) {
+	print.string("HELLO WORLD")
+	print.int(n)
+}
+
+fast
+
+proc main() {
+	var n1,n2
+	100 !n1 100 !n2
+	#["DB"]
+	prompt($2A ^ 7)	
+}
