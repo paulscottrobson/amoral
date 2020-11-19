@@ -20,6 +20,8 @@ var count											# Holds number of balls
 var ballArray										# addr of Word array of ball references 
 													# (arrays need fixing)
 
+fast
+
 struct ball { x,y,xi,yi,colour }					# structure with ball members
 
 #

@@ -63,6 +63,17 @@ class M6502CodeGenerator(BaseCodeGenerator):
 			self.cb.append16(address)
 			return
 		#
+		if baseCmd == RTOpcodes.DCV:											# dec var
+			self.cb.append(Asm6502.LDA_A)										# lda xxxx
+			self.cb.append16(address)
+			self.cb.append(Asm6502.BNE)											# bne *+3
+			self.cb.append(3)
+			self.cb.append(Asm6502.DEC_A)										# dec xxxx+1
+			self.cb.append16(address+1)
+			self.cb.append(Asm6502.DEC_A)										# dec xxxx
+			self.cb.append16(address)
+			return
+		#
 		assert False
 	#
 	#		Compile an immediate command. e.g. add #4 add #2004
@@ -99,6 +110,7 @@ class M6502CodeGenerator(BaseCodeGenerator):
 			self.cb.append16(self.im.find(self.bin2[baseCmd]+".immediate").getValue())
 			self.cb.append16(const)
 			return
+		#
 		assert False
 	#
 	#		Can optimise short constants ?
@@ -160,12 +172,51 @@ class M6502CodeGenerator(BaseCodeGenerator):
 	#		can be updated.
 	#
 	def branch(self,cmd,target = 0):
+		if cmd == RTOpcodes.BNE:												# non-zero
+			self.cb.append(Asm6502.CMP_IM)
+			self.cb.append(0)
+			self.cb.append(Asm6502.BNE)
+			self.cb.append(4)
+			self.cb.append(Asm6502.CPX_IM)
+			self.cb.append(0)
+			self.cb.append(Asm6502.BEQ)
+			self.cb.append(3)
+			self.cb.append(Asm6502.JMP_A)
+			code = self.cb.getAddr()
+			self.cb.append16(target)
+			return code
+		#
+		if cmd == RTOpcodes.BEQ:												# zero
+			self.cb.append(Asm6502.CMP_IM)
+			self.cb.append(0)
+			self.cb.append(Asm6502.BNE)
+			self.cb.append(7)
+			self.cb.append(Asm6502.CPX_IM)
+			self.cb.append(0)
+			self.cb.append(Asm6502.BNE)
+			self.cb.append(3)
+			self.cb.append(Asm6502.JMP_A)
+			code = self.cb.getAddr()
+			self.cb.append16(target)
+			return code
+		#
+		if cmd == RTOpcodes.BPL or cmd == RTOpcodes.BMI:						# plus/minus
+			self.cb.append(Asm6502.CPX_IM)
+			self.cb.append(0)
+			self.cb.append(Asm6502.BMI if cmd == RTOpcodes.BPL else Asm6502.BPL)
+			self.cb.append(3)
+			self.cb.append(Asm6502.JMP_A)
+			code = self.cb.getAddr()
+			self.cb.append16(target)
+			return code
+		#
 		assert False
 	#
 	#		Patch a branch
 	#
 	def patchBranch(self,patchAddr,patchTarget):
-		assert False
+		self.cb.write(patchAddr,patchTarget & 0xFF)
+		self.cb.write(patchAddr+1,patchTarget >> 8)
 	#
 	#		String constant.
 	#

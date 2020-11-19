@@ -1,13 +1,7 @@
 var x
 
-slow
-
-proc test(n) {
-	if (n == 4) { print.int(n) }
-}
-
-slow
+fast
 proc main() {
 	var n1,n2
-	times(10,n1) { test(n1) }
+	times(1000,n1) { print.int(n1) }
 }

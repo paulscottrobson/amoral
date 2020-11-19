@@ -12,13 +12,14 @@
 import random
 
 class GenerateTestCode(object):
-	def __init__(self,seed = 42,varCount = 10,fileName = "test.amo"):
+	def __init__(self,isFast,seed = 42,varCount = 10,fileName = "test.amo"):
 		if seed is None:
 			seed = random.randint(0,99999)
 		random.seed(seed)
 		print("Test using "+str(seed))
 		self.h = open(fileName,"w")
 		self.createAssert()
+		self.h.write("fast\n" if isFast else "slow\n")
 		self.h.write("proc main() {\n")
 		self.variables = {}
 		for i in range(0,varCount):
@@ -133,8 +134,8 @@ class GenerateTestCode(object):
 			self.createTest(n1[0]+" "+op+op,str(r))
 
 if __name__ == "__main__":
-	gen = GenerateTestCode(None,10)
-	gen.checkAssignment(10)
-	gen.checkBinary(100)
-	gen.checkUnary(100)
+	gen = GenerateTestCode(True,None,20)
+	gen.checkAssignment(20)
+	gen.checkBinary(200)
+	gen.checkUnary(200)
 	gen.close()
