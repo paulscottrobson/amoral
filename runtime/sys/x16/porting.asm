@@ -81,6 +81,21 @@ EndExitEmulator:
 		rts
 EndVPoke:		
 
+		define "poke.vw:3",EndVWPoke
+		tay 								; save byte in Y
+		lda 	Param1 						; set Vera address
+		ora 	#$10 						; set 1 increment
+		sta 	Vera+2
+		lda 	Param2+1
+		sta 	Vera+1
+		lda 	Param2
+		sta 	Vera
+		sty 	Vera+3 						; write out a word.
+		stx 	Vera+3 
+		tya
+		rts
+EndVWPoke:	
+
 		define "peek.v:2",EndVPeek
 		stx 	Vera+1
 		sta 	Vera
