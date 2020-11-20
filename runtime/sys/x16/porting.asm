@@ -71,6 +71,7 @@ EndExitEmulator:
 		define "poke.v:3",EndVPoke
 		tay 								; save byte in Y
 		lda 	Param1 						; set Vera address
+		ora 	#$10 						; set 1 increment
 		sta 	Vera+2
 		lda 	Param2+1
 		sta 	Vera+1

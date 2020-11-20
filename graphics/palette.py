@@ -29,36 +29,36 @@ rawData = """
 Black/Transparent.
    RGB: 0, 0, 0 
 Red
-    RGB: 173, 35, 35 
+    RGB: 255,0,0
 Green
-    RGB: 29, 105, 20 
+    RGB: 0,255,0
 Yellow
-    RGB: 255, 238, 51 
+    RGB: 255, 255,0
 Blue
-    RGB: 42, 75, 215 
+    RGB: 0,0,255
 Purple
-    RGB: 129, 38, 192 
+    RGB: 255,0,255
 Cyan
-    RGB: 41, 208, 208 
+    RGB: 0,255,255
 White
     RGB: 255, 255, 255 
 
 Black
    RGB: 0, 0, 0 
-Pink
-    RGB: 255, 205, 243 
-Lt. Green
-    RGB: 129, 197, 122 
-Orange
-    RGB: 255, 146, 51 
-Lt. Blue
-    RGB: 157, 175, 255 
-Brown
-    RGB: 129, 74, 25 
 Dk. Gray
     RGB: 87, 87, 87 
 Lt. Gray
     RGB: 160, 160, 160 
+Orange
+    RGB: 255, 128, 0
+Brown
+    RGB: 150, 70, 20
+Lt. Green
+    RGB: 128, 255, 0
+Lt. Blue
+    RGB: 0,128,255
+Pink
+    RGB: 255, 205, 243 
 """
 
 p = [x.strip() for x in rawData.split("\n") if x.find("RGB") >= 0]
@@ -67,12 +67,17 @@ p = [process(x) for x in p]
 #
 #       Python format.
 #
-print("#\n#\tPython format\n#\t\n{0}\n\n".format(str(p)))
+h = open("palette.txt","w")
+h.write("#\n#\tPython format\n#\t\n{0}\n\n".format(str(p)))
+h.close()
 #
 #       Four bit format.
 #
 p = [ [pv(x[0]),pv(x[1]),pv(x[2])] for x in p]
-p = [ x[2]+x[1]*16+x[0]*256 for x in p]
+p = [ x[1]*4096+x[2]*256+x[0] for x in p]
 p = ["{0:04x}".format(x) for x in p]
-print("#\n#\tAmoral format\n#\t\n[[\"{0}\"]]\n\n".format(" ".join(p)))
+h = open("palette.amo","w")
+h.write("code proc default.palette() {\n")
+h.write("\t[[\"{0}\"]]\n}}\n".format(" ".join(p)))
+h.close()
 

@@ -2,7 +2,7 @@ TODO List
 =========
 
 PostCompiler:
-	Test new palette.
+	Increment on poke.v
 	Fix graphic program & sprite converter to use it.
 	Generalise to more sensible systems
 	Update Graphic converter.

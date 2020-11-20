@@ -22,7 +22,10 @@ run : $(PRGFILE)
 gif : $(PRGFILE)
 	..$(S)bin$(S)x16emu.exe -debug -prg $(PRGFILE) -scale 2 -run -gif demo.gif
 
-$(PRGFILE) : test.amo
+palette.amo : palette.py
+	python palette.py 
+	
+$(PRGFILE) : palette.amo test.amo 
 	$(CMAKE) -C ..$(S)runtime
 	$(CCOPY) ..$(S)bin$(S)runtime.prg . $(CCOPYQ)
-	python ..$(S)bin$(S)amoral.zip -o $@ -s $<	
+	python ..$(S)bin$(S)amoral.zip -o $@ -s $^

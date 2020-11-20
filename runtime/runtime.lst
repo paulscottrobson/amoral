@@ -1,7 +1,7 @@
 
 ; 64tass Turbo Assembler Macro V1.55.2200 listing file
 ; 64tass -D test=0 -q --m65c02 -o runtime.prg -L runtime.lst runtime.asm
-; Thu Nov 19 19:58:36 2020
+; Fri Nov 20 09:43:12 2020
 
 ;Offset	;Hex		;Monitor	;Source
 
@@ -37,7 +37,7 @@
 >1017	10						.byte 	ZeroAddrEnd 				; High byte of ZeroPage used.
 >1018	00 10						.word 	BootAddr 					; the address of boot
 >101a	00 08						.word 	VarAddr 					; the address of the variables
->101c	48 17						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
+>101c	4a 17						.word	RunTimeEnd 					; where the runtime ends (e.g. where code goes)
 .101e					AllocMem:
 >101e	00 00						.word 	$0000 						; address of allocatable memory (set up by compiler)
 >1020	b1 02					.word 	EndRunPCode-* 							; offset to next entry
@@ -999,53 +999,54 @@
 >16dc						.align 	2								; force to even boundary.
 .16dc	4c ff ff	jmp $ffff			jmp 	$FFFF
 .16df					EndExitEmulator:
->16df	23 00					.word 	EndVPoke-* 							; offset to next entry
+>16df	25 00					.word 	EndVPoke-* 							; offset to next entry
 >16e1	70 6f 6b 65 2e 76 3a 33			.text 	"poke.v:3",0 							; the text (must be lower case)
 >16e9	00
 >16ea						.align 	2								; force to even boundary.
 .16ea	a8		tay				tay 								; save byte in Y
 .16eb	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
-.16ee	8d 22 9f	sta $9f22			sta 	Vera+2
-.16f1	ad 03 08	lda $0803			lda 	Param2+1
-.16f4	8d 21 9f	sta $9f21			sta 	Vera+1
-.16f7	ad 02 08	lda $0802			lda 	Param2
-.16fa	8d 20 9f	sta $9f20			sta 	Vera
-.16fd	8c 23 9f	sty $9f23			sty 	Vera+3
-.1700	98		tya				tya
-.1701	60		rts				rts
-.1702					EndVPoke:
->1702	29 00					.word 	EndVWPoke-* 							; offset to next entry
->1704	70 6f 6b 65 2e 76 77 3a			.text 	"poke.vw:3",0 							; the text (must be lower case)
->170c	33 00
->170e						.align 	2								; force to even boundary.
-.170e	a8		tay				tay 								; save byte in Y
-.170f	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
-.1712	09 10		ora #$10			ora 	#$10 						; set 1 increment
-.1714	8d 22 9f	sta $9f22			sta 	Vera+2
-.1717	ad 03 08	lda $0803			lda 	Param2+1
-.171a	8d 21 9f	sta $9f21			sta 	Vera+1
-.171d	ad 02 08	lda $0802			lda 	Param2
-.1720	8d 20 9f	sta $9f20			sta 	Vera
-.1723	8c 23 9f	sty $9f23			sty 	Vera+3 						; write out a word.
-.1726	8e 23 9f	stx $9f23			stx 	Vera+3
-.1729	98		tya				tya
-.172a	60		rts				rts
-.172b					EndVWPoke:
->172b	1d 00					.word 	EndVPeek-* 							; offset to next entry
->172d	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
->1735	00
->1736						.align 	2								; force to even boundary.
-.1736	8e 21 9f	stx $9f21			stx 	Vera+1
-.1739	8d 20 9f	sta $9f20			sta 	Vera
-.173c	ad 00 08	lda $0800			lda 	Param1
-.173f	8d 22 9f	sta $9f22			sta 	Vera+2
-.1742	ad 23 9f	lda $9f23			lda 	Vera+3
-.1745	a2 00		ldx #$00			ldx 	#0
-.1747	60		rts				rts
-.1748					EndVPeek:
+.16ee	09 10		ora #$10			ora 	#$10 						; set 1 increment
+.16f0	8d 22 9f	sta $9f22			sta 	Vera+2
+.16f3	ad 03 08	lda $0803			lda 	Param2+1
+.16f6	8d 21 9f	sta $9f21			sta 	Vera+1
+.16f9	ad 02 08	lda $0802			lda 	Param2
+.16fc	8d 20 9f	sta $9f20			sta 	Vera
+.16ff	8c 23 9f	sty $9f23			sty 	Vera+3
+.1702	98		tya				tya
+.1703	60		rts				rts
+.1704					EndVPoke:
+>1704	29 00					.word 	EndVWPoke-* 							; offset to next entry
+>1706	70 6f 6b 65 2e 76 77 3a			.text 	"poke.vw:3",0 							; the text (must be lower case)
+>170e	33 00
+>1710						.align 	2								; force to even boundary.
+.1710	a8		tay				tay 								; save byte in Y
+.1711	ad 00 08	lda $0800			lda 	Param1 						; set Vera address
+.1714	09 10		ora #$10			ora 	#$10 						; set 1 increment
+.1716	8d 22 9f	sta $9f22			sta 	Vera+2
+.1719	ad 03 08	lda $0803			lda 	Param2+1
+.171c	8d 21 9f	sta $9f21			sta 	Vera+1
+.171f	ad 02 08	lda $0802			lda 	Param2
+.1722	8d 20 9f	sta $9f20			sta 	Vera
+.1725	8c 23 9f	sty $9f23			sty 	Vera+3 						; write out a word.
+.1728	8e 23 9f	stx $9f23			stx 	Vera+3
+.172b	98		tya				tya
+.172c	60		rts				rts
+.172d					EndVWPoke:
+>172d	1d 00					.word 	EndVPeek-* 							; offset to next entry
+>172f	70 65 65 6b 2e 76 3a 32			.text 	"peek.v:2",0 							; the text (must be lower case)
+>1737	00
+>1738						.align 	2								; force to even boundary.
+.1738	8e 21 9f	stx $9f21			stx 	Vera+1
+.173b	8d 20 9f	sta $9f20			sta 	Vera
+.173e	ad 00 08	lda $0800			lda 	Param1
+.1741	8d 22 9f	sta $9f22			sta 	Vera+2
+.1744	ad 23 9f	lda $9f23			lda 	Vera+3
+.1747	a2 00		ldx #$00			ldx 	#0
+.1749	60		rts				rts
+.174a					EndVPeek:
 
 ;******  Return to file: runtime.asm
 
-.1748					RuntimeEnd:
+.174a					RuntimeEnd:
 
 ;******  End of listing
