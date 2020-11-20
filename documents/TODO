@@ -2,14 +2,19 @@ TODO List
 =========
 
 PostCompiler:
-
-	Write Mario/Amoral nick graphic from Lean.
+	Test new palette.
+	Fix graphic program & sprite converter to use it.
+	Generalise to more sensible systems
 	Update Graphic converter.
 
 Notes:	
-No	65C02 optimisation (INC a rather than CLC ADC #1 in Unary ++)
 
-?	Compiler optimise for +/-1 *2/2 *8/8 etc ??
+	Compiler auto optimise for +/-1 *2/2 *8/8 etc ?? (in base class)
 
 ?	object:method() => method(object,xxx) ?
+
+run : $(PRGFILE)
+	..$(S)bin$(S)x16emu.exe -debug -prg $(PRGFILE) -scale 2 -run
+
+
 
