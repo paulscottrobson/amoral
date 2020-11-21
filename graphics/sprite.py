@@ -23,6 +23,8 @@ class SpriteConverter(object):
 		self.palette = self.getPalette()							# subclass for different palettes.
 		self.handler = handler 										# what we do with it.
 		assert len(self.palette) == 15 								# 15 colours + transparent.
+		if self.handler != None:
+			self.handler.tellPalette([self.convertRGB(x) for x in [[0,0,0]]+self.palette])
 	#
 	#		Convert one sprite.
 	#
@@ -60,7 +62,14 @@ class SpriteConverter(object):
 				col = i+1
 				best = score
 		return col
-
+	#
+	#		Convert 8 bit RGB to 4 bit
+	#
+	def convertRGB(self,p):
+		return [ self._c(p[0]),self._c(p[1]),self._c(p[2]) ]
+	#
+	def _c(self,c):
+		return (c+8) >> 4 if c != 255 else 15
 	#
 	#		Convert a sprite to the given size, keeping the aspect ratio the same. If a sprite
 	#		is not square it will be aligned accordingly.
@@ -124,6 +133,8 @@ class SpriteOutputHandler(object):
 		pass
 	def handle(self,name,imageData,width,height):
 		pass
+	def tellPalette(self,palette):
+		pass
 
 # *******************************************************************************************
 #
@@ -131,7 +142,7 @@ class SpriteOutputHandler(object):
 #
 # *******************************************************************************************
 
-class AmoralInlineHandler(object):
+class AmoralInlineHandler(SpriteOutputHandler):
 	def __init__(self,fileName = "sprite.data.amo"):
 		self.h = open(fileName,"w")
 	def close(self):
@@ -140,7 +151,43 @@ class AmoralInlineHandler(object):
 		hexData = "".join(["{0:02x}".format(c) for c in imageData])
 		self.h.write('proc spr.{0}.{1}x{2}() {{\n[["{3}"]]\n}} \n\n'.format(name,width,height,hexData))
 
-sc = ImprovedSpriteConverter(AmoralInlineHandler())
+# *******************************************************************************************
+#
+#								Amoral load to ExtRAM handler
+#
+# *******************************************************************************************
+
+class AmoralExtRamHandler(SpriteOutputHandler):
+	def __init__(self,binFile = "sprites0.bin",fileName = "sprite.data.amo"):
+		self.hBinary = open(binFile,"wb")
+		self.hAddress = open(fileName,"w")
+		self.hBinary.write(bytes([0x00]))
+		self.hBinary.write(bytes([0xA0]))
+		self.offset = 0
+	#
+	def close(self):
+		assert self.offset <= 8192,"Too much sprite data"
+		self.hAddress.write("const spr.bytes {0}\n".format(self.offset))
+		self.hAddress.close()
+		self.hBinary.close()
+	#
+	def handle(self,name,imageData,width,height):
+		p = (self.offset+0x10000) >> 5
+		self.handleOffset(name,width,height,p)
+		self.hBinary.write(bytes(imageData))		
+		self.offset += len(imageData)
+	#
+	def handleOffset(self,name,width,height,p):
+		self.hAddress.write("const spr.{0}.{1}x{2} {3}\n".format(name,width,height,p))
+	#
+	def tellPalette(self,palette):
+		assert len(palette) == 16
+		for p in palette:
+			w = p[0]*256+p[1]*16+p[2]
+			self.hBinary.write(bytes([w & 0xFF,w >> 8]))
+			self.offset += 2
+
+sc = ImprovedSpriteConverter(AmoralExtRamHandler())
 
 spriteData = sc.convert("mario.png",32,32,SpriteConverter.CENTREBOTTOM)
 spriteData = sc.convert("mario.png",64,64,SpriteConverter.CENTREBOTTOM)
