@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+make -s
+python amoral.zip -s -o test.prg balls.amo
+../bin/x16emu -debug -prg test.prg -scale 2 -run
