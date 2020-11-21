@@ -25,7 +25,7 @@ gif : $(PRGFILE)
 palette.amo : palette.py
 	python palette.py 
 	
-$(PRGFILE) : palette.amo test.amo 
+$(PRGFILE) : palette.amo sprite.data.amo test.amo 
 	$(CMAKE) -C ..$(S)runtime
 	$(CCOPY) ..$(S)bin$(S)runtime.prg . $(CCOPYQ)
 	python ..$(S)bin$(S)amoral.zip -o $@ -s $^
