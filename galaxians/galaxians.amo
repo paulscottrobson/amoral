@@ -45,8 +45,12 @@ struct enemy {
 
 var enemy.list 									# 10 x 6 list of enemies in the structure.
 var enemy.alive 								# number alive.
+var formation.x 								# x formation position
+var formation.dx 								# dx formation
+var formation.event 							# formation event timer
 
 const ENEMY.MAX 60 								# how many to allow for.
+const FORM.Y.TOP 20								# top position when in formation.
 
 # ***********************************************************************************
 #
@@ -80,13 +84,14 @@ proc enemy.list.initialise() {
 #
 # ***********************************************************************************
 
-proc enemy.update(xo,yo,gSel) {
+fast 
+proc enemy.update(xo,gSel) {
 	var s,g
 	if (enemy.r_state() >= 0) {
 		enemy.r_sprite.addr() -> s 				# get sprite address
 		if (enemy.r_state() == 0) {
 			enemy.w_x(enemy.r_xOffset()+xo)		# update x,y if in formation
-			enemy.w_y(enemy.r_yOffset()+yo)
+			enemy.w_y(enemy.r_yOffset()+FORM.Y.TOP)
 		}
 		enemy.r_graphic.0() -> g 				# select which of two graphics
 		if (gSel <> 0) { enemy.r_graphic.1() -> g}
@@ -96,6 +101,7 @@ proc enemy.update(xo,yo,gSel) {
 		poke.vw(1,s+6,$500C)						
 	}
 }
+slow
 
 # ***********************************************************************************
 #
@@ -130,11 +136,13 @@ proc enemy.remove(x,y) {
 
 proc enemy.list.reset() {
 	var p,n
+	160 -> formation.x
+	2 -> formation.dx
 	times(ENEMY.MAX,n) {
 		peek.w(enemy.list[n]) -> p 				# get address
 		enemy.use(p)							# operate on it.
 		enemy.w_state(0)						# state to in formation.
-		enemy.update(160,12,random()&1)
+		enemy.update(formation.x,0)
 	}
 	enemy.remove(0,0)							# make the pattern
 	enemy.remove(0,1)
@@ -145,9 +153,38 @@ proc enemy.list.reset() {
 	enemy.remove(4,0)
 }
 
-proc main() {
-	var n
+fast proc enemy.formation.move() {
+	var n,g
+	abs(formation.x-160) >> >> >> & 1 => g
+	formation.x +formation.dx -> formation.x
+	if (abs(formation.x-160) >= 60) { neg(formation.dx) => formation.dx }
+	times(ENEMY.MAX,n) {
+		enemy.use(peek.w(enemy.list[n]))
+		enemy.update(formation.x,g)
+	}	
+}
 
+# ***********************************************************************************
+#
+#		Event trigger. if (pEvent) is zero initialise, if timed out reinitialise
+#		and return true.
+#
+# ***********************************************************************************
+
+fast func event(pEvent,rate) {
+	var p,r peek.w(pEvent) -> p false->r
+	if (p == 0) { 
+		read.timer()=>p 
+	}
+	if (read.timer()-p >= 0) {
+		p +rate => p
+		true -> r
+	}
+	poke.w(pEvent,p)
+	r
+}
+
+slow proc main() {
 	print.character($90)
 	print.character(1)
 	print.character(147)
@@ -159,8 +196,12 @@ proc main() {
 	load.data("sprites0.bin",0)
 
 	enemy.list.initialise()
+	enemy.list.reset()
+
+	0 -> formation.event
 	while (0 == 0) {
-		enemy.list.reset()
-		times(5000) {}
+		if (event(@formation.event,7) < 0) {
+			enemy.formation.move()
+		}
 	}
 }

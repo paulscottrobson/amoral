@@ -29,4 +29,4 @@ sprite.data.amo : sprites$(S)/sprites.def
 $(PRGFILE) : $(SOURCE)
 	$(CMAKE) -C ..$(S)runtime
 	$(CCOPY) ..$(S)bin$(S)runtime.prg . $(CCOPYQ)
-	python ..$(S)bin$(S)amoral.zip -o $@ -s $(SOURCE)
+	python ..$(S)bin$(S)amoral.zip -n -o $@ -s $(SOURCE)
