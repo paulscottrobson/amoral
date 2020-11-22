@@ -1,0 +1,166 @@
+# ***********************************************************************************
+#
+#			Load VRAM from memory address to page:target address, count bytes.
+#
+# ***********************************************************************************
+
+fast proc load.vram(from,page,to,count) {
+	times (count) {
+		poke.v(page,to,peek.b(from))
+		from ++ -> from
+		to ++ -> to
+	}
+}
+
+# ***********************************************************************************
+#
+#							Load in a spritesn.bin file
+#
+# ***********************************************************************************
+
+fast proc load.data(spriteFile,page1addr) {
+	spriteFile
+	[["DA7AAA A90C20BDFF"]]						# phx ply tax lda #12 jsr $FFBD
+	[["A901A208A00020BAFF"]]					# lda #1,ldx #8,ldy #0, jsr $FFBA
+	[["A900A200A0A020D5FF"]]					# lda #0,ldx #$0,ldy #$A0, jsr $FFD5
+	load.vram($A000,1,$FA00,32)					# load standard palette
+	load.vram($A000,1,page1addr,spr.bytes) 		# load the data in.
+}
+
+slow
+
+# ***********************************************************************************
+#
+#										Enemy Structure
+#
+# ***********************************************************************************
+
+struct enemy {
+	state,										# 0 in formation, 1 attacking, -1 dead
+	sprite.addr, 								# sprite structure address
+	graphic.0,graphic.1,	 					# address of graphics.
+	xOffset,yOffset,							# formation,offset position in from top left, pixels
+	x,y,xi,yi									# position when attacking.
+}	
+
+var enemy.list 									# 10 x 6 list of enemies in the structure.
+var enemy.alive 								# number alive.
+
+const ENEMY.MAX 60 								# how many to allow for.
+
+# ***********************************************************************************
+#
+#									Set up Data Structures
+#
+# ***********************************************************************************
+
+proc enemy.list.initialise() {
+	var n,p,g1,g2,row
+	alloc(ENEMY.MAX<<) => enemy.list			# 60 elements.
+	ENEMY.MAX => enemy.alive 					# reset count.
+	times(ENEMY.MAX,n) {
+		enemy.new() => p 						# create new enemy
+		poke.w(enemy.list[n],p)					# store in array.
+		enemy.w_sprite.addr(n << << << +$FC00)	# save sprite address.
+		n/10 -> row
+		spr.g1a -> g1 spr.g1b -> g2 			# figure out sprite graphic
+		if (row==0) { spr.g4a->g1->g2  }
+		if (row==1) { spr.g3a->g1 spr.g3b->g2  }
+		if (row==2) { spr.g2a->g1 spr.g2b->g2  }
+		enemy.w_graphic.0(g1)					# set sprite gfx (test)
+		enemy.w_graphic.1(g2)
+		enemy.w_xOffset(n%10*14-63)
+		enemy.w_yOffset(row*12)
+	}
+}
+
+# ***********************************************************************************
+#
+#						Update position and graphic position
+#
+# ***********************************************************************************
+
+proc enemy.update(xo,yo,gSel) {
+	var s,g
+	if (enemy.r_state() >= 0) {
+		enemy.r_sprite.addr() -> s 				# get sprite address
+		if (enemy.r_state() == 0) {
+			enemy.w_x(enemy.r_xOffset()+xo)		# update x,y if in formation
+			enemy.w_y(enemy.r_yOffset()+yo)
+		}
+		enemy.r_graphic.0() -> g 				# select which of two graphics
+		if (gSel <> 0) { enemy.r_graphic.1() -> g}
+		poke.vw(1,s,g)							# update sprites
+		poke.vw(1,s+2,enemy.r_x())
+		poke.vw(1,s+4,enemy.r_y())
+		poke.vw(1,s+6,$500C)						
+	}
+}
+
+# ***********************************************************************************
+#
+#							Kill enemy by position #
+#
+# ***********************************************************************************
+
+proc enemy.kill(p) {
+	var s
+	enemy.use(peek.w(enemy.list[p]))			# set current
+	enemy.w_state($FFFF) 						# set status to dead.
+	poke.vw(1,enemy.r_sprite.addr()+6,0)
+	enemy.alive -- => enemy.alive
+}
+
+# ***********************************************************************************
+#
+#						Remove enemy and mirror by position #
+#
+# ***********************************************************************************
+
+proc enemy.remove(x,y) {
+	enemy.kill(y*10+x)
+	enemy.kill(y*10+9-x)
+}
+
+# ***********************************************************************************
+#
+#								Reset the enemy ranks
+#
+# ***********************************************************************************
+
+proc enemy.list.reset() {
+	var p,n
+	times(ENEMY.MAX,n) {
+		peek.w(enemy.list[n]) -> p 				# get address
+		enemy.use(p)							# operate on it.
+		enemy.w_state(0)						# state to in formation.
+		enemy.update(160,12,random()&1)
+	}
+	enemy.remove(0,0)							# make the pattern
+	enemy.remove(0,1)
+	enemy.remove(0,2)
+	enemy.remove(1,0)
+	enemy.remove(1,1)
+	enemy.remove(2,0)
+	enemy.remove(4,0)
+}
+
+proc main() {
+	var n
+
+	print.character($90)
+	print.character(1)
+	print.character(147)
+
+	poke.b($9f29,$61)							# layer 2 on sprites on
+	poke.b($9f2a,$40)							# double normal scale
+	poke.b($9f2b,$40)
+
+	load.data("sprites0.bin",0)
+
+	enemy.list.initialise()
+	while (0 == 0) {
+		enemy.list.reset()
+		times(5000) {}
+	}
+}

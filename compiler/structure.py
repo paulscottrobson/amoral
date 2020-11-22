@@ -138,6 +138,6 @@ class StructureHelper(object):
 					self.cb.append(Asm6502.PLA)		# pla
 					self.cb.append(Asm6502.RTS)		# rts
 			else:
-				self.cb.append(Asm6502.BPL)										# save a byte.
-				self.cb.append(0x100-1-(self.cb.getAddr()-commonRoutine))
+				self.cb.append(Asm6502.JMP_A)									# save a byte.
+				self.cb.append16(commonRoutine)	
 			self.cb.close()
