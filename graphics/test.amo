@@ -11,27 +11,27 @@ fast proc load.vram(from,page,to,count) {
 #
 #		Load in a spritesn.bin file
 #
-fast proc load.data(s) {
-	[["DA7AAA A90C20BDFF"]]			# phx ply tax lda #12 jsr $FFBD
-	[["A901A208A00020BAFF"]]		# lda #1,ldx #8,ldy #0, jsr $FFBA
-	[["A900A200A0A020D5FF"]]		# lda #0,ldx #$0,ldy #$A0, jsr $FFD5
-	load.vram($A000,1,$FA00,32)		# load standard palette
-	load.vram($A000,1,0,spr.bytes) 	# load the data in.
+fast proc load.data(spriteFile,page1addr) {
+	spriteFile
+	[["DA7AAA A90C20BDFF"]]						# phx ply tax lda #12 jsr $FFBD
+	[["A901A208A00020BAFF"]]					# lda #1,ldx #8,ldy #0, jsr $FFBA
+	[["A900A200A0A020D5FF"]]					# lda #0,ldx #$0,ldy #$A0, jsr $FFD5
+	load.vram($A000,1,$FA00,32)					# load standard palette
+	load.vram($A000,1,page1addr,spr.bytes) 		# load the data in.
 }
 
 slow
 
 proc init.sprite(spr,y) {
-	poke.vw(1,spr,spr.mario.64x64)	# Address / 32 in first two bytes.
-	poke.vw(1,spr+2,random() & $FF) # X
-	poke.vw(1,spr+4,y)				# Y
-	poke.v(1,spr+6,$0C)				# position 11, no flips.
-	poke.v(1,spr+7,$F0) 			# 64x64 4 colour
-
+	poke.vw(1,spr,spr.g1a)						# Address / 32 in first two bytes.
+	poke.vw(1,spr+2,y*16) 						# X
+	poke.vw(1,spr+4,64)							# Y
+	poke.v(1,spr+6,$0C)							# position 11, no flips.
+	poke.v(1,spr+7,$50) 						# 64x64 4 colour
 }
 
-const MARIO.COUNT 40
-const MARIO.GAP 4
+const MARIO.COUNT 10
+const MARIO.GAP 1
 
 proc main() {
 	var n
@@ -40,11 +40,11 @@ proc main() {
 	print.character(1)
 	print.character(147)
 
-	poke.b($9f29,$61)				# layer 2 on sprites on
-	poke.b($9f2a,$40)				# double normal scale
+	poke.b($9f29,$61)							# layer 2 on sprites on
+	poke.b($9f2a,$40)							# double normal scale
 	poke.b($9f2b,$40)
 
-	load.data("sprites0.bin")
+	load.data("sprites0.bin",0)
 
 	times(16,n) {
 		poke.v(0,n<<,$2A)
@@ -55,6 +55,7 @@ proc main() {
 		init.sprite(n << << << + $FC00,n*MARIO.GAP)
 	}
 
+	halt.program()
 	var x,xa
 	while (0 == 0) {
 		times(MARIO.COUNT,n) {

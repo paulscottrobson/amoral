@@ -1,7 +1,7 @@
 # *******************************************************************************************
 # *******************************************************************************************
 #
-#       File:           sprite.py
+#       File:           cvsprite.py
 #       Date:           21st November 2020
 #       Purpose:        Sprite Conversion classes
 #       Author:         Paul Robson (paul@robson.org.uk)
@@ -28,10 +28,10 @@ class SpriteConverter(object):
 	#
 	#		Convert one sprite.
 	#
-	def convert(self,imageFile,width = 32,height = 32,alignment = None):
+	def convert(self,imageFile,width = 32,height = 32,alignment = None,forceScale = None):
 		alignment = alignment if alignment is not None else SpriteConverter.CENTRE
 		image = Image.open(imageFile)								# load image
-		image = self.preProcess(image,width,height,alignment)
+		image = self.preProcess(image,width,height,alignment,forceScale)
 		spriteData = [ 0 ] * (width*height>>1)						# allocate memory for it.
 		for x in range(0,width):									# scan the image
 			for y in range(0,height):
@@ -74,13 +74,16 @@ class SpriteConverter(object):
 	#		Convert a sprite to the given size, keeping the aspect ratio the same. If a sprite
 	#		is not square it will be aligned accordingly.
 	#
-	def preProcess(self,image,width,height,alignment):
+	def preProcess(self,image,width,height,alignment,forceScale):
 		if width == image.size[0] and height == image.size[1]:		# correct size ?
 			return image
 		scale = min(width/image.size[0],height/image.size[1])		# scale it first ?
+		if forceScale is not None:
+			scale = forceScale
 		if scale != 1.0:											# scale image keeping a/r
-			image = self.scaleImage(image,width*scale,height*scale)	# rescale it
-		newImage = Image.new("RGBA",(width,height),0x0) 			# Fill with clear.
+			image = self.scaleImage(image,image.size[0]*scale,image.size[1]*scale)	# rescale it
+		newImage = Image.new("RGBA",(width,height),0x0)			# Fill with clear.
+
 		x = int(newImage.size[0]/2-image.size[0]/2) 				# centre horizontally.
 		y = int(newImage.size[1]/2-image.size[1]/2) 				# centre vertically
 		if alignment == SpriteConverter.CENTREBOTTOM:				# put on the bottom.
@@ -149,7 +152,7 @@ class AmoralInlineHandler(SpriteOutputHandler):
 		self.h.close()
 	def handle(self,name,imageData,width,height):
 		hexData = "".join(["{0:02x}".format(c) for c in imageData])
-		self.h.write('proc spr.{0}.{1}x{2}() {{\n[["{3}"]]\n}} \n\n'.format(name,width,height,hexData))
+		self.h.write('proc spr.{0}.() {{\n[["{1}"]]\n}} \n\n'.format(name,hexData))
 
 # *******************************************************************************************
 #
@@ -178,7 +181,7 @@ class AmoralExtRamHandler(SpriteOutputHandler):
 		self.offset += len(imageData)
 	#
 	def handleOffset(self,name,width,height,p):
-		self.hAddress.write("const spr.{0}.{1}x{2} {3}\n".format(name,width,height,p))
+		self.hAddress.write("const spr.{0} {1}\n".format(name,p))
 	#
 	def tellPalette(self,palette):
 		assert len(palette) == 16
@@ -187,9 +190,32 @@ class AmoralExtRamHandler(SpriteOutputHandler):
 			self.hBinary.write(bytes([w & 0xFF,w >> 8]))
 			self.offset += 2
 
+# *******************************************************************************************
+#
+#							Process a directory of sprites
+#
+# *******************************************************************************************
+
+class SpriteDirectoryProcessor(object):
+	def __init__(self,spriteConv):
+		self.spriteConv = spriteConv
+		self.settings = { "size":"16","pos":"b","scale":"0"}
+		s = [x.replace("\t"," ") for x in open("sprites"+os.sep+"sprites.def").readlines()]
+		s = [x if x.find("#") < 0 else x[:x.find("#")] for x in s]
+		for l in [x.strip() for x in s if x.strip() != ""]:
+			if l.find("=") >= 0:
+				l = [x.strip() for x in l.split("=")]
+				self.settings[l[0]] = l[1].lower()
+			else:
+				self.convert(l)
+		spriteConv.done()
+
+	def convert(self,spriteFile):
+		size = int(self.settings["size"])
+		scale = float(self.settings["scale"])
+		scale = None if scale == 0 else scale
+		self.spriteConv.convert("sprites"+os.sep+spriteFile,size,size,self.settings["pos"].upper(),scale)
+
 sc = ImprovedSpriteConverter(AmoralExtRamHandler())
+SpriteDirectoryProcessor(sc)
 
-spriteData = sc.convert("mario.png",32,32,SpriteConverter.CENTREBOTTOM)
-spriteData = sc.convert("mario.png",64,64,SpriteConverter.CENTREBOTTOM)
-
-sc.done()
