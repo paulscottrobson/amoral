@@ -55,3 +55,22 @@ func event(pEvent,rate) {
 }
 
 slow
+
+# ***********************************************************************************
+#
+#							Initialise Game Display
+#
+# ***********************************************************************************
+
+proc initialise.display() {
+
+	print.character($90)
+	print.character(1)
+	print.character(147)
+
+	poke.b($9f29,$61)							# layer 2 on sprites on
+	poke.b($9f2a,$40)							# double normal scale
+	poke.b($9f2b,$40)
+
+	load.data("sprites0.bin",0)
+}

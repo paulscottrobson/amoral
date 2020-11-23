@@ -41,8 +41,8 @@ proc enemy.list.initialise() {
 		if (row==2) { spr.g2a->g1 spr.g2b->g2  }
 		enemy.w_graphic.0(g1)					# set sprite gfx (test)
 		enemy.w_graphic.1(g2)
-		enemy.w_xOffset(n%10*14-63)
 		enemy.w_yOffset(row*12)
+		enemy.w_xOffset(n%10*14-63)
 	}
 }
 
@@ -57,13 +57,13 @@ fast
 proc enemy.update(xo,gSel) {
 	var s,g,i
 	enemy.r_graphic.0() -> g 					# select which of two graphics
-	if (gSel <> 0) { enemy.r_graphic.1() -> g}
 
 	if (enemy.r_state() >= 0) { 				# if alive.
 		enemy.r_sprite.addr() -> s 				# get sprite address
 		if (enemy.r_state() == 0) { 			# if in formation
 			enemy.w_x(enemy.r_xOffset()+xo)		# update x,y pos.
 			enemy.w_y(enemy.r_yOffset()+ENEMY.FORM.Y)
+			if (gSel <> 0) { enemy.r_graphic.1() -> g}
 		}
 		poke.vw(1,s,g)							# update sprites
 		poke.vw(1,s+2,enemy.r_x())
@@ -169,13 +169,32 @@ proc enemy.move.attackers() {
 
 proc enemy.attack(id) {
 	var ok false->ok
-	enemy.use(peek.w(enemy.list[id]))
-	if (enemy.r_state() == 0) {
-		enemy.w_state(1)
-		enemy.w_xi(4) 
+	enemy.use(peek.w(enemy.list[id])) 						# select object
+	if (enemy.r_state() == 0) { 							# in formation ?
+		enemy.w_state(1)									# attacking ?
+		enemy.w_xi(4) 										# direction.
 		if (enemy.r_x() < 160) { enemy.w_xi(0-4) }
 		enemy.w_yi(2)
 		true -> ok
 	}
 	ok
+}
+
+# ***********************************************************************************
+#
+#				Pick random galaxian and launch attack with wingmen
+#
+# ***********************************************************************************
+
+proc enemy.launch.attack() {
+	var n,x
+	random() & 63 -> n 										# pick one.
+	if (n-ENEMY.MAX < 0) { 									# BUG: Can't use RHS constants
+		enemy.attack(n)										# start an attack
+		if (n < 50) { 										# not the bottom row.
+			n % 10 -> x 									# horizontal row position.
+			if (x >= 1) { enemy.attack(n+10-1) }			# wingmen.
+			if (x < 9) { enemy.attack(n+10+1) }
+		}
+	}
 }

@@ -1,30 +1,26 @@
 var formation.event 							# formation event timer
 var dive.event 
+var attack.event 
 
 slow proc main() {
-	print.character($90)
-	print.character(1)
-	print.character(147)
 
-	poke.b($9f29,$61)							# layer 2 on sprites on
-	poke.b($9f2a,$40)							# double normal scale
-	poke.b($9f2b,$40)
-
-	load.data("sprites0.bin",0)
-
+	initialise.display()
 	enemy.list.initialise()
 	enemy.list.reset()
+	missile.reset(10)
 
-	enemy.attack(12)
-	enemy.attack(23)
-	enemy.attack(21)
-	0 -> formation.event -> dive.event
+	0 -> formation.event -> dive.event -> attack.event
 	while (0 == 0) {
 		if (event(@formation.event,10) < 0) {
 			enemy.move.formation()
+			missile.fire()
 		}
 		if (event(@dive.event,3) < 0) {
 			enemy.move.attackers()
+			missile.move.all()
+		}
+		if (event(@attack.event,120) < 0) {
+			enemy.launch.attack()
 		}
 	}
 }

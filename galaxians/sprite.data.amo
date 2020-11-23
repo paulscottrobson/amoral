@@ -6,4 +6,5 @@ const spr.g2b 2065
 const spr.g3b 2069
 const spr.g4a 2073
 const spr.ship 2077
-const spr.bytes 1440
+const spr.bullet 2093
+const spr.bytes 1568

@@ -3,6 +3,9 @@ TODO List
 
 PostCompiler:
 	Inline code to allow Ux and Lx for lower and upper variables named A-Z
+	Add else.
+	Can't use constants in R-Expr on comparisons.
+
 	? Compiler auto optimise for +/-1 *2/2 *8/8 etc ?? (in base class)
 
 Notes:	
@@ -10,5 +13,6 @@ Notes:
 
 ?	object:method() => method(object,xxx) ?
 
+FIXED:Can't compare against 9.
 
 

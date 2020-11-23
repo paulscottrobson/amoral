@@ -17,3 +17,6 @@ size = 32
 scale = 0.32
 
 ship.png
+
+size = 16
+bullet.png

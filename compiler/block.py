@@ -284,7 +284,7 @@ class BlockCompiler(object):
 			raise AmoralException("Bad test")
 		self.parser.get()															# consume test
 		cval = self.parser.get()													# get value to test against
-		if cval == "" or cval[0] < "0" or cval[0] >= "9":
+		if cval == "" or cval[0] < "0" or cval[0] > "9":
 			raise AmoralException("Bad comparison constant")
 		if self.parser.get() != ")":												# check )
 			raise AmoralException("Missing )")		
