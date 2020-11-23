@@ -11,7 +11,7 @@ S = /
 endif
 
 PRGFILE = galaxians.prg
-SOURCE = sprite.data.amo galaxians.amo
+SOURCE = sprite.data.amo graphics.amo enemy.amo galaxians.amo
 
 .PHONY : all
 

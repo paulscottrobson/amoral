@@ -2,19 +2,13 @@ TODO List
 =========
 
 PostCompiler:
-	Increment on poke.v
-	Fix graphic program & sprite converter to use it.
-	Generalise to more sensible systems
-	Update Graphic converter.
+	Inline code to allow Ux and Lx for lower and upper variables named A-Z
+	? Compiler auto optimise for +/-1 *2/2 *8/8 etc ?? (in base class)
 
 Notes:	
 
-	Compiler auto optimise for +/-1 *2/2 *8/8 etc ?? (in base class)
 
 ?	object:method() => method(object,xxx) ?
-
-run : $(PRGFILE)
-	..$(S)bin$(S)x16emu.exe -debug -prg $(PRGFILE) -scale 2 -run
 
 
 
